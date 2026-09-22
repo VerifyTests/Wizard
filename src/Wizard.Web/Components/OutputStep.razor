@@ -50,7 +50,7 @@
                             <li>
                                 <button type="button"
                                         class="file-link @(file.Path == SelectedFile.Path ? "selected" : "")"
-                                        @onclick="() => selectedPath = file.Path">@file.Path</button>
+                                        @onclick="() => selectedPath = file.Path">@PathWithBreaks(file.Path)</button>
                             </li>
                         }
                     </ul>
@@ -96,6 +96,10 @@
     GeneratedFile SelectedFile =>
         output.Files.FirstOrDefault(_ => _.Path == selectedPath) ??
         output.Files.First(_ => _.Path == "readme.md");
+
+    /// <summary>Long paths wrap only after a separator, never inside a file name.</summary>
+    static MarkupString PathWithBreaks(string path) =>
+        new(string.Join("/<wbr>", path.Split('/').Select(System.Net.WebUtility.HtmlEncode)));
 
     string GuideFileName => $"{output.Plan.SolutionName}-verify-guide.md";
 

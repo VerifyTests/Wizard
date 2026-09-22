@@ -114,11 +114,15 @@ code, kbd, samp {
     line-height: 1;
 }
 
-/* Form controls do not inherit font-family either, so they would measure per-platform too. */
+/* Form controls do not inherit font-family either, so they would measure per-platform too. Chromium's
+   UA stylesheet also resets text-rendering on them, which undoes geometricPrecision: text in a button
+   then wraps at a different point on Linux than on Windows. */
 input,
 select,
-textarea {
+textarea,
+button {
     font-family: inherit;
+    text-rendering: inherit;
 }
 
 .loading {
@@ -605,7 +609,6 @@ button:disabled {
     border: none;
     background: none;
     font-family: 'Wizard Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
-    overflow-wrap: anywhere;
 }
 
 .file-root {
