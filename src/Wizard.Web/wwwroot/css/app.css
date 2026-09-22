@@ -452,6 +452,17 @@ select {
     margin: 0;
 }
 
+/* The outcome is rendered markdown, so it arrives wrapped in a <p>. At the .hint font size the default
+   1em margins are fractional pixels, which Windows and Linux round differently; whole pixels keep the
+   page height, and so the screenshots, identical. */
+.outcome {
+    margin: 16px 0;
+}
+
+.outcome p {
+    margin: 0;
+}
+
 .validation-error {
     color: #d1242f;
     font-size: .88rem;
