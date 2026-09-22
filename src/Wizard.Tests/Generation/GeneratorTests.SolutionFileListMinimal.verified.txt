@@ -1,0 +1,23 @@
+﻿[
+  global.json,
+  Directory.Build.props,
+  Directory.Packages.props,
+  nuget.config,
+  .gitignore,
+  .gitattributes,
+  .editorconfig,
+  VerifySample.slnx,
+  .config/dotnet-tools.json,
+  readme.md,
+  CLAUDE.md,
+  .github/copilot-instructions.md,
+  .claude/skills/verify-snapshot-testing/SKILL.md,
+  src/VerifySample/VerifySample.csproj,
+  src/VerifySample/ClassBeingTested.cs,
+  src/VerifySample/SampleModels.cs,
+  src/VerifySample.Tests/VerifySample.Tests.csproj,
+  src/VerifySample.Tests/Sample.Test.verified.txt,
+  src/VerifySample.Tests/ModuleInitializer.cs,
+  src/VerifySample.Tests/Sample.cs,
+  src/VerifySample.Tests/VerifyChecksTests.cs
+]

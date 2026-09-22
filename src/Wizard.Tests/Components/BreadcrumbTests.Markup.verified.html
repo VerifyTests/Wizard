@@ -1,0 +1,35 @@
+﻿<nav class="breadcrumb" aria-label="Wizard progress">
+  <a class="breadcrumb-flow" href="">New project</a>
+  <ol>
+    <li class="done">
+      <button type="button" class="step-link" data-step="os" blazor:onclick="1">
+        <span class="step-title">Operating system</span>
+        <span class="step-value">Linux</span>
+      </button>
+    </li>
+    <li class="done">
+      <button type="button" class="step-link" data-step="ide" blazor:onclick="2">
+        <span class="step-title">IDE</span>
+        <span class="step-value">JetBrains Rider</span>
+      </button>
+    </li>
+    <li class="done">
+      <button type="button" class="step-link" data-step="cli" blazor:onclick="3">
+        <span class="step-title">CLI or GUI</span>
+        <span class="step-value">Prefer GUI</span>
+      </button>
+    </li>
+    <li class="current" aria-current="step">
+      <span class="step-title">Test framework</span>
+    </li>
+    <li class="future">
+      <span class="step-title">Build server</span>
+    </li>
+    <li class="future">
+      <span class="step-title">Maintenance fee</span>
+    </li>
+    <li class="future">
+      <span class="step-title">Result</span>
+    </li>
+  </ol>
+</nav>

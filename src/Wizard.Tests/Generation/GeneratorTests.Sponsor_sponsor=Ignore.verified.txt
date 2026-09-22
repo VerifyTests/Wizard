@@ -1,0 +1,24 @@
+﻿<Project>
+  <!-- Applies to every project under this directory. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
+    <!-- Not TreatWarningsAsErrors: opting out of the maintenance fee logs an SC023 warning on
+         every build, which would then fail it. -->
+  </PropertyGroup>
+  <!-- Open Source Maintenance Fee: every Verify package checks at build time that the build
+       declares its fee status, and fails with SC021 when it does not. Nothing phones home.
+       https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+       Other options, and the rules for each: https://simoncropp.github.io/SponsorCheck/package/Verify -->
+  <!-- Opting out. Every build logs an SC023 breach-of-license warning. -->
+  <PropertyGroup>
+    <Verify_SponsorshipLicenseIgnored>true</Verify_SponsorshipLicenseIgnored>
+  </PropertyGroup>
+</Project>
+
+Summary: Opting out
+
+Outcome: The build passes but logs an SC023 breach-of-license warning on every build, so a build with warnings as errors fails. The generated `Directory.Build.props` does not treat warnings as errors for that reason.
+
+Url: step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Ignore

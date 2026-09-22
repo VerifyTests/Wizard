@@ -1,0 +1,43 @@
+﻿<Project>
+  <!-- Applies to every project under this directory. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <!-- Open Source Maintenance Fee: every Verify package checks at build time that the build
+       declares its fee status, and fails with SC021 when it does not. Nothing phones home.
+       https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+       Other options, and the rules for each: https://simoncropp.github.io/SponsorCheck/package/Verify -->
+  <!-- Not decided yet, so the build fails with SC021. Move exactly one of these out of this comment:
+
+       Sponsoring VerifyTests (https://github.com/sponsors/VerifyTests) from a GitHub organization or user:
+  <PropertyGroup>
+    <Verify_GitHubSponsorAccount>your-github-account</Verify_GitHubSponsorAccount>
+  </PropertyGroup>
+
+       Exempt (OpenSource, SmallRevenue or MaintainerConsulting), until a month at most 12 months
+       out (6 for MaintainerConsulting):
+  <PropertyGroup>
+    <Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+    <Verify_SponsorshipExemptionUntil>yyyy-MM</Verify_SponsorshipExemptionUntil>
+  </PropertyGroup>
+
+       A private licensing arrangement, until a month at most 12 months out:
+  <PropertyGroup>
+    <Verify_SponsorshipLicensedUntil>yyyy-MM</Verify_SponsorshipLicensedUntil>
+  </PropertyGroup>
+
+       Opting out, which logs an SC023 breach-of-license warning on every build:
+  <PropertyGroup>
+    <Verify_SponsorshipLicenseIgnored>true</Verify_SponsorshipLicenseIgnored>
+  </PropertyGroup>
+  -->
+</Project>
+
+Summary: Decide later
+
+Outcome: No declaration is made yet, so the first build fails with SC021. Its message contains a copy-pasteable fix, and `Directory.Build.props` contains every option, commented out.
+
+Url: step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions

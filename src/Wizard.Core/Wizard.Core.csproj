@@ -8,6 +8,11 @@
     <PackageReference Include="ProjectDefaults" PrivateAssets="all" />
   </ItemGroup>
 
+  <ItemGroup>
+    <EmbeddedResource Include="Content\*.md" LogicalName="Content.%(Filename)%(Extension)" />
+    <EmbeddedResource Include="Versions\package-versions.json" LogicalName="package-versions.json" />
+  </ItemGroup>
+
   <!-- Bakes the values generated solutions must match (plan D2): the SDK from the repo's global.json
        and the target framework from src/Directory.Build.props. RepoContractTests asserts both. -->
   <Target Name="GenerateWizardDefaults" BeforeTargets="CoreCompile">

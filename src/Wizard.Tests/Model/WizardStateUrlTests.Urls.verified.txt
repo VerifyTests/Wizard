@@ -1,0 +1,8 @@
+﻿[
+  https://verifytests.github.io/Wizard/new?step=os,
+  https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09,
+  https://verifytests.github.io/Wizard/new?step=output&os=Linux&ide=VsCode&cli=Gui&tf=Expecto&ci=None&name=My.Product&sponsor=Exempt&exempt=OpenSource&until=2027-09,
+  https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Sponsor&account=acme&start=2026-09-01&private=2027-01,
+  https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Private&until=2027-06,
+  https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Ignore
+]

@@ -1,0 +1,152 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>New project · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">New project</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="os">
+                  <span class="step-title">Operating system</span>
+                  <span class="step-value">Windows</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ide">
+                  <span class="step-title">IDE</span>
+                  <span class="step-value">JetBrains Rider</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="cli">
+                  <span class="step-title">CLI or GUI</span>
+                  <span class="step-value">Prefer CLI</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tf">
+                  <span class="step-title">Test framework</span>
+                  <span class="step-value">xUnit v3</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ci">
+                  <span class="step-title">Build server</span>
+                  <span class="step-value">GitHub Actions</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Maintenance fee</span>
+              </li>
+              <li class="open">
+                <button type="button" class="step-link" data-step="output">
+                  <span class="step-title">Result</span>
+                </button>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="sponsor">
+            <h2>Maintenance fee</h2>
+            <p>
+              Verify participates in the
+              <a href="https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md" target="_blank">Open Source Maintenance Fee</a>.     Organizations using Verify's packages in revenue-generating activities (annual revenue of US$10,000 or more)     sponsor
+              <a href="https://github.com/sponsors/VerifyTests" target="_blank">VerifyTests</a>
+              at the tier matching their size.     Individuals, non-revenue open source projects and small organizations are exempt.     Every build checks for a declaration in
+              <code>Directory.Build.props</code>.
+            </p>
+            <div class="mode-cards" role="radiogroup" aria-label="Maintenance fee status">
+              <button type="button" id="sponsor-Sponsor" class="mode-card " role="radio" aria-checked="false">
+                <strong>Sponsoring</strong>
+                <span>The organization or user sponsors VerifyTests on GitHub.</span>
+              </button>
+              <button type="button" id="sponsor-Exempt" class="mode-card selected" role="radio" aria-checked="true">
+                <strong>Exempt</strong>
+                <span>Open source, small revenue, or a consulting client of the maintainers.</span>
+              </button>
+              <button type="button" id="sponsor-PrivateArrangement" class="mode-card " role="radio" aria-checked="false">
+                <strong>Private arrangement</strong>
+                <span>A licensing agreement made directly with the maintainers.</span>
+              </button>
+              <button type="button" id="sponsor-Ignore" class="mode-card " role="radio" aria-checked="false">
+                <strong>Opting out</strong>
+                <span>The build passes with a breach-of-license warning.</span>
+              </button>
+              <button type="button" id="sponsor-NotChosen" class="mode-card " role="radio" aria-checked="false">
+                <strong>Decide later</strong>
+                <span>Every option is left commented out in Directory.Build.props.</span>
+              </button>
+            </div>
+            <div class="mode-cards" role="radiogroup" aria-label="Exemption">
+              <button type="button" id="exempt-OpenSource" class="mode-card selected" role="radio" aria-checked="true">
+                <strong>Open source</strong>
+                <span>An open source project that does not generate revenue.</span>
+              </button>
+              <button type="button" id="exempt-SmallRevenue" class="mode-card " role="radio" aria-checked="false">
+                <strong>Small revenue</strong>
+                <span>An individual, or an organization with annual revenue under US$10,000.</span>
+              </button>
+              <button type="button" id="exempt-MaintainerConsulting" class="mode-card " role="radio" aria-checked="false">
+                <strong>Maintainer consulting</strong>
+                <span>Engaged the core maintainers for consulting, for six months after.</span>
+              </button>
+            </div>
+            <div class="field">
+              <label for="sponsorUntil">Exempt until</label>
+              <p class="hint">At most 12 months out. The claim is renewed by changing the month.</p>
+              <input type="month" id="sponsorUntil">
+            </div>
+            <div class="hint outcome">
+              <div class="markdown">
+                <p>
+                  <strong>Expected build outcome:</strong>
+                  The build passes and logs the exemption's criteria as an SC031 message, not a warning, so builds with warnings as errors pass too. It passes through the end of 2027-09 (UTC); after that it fails with SC049 until the claim is renewed.</p>
+              </div>
+            </div>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+              <button type="button" class="primary">Next: Result</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

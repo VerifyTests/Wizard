@@ -1,0 +1,24 @@
+﻿<Project>
+  <!-- Applies to every project under this directory. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <!-- Open Source Maintenance Fee: every Verify package checks at build time that the build
+       declares its fee status, and fails with SC021 when it does not. Nothing phones home.
+       https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+       Other options, and the rules for each: https://simoncropp.github.io/SponsorCheck/package/Verify -->
+  <!-- Sponsoring VerifyTests from this GitHub account. The sponsorship began after the referenced Verify version was packed, so it is not in that version's bundled sponsor list yet; the start date covers the gap and can be removed after upgrading Verify. -->
+  <PropertyGroup>
+    <Verify_GitHubSponsorAccount>acme</Verify_GitHubSponsorAccount>
+    <Verify_SponsorshipStart>2026-09-01</Verify_SponsorshipStart>
+  </PropertyGroup>
+</Project>
+
+Summary: Sponsor: acme
+
+Outcome: When the start date is after the referenced Verify version was packed, the build passes and logs an SC017 audit message. A future date fails with SC028. After upgrading to a Verify version packed later than the start date, the normal bundled-list check applies and `Verify_SponsorshipStart` can be removed.
+
+Url: step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Sponsor&account=acme&start=2026-09-01

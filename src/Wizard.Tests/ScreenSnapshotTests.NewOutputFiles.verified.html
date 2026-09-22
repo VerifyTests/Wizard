@@ -1,0 +1,222 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>New project · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">New project</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="os">
+                  <span class="step-title">Operating system</span>
+                  <span class="step-value">Windows</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ide">
+                  <span class="step-title">IDE</span>
+                  <span class="step-value">JetBrains Rider</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="cli">
+                  <span class="step-title">CLI or GUI</span>
+                  <span class="step-value">Prefer CLI</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tf">
+                  <span class="step-title">Test framework</span>
+                  <span class="step-value">xUnit v3</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ci">
+                  <span class="step-title">Build server</span>
+                  <span class="step-value">GitHub Actions</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="sponsor">
+                  <span class="step-title">Maintenance fee</span>
+                  <span class="step-value">Exempt: OpenSource</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Result</span>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="output">
+            <h2>Result</h2>
+            <div class="field">
+              <label for="solutionName">Solution name</label>
+              <p class="hint">Used for the solution file, the class library, and the test project (<code>VerifySample.Tests</code>).</p>
+              <input type="text" id="solutionName">
+            </div>
+            <div class="output-actions">
+              <button type="button" class="primary download-zip">Download solution (.zip)</button>
+              <button type="button" class="copy-guide">Copy guide as markdown</button>
+              <button type="button" class="download-guide">Download guide (.md)</button>
+              <button type="button" class="copy-ai">Copy AI instructions</button>
+              <button type="button" class="download-ai">Download AI instructions (.md)</button>
+              <button type="button" class="copy-link">Copy link to this page</button>
+            </div>
+            <div class="tabs" role="tablist">
+              <button type="button" role="tab" id="tab-Guide" class="tab " aria-selected="false">Guide</button>
+              <button type="button" role="tab" id="tab-Files" class="tab selected" aria-selected="true">Files</button>
+              <button type="button" role="tab" id="tab-AI" class="tab " aria-selected="false">AI</button>
+            </div>
+            <div class="tab-panel" role="tabpanel" aria-labelledby="tab-Files">
+              <div class="file-browser">
+                <div>
+                  <p class="file-root">VerifySample/</p>
+                  <ul class="file-list">
+                    <li>
+                      <button type="button" class="file-link ">global.json</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">Directory.Build.props</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">Directory.Packages.props</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">nuget.config</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.gitignore</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.gitattributes</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.editorconfig</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">VerifySample.slnx</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">VerifySample.slnx.DotSettings</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.config/dotnet-tools.json</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">readme.md</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">CLAUDE.md</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.github/copilot-instructions.md</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.claude/skills/verify-snapshot-testing/SKILL.md</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">.github/workflows/build.yml</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample/VerifySample.csproj</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample/ClassBeingTested.cs</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample/SampleModels.cs</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample.Tests/VerifySample.Tests.csproj</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample.Tests/Sample.Test.verified.txt</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link selected">src/VerifySample.Tests/ModuleInitializer.cs</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample.Tests/Sample.cs</button>
+                    </li>
+                    <li>
+                      <button type="button" class="file-link ">src/VerifySample.Tests/VerifyChecksTests.cs</button>
+                    </li>
+                  </ul>
+                </div>
+                <div class="code-box">
+                  <div class="code-box-header">
+                    <span class="code-box-title">src/VerifySample.Tests/ModuleInitializer.cs</span>
+                    <button type="button" class="copy-button">Copy</button>
+                  </div>
+                  <pre class="code-box-content"><code>// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&amp;os=Windows&amp;ide=Rider&amp;cli=Cli&amp;tf=XunitV3&amp;ci=GitHubActions&amp;sponsor=Exempt&amp;exempt=OpenSource&amp;until=2027-09
+// Delete whatever is not needed.
+using System.Runtime.CompilerServices;
+using VerifyTests.DiffPlex;
+
+// Everything here runs once, when the test assembly loads, before any test.
+public static class ModuleInitializer
+{
+    [ModuleInitializer]
+    public static void Initialize()
+    {
+        // Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline
+        // diff instead of the whole received and verified text.
+        // OutputType.Compact prints only the changed lines, with a line of context either side.
+        // Alternatives: OutputType.Full, OutputType.Minimal.
+        VerifyDiffPlex.Initialize(OutputType.Compact);
+
+        // Initializes every Verify.* plugin the project references and has not initialized above.
+        // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
+        VerifierSettings.InitializePlugins();
+    }
+}
+</code></pre>
+                </div>
+              </div>
+            </div>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

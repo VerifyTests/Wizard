@@ -1,4 +1,6 @@
+global using System.IO.Compression;
 global using System.Net;
+global using System.Text;
 global using System.Net.Sockets;
 global using System.Text.Json;
 global using System.Text.RegularExpressions;
@@ -6,6 +8,7 @@ global using System.Xml.Linq;
 global using AngleSharp.Dom;
 global using Bunit;
 global using Microsoft.AspNetCore.Builder;
+global using Microsoft.AspNetCore.Components;
 global using Microsoft.AspNetCore.Hosting;
 global using Microsoft.AspNetCore.StaticFiles;
 global using Microsoft.Extensions.DependencyInjection;

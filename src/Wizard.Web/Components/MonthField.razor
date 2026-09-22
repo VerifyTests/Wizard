@@ -1,0 +1,23 @@
+@* A yyyy-MM value. The browser's month picker produces exactly that format. *@
+<div class="field">
+    <label for="@Id">@Label</label>
+    @if (Hint.Length > 0)
+    {
+        <p class="hint">@Hint</p>
+    }
+    <input type="month"
+           id="@Id"
+           value="@Value"
+           @onchange="Changed" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public string Id { get; set; } = "";
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+    [Parameter] public string Hint { get; set; } = "";
+    [Parameter] public string Value { get; set; } = "";
+    [Parameter] public EventCallback<string> ValueChanged { get; set; }
+
+    Task Changed(ChangeEventArgs args) =>
+        ValueChanged.InvokeAsync(args.Value as string ?? "");
+}

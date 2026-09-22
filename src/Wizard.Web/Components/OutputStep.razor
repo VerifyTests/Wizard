@@ -1,0 +1,131 @@
+@inject ClipboardService Clipboard
+@inject DownloadService Download
+@inject NavigationManager Navigation
+
+@* The terminating step (plan 12.1): the guide, the files of the downloadable solution, and the AI
+   instructions, with copy and download actions for each. *@
+<div class="field">
+    <label for="solutionName">Solution name</label>
+    <p class="hint">Used for the solution file, the class library, and the test project (<code>@(output.Plan.TestProject)</code>).</p>
+    <input type="text"
+           id="solutionName"
+           value="@State.SolutionName"
+           @onchange="NameChanged" />
+</div>
+
+<div class="output-actions">
+    <button type="button" class="primary download-zip" @onclick="DownloadZip">Download solution (.zip)</button>
+    <button type="button" class="copy-guide" @onclick="() => Copy(output.Guide, nameof(output.Guide))">@CopyLabel(nameof(output.Guide), "Copy guide as markdown")</button>
+    <button type="button" class="download-guide" @onclick="() => Download.DownloadTextAsync(GuideFileName, output.Guide)">Download guide (.md)</button>
+    <button type="button" class="copy-ai" @onclick="() => Copy(output.Ai, nameof(output.Ai))">@CopyLabel(nameof(output.Ai), "Copy AI instructions")</button>
+    <button type="button" class="download-ai" @onclick="() => Download.DownloadTextAsync(AiFileName, output.Ai)">Download AI instructions (.md)</button>
+    <button type="button" class="copy-link" @onclick="() => Copy(Navigation.Uri, nameof(Navigation))">@CopyLabel(nameof(Navigation), "Copy link to this page")</button>
+</div>
+
+<div class="tabs" role="tablist">
+    @foreach (var tab in tabs)
+    {
+        <button type="button"
+                role="tab"
+                id="tab-@tab"
+                class="tab @(tab == selectedTab ? "selected" : "")"
+                aria-selected="@(tab == selectedTab ? "true" : "false")"
+                @onclick="() => selectedTab = tab">@tab</button>
+    }
+</div>
+
+<div class="tab-panel" role="tabpanel" aria-labelledby="tab-@selectedTab">
+    @switch (selectedTab)
+    {
+        case "Guide":
+            <MarkdownView Markdown="@output.Guide" />
+            break;
+        case "Files":
+            <div class="file-browser">
+                <div>
+                    <p class="file-root">@(output.Plan.SolutionName)/</p>
+                    <ul class="file-list">
+                        @foreach (var file in output.Files)
+                        {
+                            <li>
+                                <button type="button"
+                                        class="file-link @(file.Path == SelectedFile.Path ? "selected" : "")"
+                                        @onclick="() => selectedPath = file.Path">@file.Path</button>
+                            </li>
+                        }
+                    </ul>
+                </div>
+                <CodeBox Title="@SelectedFile.Path" Content="@SelectedFile.Text" />
+            </div>
+            break;
+        default:
+            <pre class="ai-markdown">@output.Ai</pre>
+            break;
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
+    [Parameter, EditorRequired] public Date Today { get; set; }
+    [Parameter] public EventCallback Changed { get; set; }
+
+    static readonly string[] tabs = ["Guide", "Files", "AI"];
+
+    string selectedTab = "Guide";
+    string? selectedPath;
+    string? copied;
+    Output output = null!;
+    WizardState? generatedFor;
+
+    sealed record Output(Plan Plan, string Guide, string Ai, IReadOnlyList<GeneratedFile> Files);
+
+    protected override void OnParametersSet()
+    {
+        // generation is pure, so it only reruns when the state changed
+        if (generatedFor == State)
+        {
+            return;
+        }
+
+        generatedFor = State with { };
+        var plan = Plan.Build(State, PackageVersions.Baked, Today);
+        output = new(plan, DocsGenerator.Build(plan), AiContentGenerator.Build(plan), SolutionGenerator.Build(plan));
+        copied = null;
+    }
+
+    GeneratedFile SelectedFile =>
+        output.Files.FirstOrDefault(_ => _.Path == selectedPath) ??
+        output.Files.First(_ => _.Path == "readme.md");
+
+    string GuideFileName => $"{output.Plan.SolutionName}-verify-guide.md";
+
+    string AiFileName => $"{output.Plan.SolutionName}-ai-instructions.md";
+
+    string CopyLabel(string key, string label)
+    {
+        if (copied == key)
+        {
+            return "Copied!";
+        }
+
+        return label;
+    }
+
+    async Task Copy(string text, string key)
+    {
+        await Clipboard.CopyAsync(text);
+        copied = key;
+    }
+
+    Task DownloadZip()
+    {
+        var zip = ZipBuilder.Build(output.Plan.SolutionName, output.Files);
+        return Download.DownloadAsync($"{output.Plan.SolutionName}.zip", "application/zip", zip).AsTask();
+    }
+
+    Task NameChanged(ChangeEventArgs args)
+    {
+        State.SolutionName = SolutionNames.Clean(args.Value as string);
+        return Changed.InvokeAsync();
+    }
+}

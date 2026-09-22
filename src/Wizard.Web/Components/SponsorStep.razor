@@ -1,0 +1,182 @@
+@* The Open Source Maintenance Fee declaration (plan 14). Mode cards, then the fields that mode needs;
+   the generated Directory.Build.props block and the expected build outcome update as values change. *@
+<p>
+    Verify participates in the <a href="@SponsorXml.FeeDocs" target="_blank">Open Source Maintenance Fee</a>.
+    Organizations using Verify's packages in revenue-generating activities (annual revenue of US$10,000 or more)
+    sponsor <a href="@SponsorXml.SponsorsPage" target="_blank">VerifyTests</a> at the tier matching their size.
+    Individuals, non-revenue open source projects and small organizations are exempt.
+    Every build checks for a declaration in <code>Directory.Build.props</code>.
+</p>
+
+<ChoiceCards TValue="SponsorMode"
+             Options="modes"
+             Value="State.SponsorMode"
+             ValueChanged="ModeChanged"
+             IdPrefix="sponsor"
+             Label="Maintenance fee status" />
+
+@switch (State.SponsorMode)
+{
+    case SponsorMode.Sponsor:
+        <div class="field">
+            <label for="sponsorAccount">GitHub account the sponsorship is made from</label>
+            <p class="hint">The organization or user that sponsors VerifyTests.</p>
+            <input type="text"
+                   id="sponsorAccount"
+                   value="@State.SponsorAccount"
+                   @oninput="AccountChanged" />
+        </div>
+        <div class="check">
+            <input type="checkbox"
+                   id="sponsorshipNew"
+                   checked="@(State.SponsorshipStart != null)"
+                   @onchange="NewChanged" />
+            <label for="sponsorshipNew">
+                The sponsorship is new: it began after the Verify version in use was packed, so that version's
+                bundled sponsor list does not include it yet.
+            </label>
+        </div>
+        @if (State.SponsorshipStart is { } start)
+        {
+            <div class="field">
+                <label for="sponsorshipStart">Sponsorship start</label>
+                <input type="date"
+                       id="sponsorshipStart"
+                       value="@start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)"
+                       @onchange="_ => Update(state => state.SponsorshipStart = ParseDate(_.Value) ?? state.SponsorshipStart)" />
+            </div>
+        }
+
+        <div class="check">
+            <input type="checkbox"
+                   id="sponsorshipPrivate"
+                   checked="@(State.SponsorshipPrivateUntil.Length > 0)"
+                   @onchange="PrivateChanged" />
+            <label for="sponsorshipPrivate">
+                The sponsorship is private on GitHub. Private sponsorships are never in the bundled list, so the
+                claim runs until a month at most @SponsorRules.PrivateMaxMonths months out, and is renewed.
+            </label>
+        </div>
+        @if (State.SponsorshipPrivateUntil.Length > 0)
+        {
+            <MonthField Id="sponsorshipPrivateUntil"
+                        Label="Private sponsorship claimed until"
+                        Value="@State.SponsorshipPrivateUntil"
+                        ValueChanged="_ => Update(state => state.SponsorshipPrivateUntil = _)" />
+        }
+
+        break;
+    case SponsorMode.Exempt:
+        <ChoiceCards TValue="Exemption"
+                     Options="exemptions"
+                     Value="State.Exemption"
+                     ValueChanged="ExemptionChanged"
+                     IdPrefix="exempt"
+                     Label="Exemption" />
+        <MonthField Id="sponsorUntil"
+                    Label="Exempt until"
+                    Hint="@($"At most {SponsorRules.MaxMonths(State.Exemption ?? Exemption.OpenSource)} months out. The claim is renewed by changing the month.")"
+                    Value="@State.SponsorUntil"
+                    ValueChanged="_ => Update(state => state.SponsorUntil = _)" />
+        break;
+    case SponsorMode.PrivateArrangement:
+        <MonthField Id="sponsorUntil"
+                    Label="Licensed until"
+                    Hint="@($"At most {SponsorRules.LicensedMaxMonths} months out. Renewed with a one-line edit.")"
+                    Value="@State.SponsorUntil"
+                    ValueChanged="_ => Update(state => state.SponsorUntil = _)" />
+        break;
+    case SponsorMode.Ignore:
+        <p class="callout">Every build will log an SC023 breach-of-license warning, and a build that treats warnings as errors fails. The generated solution does not treat warnings as errors for this reason.</p>
+        break;
+    default:
+        <p class="callout">The generated <code>Directory.Build.props</code> will contain every option, commented out. Until one is chosen, the build fails with SC021, whose message explains the options too.</p>
+        break;
+}
+
+@foreach (var error in SponsorRules.Errors(State, Today))
+{
+    <p class="validation-error">@error</p>
+}
+
+@* The outcome prose is shared with the guide, so it is markdown. *@
+<div class="hint outcome">
+    <MarkdownView Markdown="@($"**Expected build outcome:** {SponsorRules.Outcome(State)}")" />
+</div>
+
+@code {
+    [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
+    [Parameter, EditorRequired] public Date Today { get; set; }
+    [Parameter] public EventCallback Changed { get; set; }
+
+    static readonly IReadOnlyList<Choice<SponsorMode>> modes =
+    [
+        new(SponsorMode.Sponsor, "Sponsoring", "The organization or user sponsors VerifyTests on GitHub."),
+        new(SponsorMode.Exempt, "Exempt", "Open source, small revenue, or a consulting client of the maintainers."),
+        new(SponsorMode.PrivateArrangement, "Private arrangement", "A licensing agreement made directly with the maintainers."),
+        new(SponsorMode.Ignore, "Opting out", "The build passes with a breach-of-license warning."),
+        new(SponsorMode.NotChosen, "Decide later", "Every option is left commented out in Directory.Build.props.")
+    ];
+
+    static readonly IReadOnlyList<Choice<Exemption>> exemptions =
+    [
+        new(Exemption.OpenSource, "Open source", "An open source project that does not generate revenue."),
+        new(Exemption.SmallRevenue, "Small revenue", "An individual, or an organization with annual revenue under US$10,000."),
+        new(Exemption.MaintainerConsulting, "Maintainer consulting", "Engaged the core maintainers for consulting, for six months after.")
+    ];
+
+    Task Update(Action<WizardState> change)
+    {
+        change(State);
+        return Changed.InvokeAsync();
+    }
+
+    Task ModeChanged(SponsorMode mode) =>
+        Update(state =>
+        {
+            state.SponsorMode = mode;
+            SponsorRules.ApplyDefaults(state, Today);
+        });
+
+    Task ExemptionChanged(Exemption exemption) =>
+        Update(state =>
+        {
+            state.Exemption = exemption;
+            // the maximum term differs per exemption, so the default month follows the choice
+            state.SponsorUntil = MonthBound.Ceiling(Today, SponsorRules.MaxMonths(exemption));
+        });
+
+    Task AccountChanged(ChangeEventArgs args) =>
+        Update(state => state.SponsorAccount = (args.Value as string ?? "").Trim());
+
+    /// <summary>A new sponsorship defaults its start to today (plan D8): the verifier rejects a future date.</summary>
+    Task NewChanged(ChangeEventArgs args) =>
+        Update(state =>
+        {
+            state.SponsorshipStart = null;
+            if (args.Value is true)
+            {
+                state.SponsorshipStart = Today;
+            }
+        });
+
+    Task PrivateChanged(ChangeEventArgs args) =>
+        Update(state =>
+        {
+            state.SponsorshipPrivateUntil = "";
+            if (args.Value is true)
+            {
+                state.SponsorshipPrivateUntil = MonthBound.Ceiling(Today, SponsorRules.PrivateMaxMonths);
+            }
+        });
+
+    static Date? ParseDate(object? value)
+    {
+        if (Date.TryParseExact(value as string, "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var date))
+        {
+            return date;
+        }
+
+        return null;
+    }
+}

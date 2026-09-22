@@ -1,0 +1,26 @@
+﻿{
+  exempt, consulting past 6 months: [
+    The exemption end month can be at most 6 months out (2027-03).
+  ],
+  exempt, expired: [
+    The exemption end month has already passed.
+  ],
+  exempt, none chosen: [
+    Choose the exemption that applies.
+  ],
+  private arrangement, bad format: [
+    The licensed-until month must be a month in the form yyyy-MM.
+  ],
+  sponsor, bad account: [
+    Enter the GitHub account (organization or user) the sponsorship is made from.
+  ],
+  sponsor, future start: [
+    The sponsorship start cannot be in the future: the build fails with SC028.
+  ],
+  sponsor, no account: [
+    Enter the GitHub account (organization or user) the sponsorship is made from.
+  ],
+  sponsor, private too far: [
+    The private sponsorship end month can be at most 12 months out (2027-09).
+  ]
+}

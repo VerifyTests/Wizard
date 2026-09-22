@@ -1,0 +1,112 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>New project · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">New project</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="os">
+                  <span class="step-title">Operating system</span>
+                  <span class="step-value">Linux</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ide">
+                  <span class="step-title">IDE</span>
+                  <span class="step-value">JetBrains Rider</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="cli">
+                  <span class="step-title">CLI or GUI</span>
+                  <span class="step-value">Prefer CLI</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Test framework</span>
+              </li>
+              <li class="future">
+                <span class="step-title">Build server</span>
+              </li>
+              <li class="future">
+                <span class="step-title">Maintenance fee</span>
+              </li>
+              <li class="future">
+                <span class="step-title">Result</span>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="tf">
+            <h2>Test framework</h2>
+            <div class="mode-cards" role="radiogroup" aria-label="Test framework">
+              <button type="button" id="tf-XunitV3" class="mode-card " role="radio" aria-checked="false">
+                <strong>xUnit v3</strong>
+              </button>
+              <button type="button" id="tf-NUnit" class="mode-card " role="radio" aria-checked="false">
+                <strong>NUnit</strong>
+              </button>
+              <button type="button" id="tf-TUnit" class="mode-card " role="radio" aria-checked="false">
+                <strong>TUnit</strong>
+              </button>
+              <button type="button" id="tf-MSTest" class="mode-card " role="radio" aria-checked="false">
+                <strong>MSTest</strong>
+                <span>Test classes opt in with [UsesVerify].</span>
+              </button>
+              <button type="button" id="tf-Fixie" class="mode-card " role="radio" aria-checked="false">
+                <strong>Fixie</strong>
+                <span>No Microsoft.Testing.Platform runner, so it uses VSTest.</span>
+              </button>
+              <button type="button" id="tf-Expecto" class="mode-card " role="radio" aria-checked="false">
+                <strong>Expecto</strong>
+                <span>Tests in F#.</span>
+              </button>
+            </div>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+              <button type="button" class="primary" disabled="">Next: Build server</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

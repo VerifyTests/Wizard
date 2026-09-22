@@ -239,6 +239,141 @@ a.entry-card:hover {
     color: var(--muted);
 }
 
+.entry-card.soon {
+    background: var(--panel);
+    border: 1px dashed var(--border);
+    border-radius: 8px;
+    padding: 1.25rem 1.5rem;
+}
+
+.entry-card.soon h2 {
+    color: var(--muted);
+}
+
+/* flow layout: the breadcrumb rail on the left (plan 7.4), the step on the right */
+.wizard-layout {
+    display: grid;
+    grid-template-columns: 240px minmax(0, 1fr);
+    gap: 1.5rem;
+    align-items: start;
+}
+
+.breadcrumb {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .75rem 0;
+}
+
+.breadcrumb-flow {
+    display: block;
+    padding: .25rem 1rem .6rem;
+    font-weight: 600;
+    color: var(--text);
+    text-decoration: none;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: .4rem;
+}
+
+.breadcrumb ol {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.breadcrumb li > span,
+.breadcrumb .step-link {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: .4rem 1rem;
+    border: none;
+    border-left: 3px solid transparent;
+    border-radius: 0;
+    background: none;
+    font: inherit;
+    color: var(--muted);
+}
+
+.breadcrumb .step-link {
+    cursor: pointer;
+}
+
+.breadcrumb .step-link:hover {
+    background: var(--bg);
+}
+
+.breadcrumb .step-title {
+    display: block;
+    font-size: .88rem;
+}
+
+.breadcrumb .step-value {
+    display: block;
+    color: var(--text);
+    font-weight: 600;
+}
+
+.breadcrumb li.current > span {
+    border-left-color: var(--primary);
+    color: var(--text);
+    font-weight: 600;
+}
+
+.breadcrumb li.future > span {
+    opacity: .6;
+}
+
+/* Narrow screens: a horizontal strip of the chosen values above the step. */
+@media (max-width: 768px) {
+    .wizard-layout {
+        grid-template-columns: minmax(0, 1fr);
+    }
+
+    .breadcrumb {
+        overflow-x: auto;
+        padding: .4rem .5rem;
+    }
+
+    .breadcrumb-flow {
+        display: none;
+    }
+
+    .breadcrumb ol {
+        display: flex;
+        gap: .25rem;
+        white-space: nowrap;
+    }
+
+    .breadcrumb li.future {
+        display: none;
+    }
+
+    .breadcrumb li {
+        display: flex;
+        align-items: center;
+    }
+
+    .breadcrumb li + li::before {
+        content: '›';
+        color: var(--muted);
+    }
+
+    .breadcrumb li > span,
+    .breadcrumb .step-link {
+        border-left: none;
+        padding: .2rem .5rem;
+    }
+
+    .breadcrumb .step-title {
+        display: none;
+    }
+
+    .breadcrumb li.current .step-title {
+        display: block;
+    }
+}
+
 /* step body */
 .step-body {
     background: var(--panel);
@@ -414,6 +549,103 @@ button:disabled {
 
 .output-header h2 {
     margin: 0;
+}
+
+.output-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 1rem 0;
+}
+
+.tabs {
+    display: flex;
+    gap: .25rem;
+    border-bottom: 1px solid var(--border);
+    margin-top: 1rem;
+}
+
+.tabs .tab {
+    border: 1px solid transparent;
+    border-bottom: none;
+    border-radius: 6px 6px 0 0;
+    background: none;
+}
+
+.tabs .tab.selected {
+    border-color: var(--border);
+    background: var(--panel);
+    font-weight: 600;
+    margin-bottom: -1px;
+}
+
+.tab-panel {
+    padding-top: 1rem;
+}
+
+.file-browser {
+    display: grid;
+    grid-template-columns: minmax(0, 18rem) minmax(0, 1fr);
+    gap: 1rem;
+    align-items: start;
+}
+
+.file-list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+    font-size: .85rem;
+}
+
+.file-link {
+    display: block;
+    width: 100%;
+    text-align: left;
+    padding: .2rem .4rem;
+    border: none;
+    background: none;
+    font-family: 'Wizard Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    overflow-wrap: anywhere;
+}
+
+.file-root {
+    margin: 0 0 .25rem;
+    padding: 0 .4rem;
+    font-family: 'Wizard Mono', ui-monospace, SFMono-Regular, 'SF Mono', Menlo, Consolas, 'Liberation Mono', monospace;
+    font-size: .85rem;
+    color: var(--muted);
+}
+
+.file-link.selected {
+    background: var(--bg);
+    font-weight: 600;
+}
+
+pre.ai-markdown {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: .85rem;
+    overflow-x: auto;
+    white-space: pre-wrap;
+    font-size: .85rem;
+}
+
+.markdown pre {
+    background: var(--code-bg);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: .75rem;
+    overflow-x: auto;
+    font-size: .85rem;
+}
+
+.markdown img {
+    max-width: 100%;
+}
+
+.markdown code {
+    font-size: .9em;
 }
 
 .code-box {

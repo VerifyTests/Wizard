@@ -1,0 +1,60 @@
+@page "/new"
+@implements IDisposable
+
+<PageTitle>New project · Verify Wizard</PageTitle>
+
+<div class="wizard-layout">
+    <Breadcrumb State="state" Steps="steps" Today="today" StepSelected="GoTo" />
+
+    <section class="step-body" data-step="@state.Step">
+        <h2>@current.Title</h2>
+
+        @switch (state.Step)
+        {
+            case "os":
+                <p class="hint">Decides which diff tools are listed, and whether DiffEngineTray is suggested.</p>
+                <ChoiceCards TValue="Os" Options="osChoices" Value="state.Os" ValueChanged="_ => Set(wizard => wizard.Os = _)" IdPrefix="os" Label="Operating system" />
+                break;
+            case "ide":
+                <p class="hint">Rider and ReSharper have a Verify plugin for accepting snapshots in the test runner.</p>
+                <ChoiceCards TValue="Ide" Options="IdeChoices" Value="state.Ide" ValueChanged="_ => Set(wizard => wizard.Ide = _)" IdPrefix="ide" Label="IDE" />
+                break;
+            case "cli":
+                <p class="hint">This will affect the approach to installing NuGet packages and snapshot management options.</p>
+                <ChoiceCards TValue="CliPreference" Options="cliChoices" Value="state.Cli" ValueChanged="_ => Set(wizard => wizard.Cli = _)" IdPrefix="cli" Label="CLI or GUI" />
+                break;
+            case "tf":
+                <ChoiceCards TValue="TestFramework" Options="testFrameworkChoices" Value="state.TestFramework" ValueChanged="_ => Set(wizard => wizard.TestFramework = _)" IdPrefix="tf" Label="Test framework" />
+                break;
+            case "ci":
+                <p class="hint">Generates a build definition that runs the tests and publishes any <code>*.received.*</code> files when they fail.</p>
+                <ChoiceCards TValue="BuildServer" Options="buildServerChoices" Value="state.BuildServer" ValueChanged="_ => Set(wizard => wizard.BuildServer = _)" IdPrefix="ci" Label="Build server" />
+                break;
+            case "sponsor":
+                <SponsorStep State="state" Today="today" Changed="Changed" />
+                break;
+            default:
+                <OutputStep State="state" Today="today" Changed="Changed" />
+                break;
+        }
+
+        <div class="wizard-nav">
+            @if (PreviousStep is { } previous)
+            {
+                <button type="button" class="back" @onclick="() => GoTo(previous.Id)">Back</button>
+            }
+            else
+            {
+                <a class="back" href="">Home</a>
+            }
+
+            @if (NextStep is { } next)
+            {
+                <button type="button"
+                        class="primary"
+                        disabled="@(!current.IsComplete(state, today))"
+                        @onclick="() => GoTo(next.Id)">Next: @next.Title</button>
+            }
+        </div>
+    </section>
+</div>

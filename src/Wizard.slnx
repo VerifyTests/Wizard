@@ -11,6 +11,7 @@
     <File Path="../global.json" />
     <File Path="nuget.config" />
     <File Path="../.github/workflows/deploy.yml" />
+    <File Path="../.github/workflows/integration.yml" />
     <File Path="../.github/dependabot.yml" />
   </Folder>
   <Project Path="Wizard.Core/Wizard.Core.csproj" />

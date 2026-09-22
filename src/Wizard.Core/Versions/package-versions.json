@@ -1,0 +1,30 @@
+{
+  "updated": "2026-09-22",
+  "packages": {
+    "Verify": "33.1.1",
+    "Verify.DiffPlex": "3.3.1",
+    "Verify.XunitV3": "33.1.1",
+    "xunit.v3": "4.0.1",
+    "Verify.NUnit": "33.1.1",
+    "NUnit": "4.6.1",
+    "NUnit3TestAdapter": "6.3.0",
+    "Verify.TUnit": "33.1.1",
+    "TUnit": "1.68.17",
+    "Verify.MSTest": "33.1.1",
+    "MSTest.TestAdapter": "4.4.1",
+    "MSTest.TestFramework": "4.4.1",
+    "Verify.Fixie": "33.1.1",
+    "Fixie": "4.2.0",
+    "Fixie.TestAdapter": "4.2.0",
+    "Microsoft.NET.Test.Sdk": "18.10.1",
+    "Verify.Expecto": "33.1.1",
+    "Expecto": "11.1.0",
+    "YoloDev.Expecto.TestSdk": "0.16.1",
+    "FSharp.Core": "11.0.100",
+    "verify.tool": "0.9.1",
+    "DiffEngineTray": "20.3.1"
+  },
+  "pinned": {
+    "YoloDev.Expecto.TestSdk": "1.0.0 sorts newest but requires Expecto < 10; 0.16.1 is the version Verify's own usages build against."
+  }
+}

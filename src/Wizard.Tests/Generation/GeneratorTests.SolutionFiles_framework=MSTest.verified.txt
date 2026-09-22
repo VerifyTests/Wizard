@@ -1,0 +1,1180 @@
+﻿==== global.json
+
+{
+  "sdk": {
+    "version": "10.0.401",
+    "rollForward": "latestFeature"
+  },
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
+
+==== Directory.Build.props
+
+<Project>
+  <!-- Applies to every project under this directory. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <!-- Open Source Maintenance Fee: every Verify package checks at build time that the build
+       declares its fee status, and fails with SC021 when it does not. Nothing phones home.
+       https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+       Other options, and the rules for each: https://simoncropp.github.io/SponsorCheck/package/Verify -->
+  <!-- Exempt: an open source project that does not generate revenue. The claim is time-bounded: renew the month before it passes. -->
+  <PropertyGroup>
+    <Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+    <Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
+  </PropertyGroup>
+</Project>
+
+==== Directory.Packages.props
+
+<Project>
+  <!-- Central Package Management: every package version is set here, once. Projects reference
+       packages with <PackageReference Include="..." /> and no Version.
+       https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management -->
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+    <!-- Transitive dependencies are held to the versions below too, so a package pulled in
+         indirectly cannot resolve to an older version than the one referenced directly. -->
+    <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+  </PropertyGroup>
+  <!-- Test framework: MSTest -->
+  <ItemGroup>
+    <PackageVersion Include="MSTest.TestAdapter" Version="4.4.1" />
+    <PackageVersion Include="MSTest.TestFramework" Version="4.4.1" />
+    <PackageVersion Include="Verify.MSTest" Version="33.1.1" />
+  </ItemGroup>
+  <!-- Verify.DiffPlex: text snapshot failures show an inline diff -->
+  <ItemGroup>
+    <PackageVersion Include="Verify.DiffPlex" Version="3.3.1" />
+  </ItemGroup>
+</Project>
+
+==== nuget.config
+
+<?xml version="1.0" encoding="utf-8"?>
+<configuration>
+  <config>
+    <!-- Only install packages whose signature matches a trusted signer below. -->
+    <add key="signatureValidationMode" value="require" />
+  </config>
+  <packageSources>
+    <clear />
+    <add key="nuget.org" value="https://api.nuget.org/v3/index.json" protocolVersion="3" />
+  </packageSources>
+  <trustedSigners>
+    <repository name="nuget.org" serviceIndex="https://api.nuget.org/v3/index.json">
+      <certificate fingerprint="5A2901D6ADA3D18260B9C6DFE2133C95D74B9EEF6AE0E5DC334C8454D1477DF4" hashAlgorithm="SHA256" allowUntrustedRoot="false" />
+      <certificate fingerprint="1F4B311D9ACC115C8DC8018B5A49E00FCE6DA8E2855F9F014CA6F34570BC482D" hashAlgorithm="SHA256" allowUntrustedRoot="false" />
+      <certificate fingerprint="0E5F38F57DC1BCC806D8494F4F90FBCEDD988B46760709CBEEC6F4219AA6157D" hashAlgorithm="SHA256" allowUntrustedRoot="false" />
+    </repository>
+  </trustedSigners>
+</configuration>
+
+==== .gitignore
+
+# Verify: received files are the output of a failed run, never committed
+*.received.*
+*.received/
+
+bin/
+obj/
+.vs/
+.idea/
+*.user
+TestResults/
+
+==== .gitattributes
+
+* text=auto
+
+# Verify: text snapshots are UTF-8 (with BOM, which git passes through) and lf, on every OS
+*.verified.txt text eol=lf working-tree-encoding=UTF-8
+*.verified.xml text eol=lf working-tree-encoding=UTF-8
+*.verified.json text eol=lf working-tree-encoding=UTF-8
+*.verified.md text eol=lf working-tree-encoding=UTF-8
+*.verified.html text eol=lf working-tree-encoding=UTF-8
+*.verified.csv text eol=lf working-tree-encoding=UTF-8
+*.verified.cs text eol=lf working-tree-encoding=UTF-8
+*.verified.bin binary
+*.verified.png binary
+
+==== .editorconfig
+
+root = true
+
+[*]
+indent_style = space
+insert_final_newline = true
+
+[*.{cs,fs}]
+indent_size = 4
+charset = utf-8
+
+[*.{csproj,fsproj,props,targets,slnx,json,yml,yaml,config}]
+indent_size = 2
+
+# Verify marks methods whose result must be used (such as Verify()) with [Pure];
+# Rider and ReSharper can make ignoring that result an error.
+[*.cs]
+resharper_return_value_of_pure_method_is_not_used_highlighting = error
+
+# Verify settings
+[*.{received,verified}.{json,txt,xml}]
+charset = utf-8-bom
+end_of_line = lf
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+tab_width = unset
+trim_trailing_whitespace = false
+
+[*.{received,verified}.{json,xml,html,htm,yaml,svg}]
+indent_size = 2
+indent_style = space
+
+==== VerifySample.slnx
+
+<Solution>
+  <Folder Name="/Solution Items/">
+    <File Path="global.json" />
+    <File Path="Directory.Build.props" />
+    <File Path="Directory.Packages.props" />
+    <File Path="nuget.config" />
+    <File Path=".gitignore" />
+    <File Path=".gitattributes" />
+    <File Path=".editorconfig" />
+    <File Path="readme.md" />
+    <File Path=".config/dotnet-tools.json" />
+    <File Path=".github/workflows/build.yml" />
+  </Folder>
+  <Project Path="src/VerifySample/VerifySample.csproj" />
+  <Project Path="src/VerifySample.Tests/VerifySample.Tests.csproj" />
+</Solution>
+
+==== VerifySample.slnx.DotSettings
+
+<wpf:ResourceDictionary xml:space="preserve" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:s="clr-namespace:System;assembly=mscorlib" xmlns:ss="urn:shemas-jetbrains-com:settings-storage-xaml" xmlns:wpf="http://schemas.microsoft.com/winfx/2006/xaml/presentation">
+	<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestRunner/SpawnedProcessesResponse/@EntryValue">DoNothing</s:String>
+</wpf:ResourceDictionary>
+
+==== .config/dotnet-tools.json
+
+{
+  "version": 1,
+  "isRoot": true,
+  "tools": {
+    "verify.tool": {
+      "version": "0.9.1",
+      "commands": [
+        "dotnet-verify"
+      ],
+      "rollForward": false
+    }
+  }
+}
+
+==== readme.md
+
+# Getting started with Verify: VerifySample
+
+Generated by the [Verify wizard](https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09) (reopen that link to change any answer).
+
+ * Operating system: Windows
+ * IDE: JetBrains Rider
+ * Package management: Prefer CLI
+ * Test framework: MSTest
+ * Build server: GitHub Actions
+ * Maintenance fee: Exempt: OpenSource
+ * .NET: net10.0 (SDK 10.0.401)
+
+The downloadable solution already contains everything described below: a class library, a test project with a passing sample test, and the settings files. This guide explains each part, so the same setup can be applied to an existing solution.
+
+## Add NuGet packages
+
+Add the following packages to the test project. The solution uses [Central Package Management](https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management): versions live in `Directory.Packages.props`, and project files reference packages without a version.
+
+```
+dotnet add package MSTest.TestAdapter
+dotnet add package MSTest.TestFramework
+dotnet add package Verify.MSTest
+dotnet add package Verify.DiffPlex
+```
+
+With Central Package Management enabled, `dotnet add package` writes the version to `Directory.Packages.props`.
+
+## Microsoft.Testing.Platform
+
+[Microsoft.Testing.Platform](https://learn.microsoft.com/en-us/dotnet/core/testing/microsoft-testing-platform-intro) (MTP) is the recommended way to run tests. It replaces VSTest, so `Microsoft.NET.Test.Sdk` is not required.
+
+### dotnet test
+
+The .NET 10 SDK added an [MTP mode to dotnet test](https://learn.microsoft.com/en-us/dotnet/core/testing/unit-testing-with-dotnet-test). The default VSTest mode does not run MTP test projects. Enable MTP mode by adding the following to `global.json` at the root of the repository:
+
+```json
+{
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
+```
+
+### Test project settings
+
+Add the following to the test project:
+
+```xml
+<PropertyGroup>
+  <OutputType>Exe</OutputType>
+  <EnableMSTestRunner>true</EnableMSTestRunner>
+</PropertyGroup>
+```
+
+## Implicit Usings
+
+**All examples use [Implicit Usings](https://docs.microsoft.com/en-us/dotnet/core/project-sdk/msbuild-props#implicitusings). Ensure `<ImplicitUsings>` is set to `enable` to ensure examples compile correctly.**
+
+```
+<ImplicitUsings>enable</ImplicitUsings>
+```
+
+If `ImplicitUsings` are not enabled, substitute usages of `Verify()` with `Verifier.Verify()`.
+
+## Conventions
+
+### Source Control Includes/Excludes
+
+ * **All `*.received.*` files should be excluded from source control.**
+
+eg. add the following to `.gitignore`
+
+```
+*.received.*
+```
+
+If using [UseSplitModeForUniqueDirectory](https://github.com/VerifyTests/Verify/blob/main/docs/naming.md#usesplitmodeforuniquedirectory) also include:
+
+`*.received/`
+
+
+All `*.verified.*` files should be committed to source control.
+
+### Text file settings
+
+Text variants of verified and received have the following characteristics:
+
+ * UTF8 with a [Byte order mark (BOM)](https://en.wikipedia.org/wiki/Byte_order_mark)
+ * Newlines as line-feed (lf)
+ * No trailing newline
+
+This manifests in several ways:
+
+
+#### Source control settings
+
+All text extensions of `*.verified.*` should have:
+
+ * `eol` set to `lf`
+ * `working-tree-encoding` set to `UTF-8`
+
+Note: `working-tree-encoding=UTF-8` is correct even though Verify writes files with a BOM. Git does not strip or add the BOM - it passes through transparently. The `UTF-8-BOM` encoding would explicitly add a BOM on checkout and strip it on commit (so the internal blob differs from the working tree), but that is not the desired behavior since Verify writes the BOM itself and it should be preserved in the blob.
+
+All Binary files should also be marked to avoid merging and line ending issues with binary files.
+
+eg add the following to `.gitattributes`
+
+```
+*.verified.txt text eol=lf working-tree-encoding=UTF-8
+*.verified.xml text eol=lf working-tree-encoding=UTF-8
+*.verified.json text eol=lf working-tree-encoding=UTF-8
+*.verified.bin binary
+```
+
+
+#### Line ending autocrlf
+
+On Windows, if `core.autocrlf` is set to `true`, files may show as modified with no actual content changes. To fix this:
+
+```
+git config --global core.autocrlf input
+```
+
+`core.autocrlf=true` normalizes line endings to lf on commit, and converts them back to crlf on checkout. So the blobs stored in git are lf while the files on disk are crlf. Verify rejects a verified file containing a carriage return, so tests fail even though the committed content is correct.
+
+Adding the `.gitattributes` entries above overrides `core.autocrlf` for those paths, but it does not update files that are already checked out. Git re-applies line ending filters only when a file's blob changes, and since `core.autocrlf` already normalized those blobs to lf, adding the attributes changes no content. A one-time refresh of the working tree is required after committing `.gitattributes`:
+
+```
+git rm --cached -r .
+git reset --hard
+```
+
+This discards uncommitted changes, so commit or stash first.
+
+Where crlf was committed to the blobs (`core.autocrlf` unset or `false`), the content itself needs normalizing instead. In that case `git add --renormalize .` produces a commit that converts the blobs, and checkout updates each working tree as it is pulled:
+
+```
+git add --renormalize .
+git commit -m "Normalize line endings"
+```
+
+Build servers that reuse a cached working directory between runs need the same refresh as a developer machine. A build that clones fresh each run is unaffected.
+
+
+#### EditorConfig settings
+
+If modifying text verified/received files in an editor, it is desirable for the editor to respect the above conventions. For [EditorConfig](https://editorconfig.org/) enabled the following can be used:
+
+```
+# Verify settings
+[*.{received,verified}.{json,txt,xml}]
+charset = utf-8-bom
+end_of_line = lf
+indent_size = unset
+indent_style = unset
+insert_final_newline = false
+tab_width = unset
+trim_trailing_whitespace = false
+
+[*.{received,verified}.{json,xml,html,htm,yaml,svg}]
+indent_size = 2
+indent_style = space
+```
+
+**Note that the above are suggested for subset of text extension. Add others as required based on the text file types being verified.**
+
+**Visual Studio Code** does not apply the EditorConfig `end_of_line` setting natively. Without it, accepting a snapshot by editing in the built-in diff editor (for example reverting a block from received into verified) can save the verified file with `crlf` on Windows, taken from the default `files.eol`. Verify then rejects that file for containing a carriage return. Installing the [EditorConfig for VS Code extension](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig) applies `end_of_line = lf` on save. Setting `"files.eol": "\n"` in Visual Studio Code settings has the same effect without the extension.
+
+
+#### Newline tolerance
+
+The settings above are the recommended approach, since they keep the content on disk consistent for everyone working on a repository. Where per developer setup cannot be relied on, Verify can instead be made tolerant of carriage returns and of a trailing newline in verified files. Both are opt in, and both have side effects worth understanding before enabling them. See [Newline tolerance](https://github.com/VerifyTests/Verify/blob/main/docs/newline-tolerance.md).
+
+### Conventions check
+
+Conventions can be checked by calling `VerifyChecks.Run()` in a test. The solution includes this test:
+
+```cs
+[TestClass]
+public partial class VerifyChecksTests
+{
+    [TestMethod]
+    public Task Run() =>
+        VerifyChecks.Run();
+}
+```
+
+## Snapshot management
+
+When a snapshot does not match, Verify writes a `.received.` file next to the `.verified.` one and opens a diff tool. The following tools help review and accept those changes.
+
+### DiffEngineTray
+
+Install [DiffEngineTray](https://github.com/VerifyTests/DiffEngine/blob/main/docs/tray.md).
+
+DiffEngineTray sits in the Windows tray. It monitors pending changes in snapshots, and provides a mechanism for accepting or rejecting those changes.
+
+```
+dotnet tool install -g DiffEngineTray
+```
+
+This is optional, but recommended. Also consider enabling [Run at startup](https://github.com/VerifyTests/DiffEngine/blob/main/docs/tray.md#run-at-startup).
+
+### Rider Plugin
+
+Install the [Rider Plugin](https://plugins.jetbrains.com/plugin/17240-verify-support).
+
+Provides a mechanism for contextually accepting or rejecting snapshot changes inside the Rider test runner.
+
+This is optional, but recommended.
+
+### Disable orphaned process detection
+
+Resharper and Rider have a feature [Check for orphaned processes spawned by test runner](https://www.jetbrains.com/help/resharper/Reference__Options__Tools__Unit_Testing__Test_Runner.html).
+
+> By default, a list of all processes that are launched by the executed tests. If some of theses processes do not exit after the test execution is over, ReSharper will suggest you to terminate the process. If your setup requires some processes started by the tests to continue running, you can clear this checkbox to avoid unnecessary notifications.
+
+Since this project launches diff tools, it will trigger this feature and a dialog will show:
+
+> All unit tests are finished, but child processes spawned by the test runner process are still running. Terminate child process?
+
+<img src="https://raw.githubusercontent.com/VerifyTests/Verify/main/docs/resharper-spawned.png" alt="R# terminate process dialog" width="400">
+
+As such this feature needs to be disabled:
+
+
+#### Disable for solution
+
+Add the following to `[Solution].sln.DotSettings`.
+
+```
+<s:String x:Key="/Default/Housekeeping/UnitTestingMru/UnitTestRunner/SpawnedProcessesResponse/@EntryValue">DoNothing</s:String>
+```
+
+
+#### Disable for machine
+
+
+##### Resharper
+
+ReSharper | Options | Tools | Unit Testing | Test Runner
+
+<img src="https://raw.githubusercontent.com/VerifyTests/Verify/main/docs/resharper-ignore-spawned.png" alt="Disable R# orphaned processes detection" width="400">
+
+
+##### Rider
+
+File | Settings | Manage Layers | This computer | Edit Layer | Build, Execution, Deployment | Unit Testing | Test Runner
+
+<img src="https://raw.githubusercontent.com/VerifyTests/Verify/main/docs/rider-ignore-spawned.png" alt="Disable R# orphaned processes detection" width="500">
+
+The solution already includes this setting, in `VerifySample.slnx.DotSettings`.
+
+### Treat "return value of pure method is not used" as error
+
+Verify uses the [PureAttribute](https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.contracts.pureattribute) to mark methods where the result of the method is expected to be used. For example awaiting the call to `Verify()`.
+Rider and ReSharper can be configured to treat an un-used return value as an error.
+Add the following to the `.editorconfig` file:
+
+```
+[*.cs]
+resharper_return_value_of_pure_method_is_not_used_highlighting = error
+```
+
+The solution's `.editorconfig` already includes this setting.
+
+### Verify.Terminal
+
+[Verify.Terminal](https://github.com/VerifyTests/Verify.Terminal) is a dotnet tool for managing snapshots from the command line (`dotnet verify review`, `accept` and `reject`). This is optional.
+
+The solution installs it as a local tool in `.config/dotnet-tools.json`, so `dotnet tool restore` makes it available. To install it globally instead:
+
+```
+dotnet tool install -g verify.tool
+```
+
+## DiffPlex
+
+The text comparison behavior of Verify is pluggable. The default behaviour, on failure, is to output both the received and the verified contents as part of the exception. This can be noisy when verifying large strings.
+
+[Verify.DiffPlex](https://github.com/VerifyTests/Verify.DiffPlex) changes the text compare result to highlighting text differences inline. This is optional, but recommended. It is enabled in the module initializer below.
+
+## Initialization
+
+Verify is configured once, before any test runs, in a [module initializer](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/general#moduleinitializer-attribute). The solution's `ModuleInitializer.cs`:
+
+```cs
+using System.Runtime.CompilerServices;
+using VerifyTests.DiffPlex;
+
+// Everything here runs once, when the test assembly loads, before any test.
+public static class ModuleInitializer
+{
+    [ModuleInitializer]
+    public static void Initialize()
+    {
+        // Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline
+        // diff instead of the whole received and verified text.
+        // OutputType.Compact prints only the changed lines, with a line of context either side.
+        // Alternatives: OutputType.Full, OutputType.Minimal.
+        VerifyDiffPlex.Initialize(OutputType.Compact);
+
+        // Initializes every Verify.* plugin the project references and has not initialized above.
+        // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
+        VerifierSettings.InitializePlugins();
+    }
+}
+```
+
+## Sample Test
+
+```cs
+[TestClass]
+public partial class Sample
+{
+    [TestMethod]
+    public Task Test()
+    {
+        var person = ClassBeingTested.FindPerson();
+        return Verify(person);
+    }
+}
+```
+
+`ClassBeingTested.FindPerson()` lives in the `VerifySample` project. The solution includes the approved snapshot, `Sample.Test.verified.txt`, so this test passes on the first run:
+
+```txt
+{
+  GivenNames: John,
+  FamilyName: Smith,
+  Spouse: Jill,
+  Address: {
+    Street: 4 Puddle Lane,
+    Country: USA
+  },
+  Children: [
+    Sam,
+    Mary
+  ],
+  Id: Guid_1
+}
+```
+
+### Marking tests as 'Using Verify'
+
+The MSTest implementation leverages a [Source Generator](https://learn.microsoft.com/en-us/dotnet/csharp/roslyn-sdk/source-generators-overview) and requires test classes to opt in to being processed by the Source Generator.
+
+Add the `UsesVerifyAttribute`.
+
+For all test classes in an assembly:
+
+```
+[assembly: UsesVerify]
+```
+
+For a specific a test class:
+
+```
+[UsesVerify]
+[TestClass]
+public class TheTest...
+```
+
+Or inherit from `VerifyBase`:
+
+```cs
+[TestClass]
+public class VerifyBaseUsage :
+    VerifyBase
+{
+    [TestMethod]
+    public Task Simple() =>
+        Verify("The content");
+}
+```
+
+The solution uses the assembly-wide attribute, in `AssemblyInfo.cs`.
+
+## Diff Tool
+
+Verify supports many [Diff Tools](https://github.com/VerifyTests/DiffEngine/blob/main/docs/diff-tool.md#supported-tools) for comparing received to verified. While IDEs are supported, due to their MDI nature, using a different Diff Tool is recommended.
+
+Tools supported by Windows:
+
+ * [MsWordDiff](https://github.com/SimonCropp/MsOfficeDiff)
+ * [MsExcelDiff](https://github.com/SimonCropp/MsOfficeDiff)
+ * [BeyondCompare](https://www.scootersoftware.com)
+ * [P4Merge](https://www.perforce.com/products/helix-core-apps/merge-diff-tool-p4merge)
+ * [DeltaWalker](https://www.deltawalker.com/)
+ * [WinMerge](https://winmerge.org/)
+ * [TortoiseMerge](https://tortoisesvn.net/TortoiseMerge.html)
+ * [TortoiseGitMerge](https://tortoisegit.org/docs/tortoisegitmerge/)
+ * [TortoiseGitIDiff](https://tortoisegit.org/docs/tortoisegitmerge/)
+ * [TortoiseIDiff](https://tortoisesvn.net/TortoiseIDiff.html)
+ * [KDiff3](https://github.com/KDE/kdiff3)
+ * [Guiffy](https://www.guiffy.com/)
+ * [ExamDiff](https://www.prestosoft.com/edp_examdiffpro.asp)
+ * [Diffinity](https://truehumandesign.se/s_diffinity.php)
+ * [Rider](https://www.jetbrains.com/rider/)
+ * [Vim](https://www.vim.org/)
+ * [Neovim](https://neovim.io/)
+ * [DiffEngineViewer](https://github.com/VerifyTests/DiffEngine)
+
+## Getting .received in output on GitHub Actions
+
+Use a [if: failure()](https://docs.github.com/en/free-pro-team@latest/actions/reference/context-and-expression-syntax-for-github-actions#failure) condition to upload any `*.received.*` files if the build fails.
+
+```yaml
+- name: Upload Test Results
+  if: failure()
+  uses: actions/upload-artifact@v4
+  with:
+    name: verify-test-results
+    path: |
+      **/*.received.*
+```
+
+The solution's `.github/workflows/build.yml` builds, runs the tests, and includes this step.
+
+## Open Source Maintenance Fee
+
+Verify participates in the [Open Source Maintenance Fee](https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md). Organizations using Verify's NuGet packages in revenue-generating activities, with annual gross revenue of at least US$10,000, sponsor [VerifyTests](https://github.com/sponsors/VerifyTests) at the tier matching their size. Individuals, non-revenue open source projects and small organizations are exempt.
+
+Every Verify package checks at build time that the build declares its status, with a property in `Directory.Build.props`. The solution's declaration:
+
+```xml
+<!-- Open Source Maintenance Fee: every Verify package checks at build time that the build
+     declares its fee status, and fails with SC021 when it does not. Nothing phones home.
+     https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+     Other options, and the rules for each: https://simoncropp.github.io/SponsorCheck/package/Verify -->
+<!-- Exempt: an open source project that does not generate revenue. The claim is time-bounded: renew the month before it passes. -->
+<PropertyGroup>
+  <Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+  <Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
+</PropertyGroup>
+```
+
+Expected build outcome: The build passes and logs the exemption's criteria as an SC031 message, not a warning, so builds with warnings as errors pass too. It passes through the end of 2027-09 (UTC); after that it fails with SC049 until the claim is renewed.
+
+The [SponsorCheck setup wizard for Verify](https://simoncropp.github.io/SponsorCheck/package/Verify) explains every option and diagnostic code.
+
+## Running the tests
+
+From the solution directory:
+
+```
+dotnet test
+```
+
+The test project is also an executable, so `dotnet run --project src/VerifySample.Tests` runs the tests directly.
+
+A new test has no `.verified.` file, so its first run fails and writes a `.received.` file. Review it, then accept it by renaming it to `.verified.`, accepting it in the diff tool, DiffEngineTray or IDE plugin, or running `dotnet verify accept`.
+
+Set the environment variable `DiffEngine_Disabled=true` when running tests where a diff tool should not open, such as a build server or an AI assistant's terminal. Verify detects the common build servers itself.
+
+## Further reading
+
+ * [Verify readme](https://github.com/VerifyTests/Verify#readme)
+ * [Serializer settings](https://github.com/VerifyTests/Verify/blob/main/docs/serializer-settings.md)
+ * [Scrubbers](https://github.com/VerifyTests/Verify/blob/main/docs/scrubbers.md)
+ * [File naming](https://github.com/VerifyTests/Verify/blob/main/docs/naming.md)
+ * [Parameterised tests](https://github.com/VerifyTests/Verify/blob/main/docs/parameterised.md)
+ * [Plugins](https://github.com/VerifyTests/Verify/blob/main/docs/plugins.md)
+ * [Using Verify with AI assistants](https://github.com/VerifyTests/Verify/blob/main/docs/ai-usage.md)
+
+==== CLAUDE.md
+
+# VerifySample: instructions for AI coding assistants
+
+Generated by the [Verify wizard](https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09). This project was set up with Verify snapshot testing; the facts below describe that setup.
+
+## Project facts
+
+ * Solution: `VerifySample.slnx`. Code under test is in `src/VerifySample`, tests in `src/VerifySample.Tests`.
+ * Test framework: MSTest.
+ * Run the tests from the solution directory with `dotnet test`. The test project runs on Microsoft.Testing.Platform (`global.json` sets the runner), so `dotnet run --project` on it also works.
+ * Target framework `net10.0`, SDK pinned by `global.json` (10.0.401).
+ * Packages use Central Package Management: add or change versions in `Directory.Packages.props`, and reference packages without a version.
+ * Verify packages: Verify.MSTest 33.1.1, Verify.DiffPlex 3.3.1.
+ * Verify is configured in `ModuleInitializer.cs` in the test project. Explicit plugin `Initialize` calls go before `VerifierSettings.InitializePlugins()`.
+ * The Open Source Maintenance Fee declaration is in `Directory.Build.props` (Exempt: OpenSource). Do not remove it: without it every build fails with SC021.
+
+## Snapshot Testing (Verify)
+
+This project uses [Verify](https://github.com/VerifyTests/Verify) for snapshot testing.
+
+### Key concepts
+
+- **`.verified.*` files** are the approved snapshots. They are committed to source control.
+- **`.received.*` files** are the actual output from the latest test run. They are generated when a test fails (actual != expected) and are git-ignored.
+- When a test fails, compare the `.received.*` file to the `.verified.*` file to understand the difference.
+
+### Handling test failures
+
+When a snapshot test fails:
+
+1. Run the failing test and read the `.received.*` file that was generated.
+2. Compare it to the corresponding `.verified.*` file.
+3. Determine if the difference is expected (due to an intentional code change) or a bug.
+   - **If expected**: copy the `.received.*` file to the `Verified:` path listed in the exception message to accept the new snapshot.
+   - **If a bug**: fix the code, not the snapshot.
+4. Never hand-edit `.verified.*` files to make tests pass. Always let Verify generate the correct output by running the test.
+5. Never derive the verified name from the received name. The two are not always identical. Multi-targeted projects add a runtime and version suffix to the received file, and ignored parameters are kept in the received name but dropped from the verified name. Always take the destination from the `Verified:` line of the exception message.
+6. Delete every `.verified.` file listed in the `Delete:` section. Those files are no longer produced by any test, usually because a test was renamed or removed.
+
+If a snapshot differs between runs or between machines, add a scrubber to the test (`ScrubLinesContaining(...)`, `ScrubLines(...)`, `AddScrubber(...)`) rather than accepting the new output each time.
+
+### Scrubbed values
+
+Verify replaces non-deterministic values in snapshots with stable placeholders:
+
+- GUIDs become `Guid_1`, `Guid_2`, etc.
+- DateTimes become `DateTime_1`, `DateTime_2`, etc.
+- File paths are replaced with tokens like `{SolutionDirectory}`, `{ProjectDirectory}`, `{TempPath}`.
+- Custom scrubbers may replace other values.
+
+These placeholders are intentional and ensure snapshots are deterministic across machines and runs.
+
+### Exception message format
+
+When a test fails, the exception message is machine-parsable with the following structure:
+
+```
+Directory: /path/to/test/project
+New:
+  - Received: TestClass.Method.received.txt
+    Verified: TestClass.Method.verified.txt
+NotEqual:
+  - Received: TestClass.Method.received.txt
+    Verified: TestClass.Method.verified.txt
+
+FileContent:
+
+New:
+
+Received: TestClass.Method.received.txt
+<file content here>
+
+NotEqual:
+
+Received: TestClass.Method.received.txt
+<received content>
+Verified: TestClass.Method.verified.txt
+<verified content>
+```
+
+ * The `Directory:` line gives the base path for all relative file references.
+ * `New` means no `.verified.` file exists yet (first run or new test).
+ * `NotEqual` means the `.received.` and `.verified.` files differ.
+ * `Delete` means a `.verified.` file is no longer produced by any test.
+ * The `FileContent:` section contains the actual text content for quick comparison without needing to read files separately.
+
+See [Exception Message Format](https://github.com/VerifyTests/Verify/blob/main/docs/exception-message-format.md) for full details.
+
+### Verified file conventions
+
+- Encoding: UTF-8 with BOM
+- Line endings: LF (not CRLF)
+- No trailing newline
+
+### Common patterns
+
+```csharp
+// Verify an object (serialized to JSON)
+await Verify(myObject);
+
+// Verify a string
+await Verify("some text output");
+
+// Verify with inline settings
+await Verify(myObject)
+    .ScrubLines(line => line.Contains("volatile"))
+    .DontScrubDateTimes();
+
+// Verify throws
+await ThrowsTask(() => MethodThatThrows())
+    .IgnoreStackTrace();
+```
+
+## Environment
+
+ * Set `DiffEngine_Disabled=true` when running tests, so no diff tool opens for each failed snapshot. The exception message still carries the file paths and the content.
+ * When asked to change code that has Verify tests, run the tests first: the `.received.*` files show exactly what changed.
+ * A new test fails on its first run because it has no `.verified.*` file yet. Review the `.received.*` file, then accept it by copying it to the `Verified:` path from the exception message.
+
+==== .github/copilot-instructions.md
+
+# VerifySample: instructions for AI coding assistants
+
+Generated by the [Verify wizard](https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09). This project was set up with Verify snapshot testing; the facts below describe that setup.
+
+## Project facts
+
+ * Solution: `VerifySample.slnx`. Code under test is in `src/VerifySample`, tests in `src/VerifySample.Tests`.
+ * Test framework: MSTest.
+ * Run the tests from the solution directory with `dotnet test`. The test project runs on Microsoft.Testing.Platform (`global.json` sets the runner), so `dotnet run --project` on it also works.
+ * Target framework `net10.0`, SDK pinned by `global.json` (10.0.401).
+ * Packages use Central Package Management: add or change versions in `Directory.Packages.props`, and reference packages without a version.
+ * Verify packages: Verify.MSTest 33.1.1, Verify.DiffPlex 3.3.1.
+ * Verify is configured in `ModuleInitializer.cs` in the test project. Explicit plugin `Initialize` calls go before `VerifierSettings.InitializePlugins()`.
+ * The Open Source Maintenance Fee declaration is in `Directory.Build.props` (Exempt: OpenSource). Do not remove it: without it every build fails with SC021.
+
+## Snapshot Testing (Verify)
+
+This project uses [Verify](https://github.com/VerifyTests/Verify) for snapshot testing.
+
+### Key concepts
+
+- **`.verified.*` files** are the approved snapshots. They are committed to source control.
+- **`.received.*` files** are the actual output from the latest test run. They are generated when a test fails (actual != expected) and are git-ignored.
+- When a test fails, compare the `.received.*` file to the `.verified.*` file to understand the difference.
+
+### Handling test failures
+
+When a snapshot test fails:
+
+1. Run the failing test and read the `.received.*` file that was generated.
+2. Compare it to the corresponding `.verified.*` file.
+3. Determine if the difference is expected (due to an intentional code change) or a bug.
+   - **If expected**: copy the `.received.*` file to the `Verified:` path listed in the exception message to accept the new snapshot.
+   - **If a bug**: fix the code, not the snapshot.
+4. Never hand-edit `.verified.*` files to make tests pass. Always let Verify generate the correct output by running the test.
+5. Never derive the verified name from the received name. The two are not always identical. Multi-targeted projects add a runtime and version suffix to the received file, and ignored parameters are kept in the received name but dropped from the verified name. Always take the destination from the `Verified:` line of the exception message.
+6. Delete every `.verified.` file listed in the `Delete:` section. Those files are no longer produced by any test, usually because a test was renamed or removed.
+
+If a snapshot differs between runs or between machines, add a scrubber to the test (`ScrubLinesContaining(...)`, `ScrubLines(...)`, `AddScrubber(...)`) rather than accepting the new output each time.
+
+### Scrubbed values
+
+Verify replaces non-deterministic values in snapshots with stable placeholders:
+
+- GUIDs become `Guid_1`, `Guid_2`, etc.
+- DateTimes become `DateTime_1`, `DateTime_2`, etc.
+- File paths are replaced with tokens like `{SolutionDirectory}`, `{ProjectDirectory}`, `{TempPath}`.
+- Custom scrubbers may replace other values.
+
+These placeholders are intentional and ensure snapshots are deterministic across machines and runs.
+
+### Exception message format
+
+When a test fails, the exception message is machine-parsable with the following structure:
+
+```
+Directory: /path/to/test/project
+New:
+  - Received: TestClass.Method.received.txt
+    Verified: TestClass.Method.verified.txt
+NotEqual:
+  - Received: TestClass.Method.received.txt
+    Verified: TestClass.Method.verified.txt
+
+FileContent:
+
+New:
+
+Received: TestClass.Method.received.txt
+<file content here>
+
+NotEqual:
+
+Received: TestClass.Method.received.txt
+<received content>
+Verified: TestClass.Method.verified.txt
+<verified content>
+```
+
+ * The `Directory:` line gives the base path for all relative file references.
+ * `New` means no `.verified.` file exists yet (first run or new test).
+ * `NotEqual` means the `.received.` and `.verified.` files differ.
+ * `Delete` means a `.verified.` file is no longer produced by any test.
+ * The `FileContent:` section contains the actual text content for quick comparison without needing to read files separately.
+
+See [Exception Message Format](https://github.com/VerifyTests/Verify/blob/main/docs/exception-message-format.md) for full details.
+
+### Verified file conventions
+
+- Encoding: UTF-8 with BOM
+- Line endings: LF (not CRLF)
+- No trailing newline
+
+### Common patterns
+
+```csharp
+// Verify an object (serialized to JSON)
+await Verify(myObject);
+
+// Verify a string
+await Verify("some text output");
+
+// Verify with inline settings
+await Verify(myObject)
+    .ScrubLines(line => line.Contains("volatile"))
+    .DontScrubDateTimes();
+
+// Verify throws
+await ThrowsTask(() => MethodThatThrows())
+    .IgnoreStackTrace();
+```
+
+## Environment
+
+ * Set `DiffEngine_Disabled=true` when running tests, so no diff tool opens for each failed snapshot. The exception message still carries the file paths and the content.
+ * When asked to change code that has Verify tests, run the tests first: the `.received.*` files show exactly what changed.
+ * A new test fails on its first run because it has no `.verified.*` file yet. Review the `.received.*` file, then accept it by copying it to the `Verified:` path from the exception message.
+
+==== .claude/skills/verify-snapshot-testing/SKILL.md
+
+---
+name: verify-snapshot-testing
+description: Handle Verify snapshot test failures. Use this when a Verify snapshot test fails, when asked to accept or update snapshots, or when asked to add a new Verify test.
+---
+
+Handle [Verify](https://github.com/VerifyTests/Verify) snapshot test failures.
+
+## Key concepts
+
+- **`.verified.*` files** are the approved snapshots. They are committed to source control.
+- **`.received.*` files** are the actual output from the latest test run. They are generated when a test fails (actual != expected) and are git-ignored.
+
+## Handling a test failure
+
+When a Verify snapshot test fails, follow this process:
+
+### Step 1: Read the exception message
+
+The exception message is machine-parsable:
+
+```
+Directory: /path/to/test/project
+New:
+  - Received: TestClass.Method.received.txt
+    Verified: TestClass.Method.verified.txt
+NotEqual:
+  - Received: TestClass.Method.received.txt
+    Verified: TestClass.Method.verified.txt
+
+FileContent:
+
+Received: TestClass.Method.received.txt
+<received content>
+Verified: TestClass.Method.verified.txt
+<verified content>
+```
+
+- `Directory:` gives the base path for all file references.
+- `New` means no `.verified.` file exists yet (first run or new test).
+- `NotEqual` means the `.received.` and `.verified.` files differ.
+- `Delete` means a `.verified.` file is no longer produced by any test.
+- `FileContent:` contains the actual content for comparison.
+
+### Step 2: Read the files
+
+1. Read the `.received.*` file to see the actual output.
+2. Read the `.verified.*` file (if it exists) to see the expected output.
+3. Compare the two to understand the difference.
+
+### Step 3: Determine the action
+
+- **If the change is expected** (due to an intentional code change): copy the `.received.*` file to the `Verified:` path to accept the new snapshot.
+- **If it is a new test** (no `.verified.*` file): accept the `.received.*` file as the new snapshot by copying it to the `Verified:` path.
+- **If the change is a bug**: fix the code, not the snapshot. Re-run the test to confirm the fix.
+
+For each entry in the `Delete:` section, delete that `.verified.` file. It is no longer produced by any test, usually because a test was renamed or removed.
+
+## Rules
+
+- **Never hand-edit `.verified.*` files** to make tests pass. Always let Verify generate the correct output by running the test.
+- **Never derive the verified name from the received name.** The two are not always identical. Multi-targeted projects add a runtime and version suffix to the received file, and ignored parameters are kept in the received name but dropped from the verified name. Always take the destination from the `Verified:` line of the exception message.
+- Snapshot files live next to the test source file. For a test in `Tests/MyTests.cs`, look for `Tests/MyTests.MethodName.verified.txt`.
+
+## Scrubbed values
+
+Verify replaces non-deterministic values with stable placeholders. These are intentional:
+
+- GUIDs become `Guid_1`, `Guid_2`, etc.
+- DateTimes become `DateTime_1`, `DateTime_2`, etc.
+- File paths become `{SolutionDirectory}`, `{ProjectDirectory}`, `{TempPath}`.
+
+Do not treat these placeholders as errors.
+
+If a snapshot changes between runs or between machines, the fix is a scrubber on the test, not repeatedly accepting the new output. Use `ScrubLinesContaining(...)`, `ScrubLines(...)` or `AddScrubber(...)` on the verification.
+
+## Verified file conventions
+
+- Encoding: UTF-8 with BOM
+- Line endings: LF (not CRLF)
+- No trailing newline
+
+==== .github/workflows/build.yml
+
+# Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+name: Build
+
+on:
+  push:
+  pull_request:
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build
+        run: dotnet build --configuration Release
+
+      - name: Test
+        run: dotnet test --configuration Release --no-build
+
+      # Verify writes a *.received.* file for every snapshot that does not match. Uploading them
+      # when the build fails makes the difference visible without re-running locally.
+      - name: Upload Test Results
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: verify-test-results
+          path: |
+            **/*.received.*
+
+==== src/VerifySample/VerifySample.csproj
+
+<Project Sdk="Microsoft.NET.Sdk">
+  <!-- The code under test. It references nothing test related. -->
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>VerifySample</RootNamespace>
+  </PropertyGroup>
+</Project>
+
+==== src/VerifySample/ClassBeingTested.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+// Stands in for real code under test. Sample.Test verifies what FindPerson returns.
+public static class ClassBeingTested
+{
+    public static Person FindPerson() =>
+        new()
+        {
+            Id = new("ebced679-45d3-4653-8791-3d969c4a986c"),
+            Title = Title.Mr,
+            GivenNames = "John",
+            FamilyName = "Smith",
+            Spouse = "Jill",
+            Children =
+            [
+                "Sam",
+                "Mary"
+            ],
+            Address = new()
+            {
+                Street = "4 Puddle Lane",
+                Country = "USA"
+            }
+        };
+}
+
+==== src/VerifySample/SampleModels.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+// Fields rather than properties, and uninitialized, to keep the sample short.
+#pragma warning disable CS8618
+
+public class Person
+{
+    public string? GivenNames;
+    public string FamilyName;
+    public string Spouse;
+    public Address Address;
+    public List<string> Children;
+    public Title Title;
+    public Guid Id;
+    public DateTimeOffset Dob;
+}
+
+public class Address
+{
+    public string Street;
+    public string Suburb;
+    public string Country;
+}
+
+public enum Title
+{
+    Mr,
+    Mrs
+}
+
+==== src/VerifySample.Tests/VerifySample.Tests.csproj
+
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <TargetFramework>net10.0</TargetFramework>
+    <RootNamespace>VerifySample.Tests</RootNamespace>
+    <!-- Run as a Microsoft.Testing.Platform app; dotnet test uses it through the runner set in global.json. -->
+    <OutputType>Exe</OutputType>
+    <EnableMSTestRunner>true</EnableMSTestRunner>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="MSTest.TestAdapter" />
+    <PackageReference Include="MSTest.TestFramework" />
+    <PackageReference Include="Verify.MSTest" />
+    <PackageReference Include="Verify.DiffPlex" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\VerifySample\VerifySample.csproj" />
+  </ItemGroup>
+</Project>
+
+==== src/VerifySample.Tests/Sample.Test.verified.txt (UTF-8 with BOM)
+
+{
+  GivenNames: John,
+  FamilyName: Smith,
+  Spouse: Jill,
+  Address: {
+    Street: 4 Puddle Lane,
+    Country: USA
+  },
+  Children: [
+    Sam,
+    Mary
+  ],
+  Id: Guid_1
+}
+
+==== src/VerifySample.Tests/ModuleInitializer.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+using System.Runtime.CompilerServices;
+using VerifyTests.DiffPlex;
+
+// Everything here runs once, when the test assembly loads, before any test.
+public static class ModuleInitializer
+{
+    [ModuleInitializer]
+    public static void Initialize()
+    {
+        // Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline
+        // diff instead of the whole received and verified text.
+        // OutputType.Compact prints only the changed lines, with a line of context either side.
+        // Alternatives: OutputType.Full, OutputType.Minimal.
+        VerifyDiffPlex.Initialize(OutputType.Compact);
+
+        // Initializes every Verify.* plugin the project references and has not initialized above.
+        // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
+        VerifierSettings.InitializePlugins();
+    }
+}
+
+==== src/VerifySample.Tests/Sample.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+// Verify serializes what FindPerson returns and compares it with Sample.Test.verified.txt.
+// On a mismatch the test fails, Sample.Test.received.txt is written next to it, and a diff tool
+// opens. Accepting the change means the received file replaces the verified one.
+[TestClass]
+public partial class Sample
+{
+    [TestMethod]
+    public Task Test()
+    {
+        var person = ClassBeingTested.FindPerson();
+        return Verify(person);
+    }
+}
+
+==== src/VerifySample.Tests/VerifyChecksTests.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+// Checks the solution follows Verify's conventions: .gitignore excludes received files, and
+// .gitattributes and .editorconfig have settings for every verified text extension in use.
+[TestClass]
+public partial class VerifyChecksTests
+{
+    [TestMethod]
+    public Task Run() =>
+        VerifyChecks.Run();
+}
+
+==== src/VerifySample.Tests/AssemblyInfo.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=MSTest&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+// Verify.MSTest uses a source generator that only processes test classes that opt in. This opts in
+// every test class in the assembly; test classes must be partial.
+[assembly: UsesVerify]
+

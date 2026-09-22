@@ -113,10 +113,12 @@ public sealed class PublishedWizard : IAsyncDisposable
 
         var playwright = await Playwright.CreateAsync();
         var browser = await playwright.Chromium.LaunchAsync();
-        // Fixed viewport so screenshots are deterministic across machines.
+        // Fixed viewport and locale so screenshots are deterministic across machines: date and month
+        // pickers render in the browser's locale.
         var context = await browser.NewContextAsync(
             new()
             {
+                Locale = "en-US",
                 ViewportSize = new()
                 {
                     Width = 1280,

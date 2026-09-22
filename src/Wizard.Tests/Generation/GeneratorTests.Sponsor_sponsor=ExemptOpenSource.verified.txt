@@ -1,0 +1,24 @@
+﻿<Project>
+  <!-- Applies to every project under this directory. -->
+  <PropertyGroup>
+    <LangVersion>latest</LangVersion>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
+    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+  </PropertyGroup>
+  <!-- Open Source Maintenance Fee: every Verify package checks at build time that the build
+       declares its fee status, and fails with SC021 when it does not. Nothing phones home.
+       https://github.com/VerifyTests/Verify/blob/main/docs/maintenance-fee.md
+       Other options, and the rules for each: https://simoncropp.github.io/SponsorCheck/package/Verify -->
+  <!-- Exempt: an open source project that does not generate revenue. The claim is time-bounded: renew the month before it passes. -->
+  <PropertyGroup>
+    <Verify_SponsorshipExemption>OpenSource</Verify_SponsorshipExemption>
+    <Verify_SponsorshipExemptionUntil>2027-09</Verify_SponsorshipExemptionUntil>
+  </PropertyGroup>
+</Project>
+
+Summary: Exempt: OpenSource
+
+Outcome: The build passes and logs the exemption's criteria as an SC031 message, not a warning, so builds with warnings as errors pass too. It passes through the end of 2027-09 (UTC); after that it fails with SC049 until the claim is renewed.
+
+Url: step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&sponsor=Exempt&exempt=OpenSource&until=2027-09

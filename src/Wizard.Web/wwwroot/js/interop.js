@@ -18,5 +18,19 @@ window.verifyWizard = {
             document.body.removeChild(area);
         }
         return Promise.resolve();
+    },
+
+    // Saves bytes from .NET (a DotNetStreamReference, which avoids base64 for larger zips) as a file.
+    downloadFile: async function (fileName, contentType, streamReference) {
+        const buffer = await streamReference.arrayBuffer();
+        const blob = new Blob([buffer], {type: contentType});
+        const url = URL.createObjectURL(blob);
+        const anchor = document.createElement('a');
+        anchor.href = url;
+        anchor.download = fileName;
+        document.body.appendChild(anchor);
+        anchor.click();
+        document.body.removeChild(anchor);
+        URL.revokeObjectURL(url);
     }
 };

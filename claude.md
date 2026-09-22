@@ -22,6 +22,12 @@ Filter to a single test (TUnit uses `--treenode-filter`, not `--filter`):
 dotnet run --project src/Wizard.Tests --configuration Release --no-build -- --treenode-filter '/*/*/HomeTests/*'
 ```
 
+`Integration/GeneratedSolutionTests` is `[Explicit]`. It writes a generated solution for each test framework to the temp directory, then runs `dotnet build` and `dotnet test` on it (restoring from nuget.org). Run it after changing anything in `Wizard.Core/Generation`:
+
+```pwsh
+dotnet run --project src/Wizard.Tests --configuration Release --no-build -- --treenode-filter '/*/*/GeneratedSolutionTests/*'
+```
+
 Building `Wizard.Tests` also publishes `Wizard.Web` into `src/Wizard.Tests/bin/<Configuration>/blazor-publish`
 (the `PublishBlazorForTests` target). `PublishedWizard` serves that output from Kestrel for the Playwright
 tests, with a `{*path}` fallback that mirrors GitHub Pages serving `404.html` for deep links.
