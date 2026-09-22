@@ -31,6 +31,7 @@ Companion research files (raw per-extension catalogue produced while researching
 19. [Changes in the Verify repository](#19-changes-in-the-verify-repository)
 20. [Implementation phases](#20-implementation-phases)
 21. [Risks and open questions](#21-risks-and-open-questions)
+22. [Suggested changes to Verify and its extensions](#22-suggested-changes-to-verify-and-its-extensions)
 - [Appendix A: static content to copy from Verify docs](#appendix-a-static-content-to-copy-from-verify-docs)
 - [Appendix B: extension registry table](#appendix-b-extension-registry-table)
 - [Appendix C: current wizard content, per section](#appendix-c-current-wizard-content-per-section)
@@ -70,8 +71,12 @@ Companion research files (raw per-extension catalogue produced while researching
 
 66 `Verify.*` folders exist under `D:\Code\VerifyTests\`, plus `D:\Code\LocalDb`. All were read (readme, `src/Directory.Build.props`, `src/Directory.Packages.props`, shipped csproj files, the `VerifyXxx` static class, test `ModuleInitializer`). The per-extension findings are in `plan-research/extension-catalogue-*.md`. Highlights that shape the design:
 
-- Most extensions expose `public static bool Initialized` + `public static void Initialize()`, so `VerifierSettings.InitializePlugins()` discovers them. Exceptions: **Verify.Blazor** has no public `Initialize` (auto-initialized by `Render`); **Verify.Wolverine** and **Verify.ParametersHashing** have a no-op `Initialize`; **Verify.Terminal** is a dotnet tool (`verify.tool`), not a library; **LocalDb** integrates through `EfLocalDb.<TestFramework>` packages, not a `Verify.*` package.
-- Some `Initialize` methods take parameters that matter: `VerifyDiffPlex.Initialize(OutputType)`, `VerifySqlServer.Initialize(recordCommands)`, `VerifyEntityFramework.Initialize(model, recordCommands)`, `VerifyNServiceBus.Initialize(captureLogs)`, `VerifyBunit.Initialize(excludeComponent)`, `VerifyImageSharp.Initialize(ssimThreshold)`, `VerifyPDFium.Initialize(dpi)`, `VerifyPlaywright.Initialize(installPlaywright)`, `VerifySerilog.Initialize(custom)`, `VerifyEmailPreviewServices.Initialize(apiKey)`, `VerifyAngleSharpDiffing.Initialize(action)`.
+- Most extensions expose `public static bool Initialized` + `public static void Initialize()`, so `VerifierSettings.InitializePlugins()` discovers them. Exceptions: **Verify.Blazor** has no public `Initialize` (auto-initialized by `Render`'s static constructor, which throws once any verification has run; see 9.1); **Verify.Wolverine** and **Verify.ParametersHashing** have a no-op `Initialize`; **Verify.Terminal** is a dotnet tool (`verify.tool`), not a library; **LocalDb** integrates through `EfLocalDb.<TestFramework>` packages, not a `Verify.*` package.
+- `InitializePlugins()` does not find every extension.
+  - Core looks for a type named `VerifyTests.` plus the assembly name without dots. The match is case-sensitive, and an assembly without that type is skipped silently (`Verify\src\Verify\VerifierSettings_PluginConvention.cs:171-176, 202-208`).
+  - As a result it never initializes **Verify.AngleSharp** (its class is `VerifyAngleSharpDiffing`), **Verify.QuestPDF** (`VerifyQuestPdf`) or **Verify.Blazor** (an internal class in the global namespace).
+  - Plugins are enumerated in file-system order (`:34`), so when two plugins register for the same thing, the winner can differ between operating systems.
+- Some `Initialize` methods take parameters that matter: `VerifyDiffPlex.Initialize(OutputType)`, `VerifySqlServer.Initialize(recordCommands)`, `VerifyEntityFramework.Initialize(model, recordCommands)`, `VerifyNServiceBus.Initialize(captureLogs)` (no effect in practice, see 11.2), `VerifyBunit.Initialize(excludeComponent)`, `VerifyImageSharp.Initialize(ssimThreshold)`, `VerifyPDFium.Initialize(dpi)`, `VerifyPlaywright.Initialize(installPlaywright)`, `VerifySerilog.Initialize(custom)`, `VerifyEmailPreviewServices.Initialize(apiKey)`, `VerifyAngleSharpDiffing.Initialize(action)`.
 - Several groups are mutually exclusive because they register a converter or comparer for the same file extension (pdf, xlsx, docx, pptx, csv, png/jpg, html, json) or install the same global listener (Activity listeners, 26-char ULID scrub windows).
 - The documented interaction the requester cited: Verify.EntityFramework and Verify.SqlServer both record every EF command (`ef` and `sql`), and `VerifySqlServer.Initialize(recordCommands: false)` **must** run before `VerifierSettings.InitializePlugins()`.
 
@@ -84,7 +89,7 @@ Numbered so they can be referenced. Each is a choice the requester did not spell
 - **D1. Three projects, not one.** `Wizard.Core` (models, registry, generators, zip builder; plain class library), `Wizard.Web` (Blazor WASM UI), `Wizard.Tests` (TUnit). SponsorCheck keeps everything in the Web project; splitting the generators out keeps snapshot tests fast and lets a future CLI reuse them.
 - **D2. SDK and TFM come from this repository, not from the Verify repository.** The requester said the generated solution's "dotnet version and sdk should be the same used by the code for this project". Interpreted as: one source of truth, which is this repository's `global.json` (SDK) and `Wizard.Web`'s `TargetFramework` (TFM). Both are baked into `WizardDefaults.g.cs` at build time (the SponsorCheck `GenerateWizardDefaults` pattern) and emitted verbatim into generated output. Initial values: **SDK `10.0.401`** (`rollForward: latestFeature`, `allowPrerelease: true`) and **`net10.0`**. This matches SponsorCheck.Web and the consumer-facing `Verify/usages/*` projects. The Verify repository itself is on `11.0.100-rc.1`; a release-candidate SDK is not appropriate for a getting-started wizard. If the requester meant "track Verify", bump this repository's `global.json` and everything follows.
 - **D3. NuGet versions: baked plus live refresh.** A `package-versions.json` in `Wizard.Core` holds the last known stable version of every package the wizard can emit. A weekly GitHub Actions workflow refreshes it from nuget.org and opens a pull request. At runtime the app also queries nuget.org (same flat-container endpoint SponsorCheck already uses from the browser) and uses the newest **non-prerelease** version when the query succeeds; the baked value is the offline fallback. "Stable" means no `-` prerelease label. If a package has no stable version (none currently), fall back to newest prerelease and say so in the output.
-- **D4. Explicit `Initialize` calls, then `InitializePlugins`.** The generated `ModuleInitializer` calls each selected extension's `Initialize` explicitly, in an order computed from the interaction rules, each with a verbose comment, and then calls `VerifierSettings.InitializePlugins()` (which skips already-initialized plugins) with a comment explaining that it picks up plugins added later. Explicit calls are needed anyway for parameters and ordering; making them universal keeps the output predictable and self-documenting.
+- **D4. Explicit `Initialize` calls, then `InitializePlugins`.** The generated `ModuleInitializer` calls each selected extension's `Initialize` explicitly, in an order computed from the interaction rules, each with a verbose comment, and then calls `VerifierSettings.InitializePlugins()` (which skips already-initialized plugins) with a comment explaining that it picks up plugins added later. Explicit calls are needed anyway for parameters and ordering; making them universal keeps the output predictable and self-documenting. They are also needed for correctness, because `InitializePlugins()` never initializes Verify.AngleSharp, Verify.QuestPDF or Verify.Blazor (1.3).
 - **D5. Windows-only extensions go in a second test project.** WinForms and Xaml need `net10.0-windows` (`UseWindowsForms`/`UseWPF`), Phash targets `net8.0-windows`. Putting them in the main test project would make the whole solution Windows-only. The zip therefore contains `<Name>.Tests` (cross-platform) and, when needed, `<Name>.Tests.Windows`. Each project has its own `ModuleInitializer`.
 - **D6. Verified files are not included in the zip**, except the one core sample whose exact output is known from the Verify repository (`Sample.Test.verified.txt`). Extension sample outputs depend on package versions and machine state; shipping wrong `.verified.` files is worse than shipping none. The README and AI content explain that the first run produces `.received.` files and how to accept them.
 - **D7. "Verbose" vs "minimal" is per extension** and defaults to **verbose**, because the requester asked to bias toward more content that users can delete. Minimal = the enable call plus the one or two most common usages. Verbose = minimal plus every documented API in the catalogue's "Verbose / edge-case APIs" list, each as its own commented test method.
@@ -432,32 +437,56 @@ sealed record ExtensionDefinition(
     IReadOnlyList<Sample> MinimalSamples,        // each: title, description, code (test method body or full test), fixtures
     IReadOnlyList<Sample> VerboseSamples,        // superset additions
     IReadOnlyList<string> Notes,                 // gotchas rendered under "Notes" in docs and as comments in code
+    bool DiscoveredByInitializePlugins,          // false for AngleSharp, QuestPDF, Blazor (1.3); asserted by a registry test against core's naming rule
     bool Beta = false,                            // e.g. Verify.Bunit 14.1.0-beta.1 (only if no stable exists)
     string? SampleVerifiedOutput = null)          // shown in docs as "resulting snapshot"
 ```
 
 `InitializeShape` is a small discriminated set:
 
-- `None` (Blazor),
+- `None` (Terminal: a dotnet tool, not a library),
 - `NoOp` (Wolverine, ParametersHashing – emitted as a comment only),
 - `Static(call)` e.g. `VerifyHttp.Initialize()`,
 - `StaticWithParameters(template, parameters)` e.g. `VerifyDiffPlex.Initialize(OutputType.{diffplex-output})`, `VerifySqlServer.Initialize(recordCommands: {bool})`, `VerifyEntityFramework.Initialize(GetDbModel(), recordCommands: {bool})` with a preamble (the `GetDbModel()` helper),
-- `Custom(generator)` for LocalDb (`LocalDbTestBase<TheDbContext>.Initialize()` after `InitializePlugins`) and Quibble (`VerifierSettings.UseStrictJson()` before `VerifyQuibble.Initialize()`).
+- `Custom(generator)` for three extensions:
+  - LocalDb: `LocalDbTestBase<TheDbContext>.Initialize()` after `InitializePlugins`.
+  - Quibble: `VerifierSettings.UseStrictJson()` before `VerifyQuibble.Initialize()`.
+  - Blazor: `RuntimeHelpers.RunClassConstructor(typeof(Render).TypeHandle);`, with a comment.
+    - Why: `Render`'s static constructor calls `VerifyBlazor.Initialize()`, which throws once any verification has run (`Verify.Blazor\src\Verify.Blazor\Render.cs:5-6`, `VerifyBlazor.cs:19`).
+    - Left lazy, a generated project whose core `Sample` test runs before the first `Render.Component` fails every Blazor test with `TypeInitializationException`, depending on test order.
+    - Retired by U1.
 
-`PackageRequirement` = (package id, kind: `PackageReference` | `FrameworkReference` | `DotnetTool`, optional condition: test framework or choice). Examples:
+`PackageRequirement` = (package id, kind: `PackageReference` | `FrameworkReference` | `DotnetTool`, optional condition: test framework or choice, optional `SponsorOwner` for packages that carry their own sponsorship gate, see 14). Examples:
 
 - Verify.Avalonia: `Verify.Avalonia`, `Avalonia.Headless.XUnit` (when xUnit v3) or `Avalonia.Headless.NUnit` (when NUnit), `Avalonia.Themes.Fluent`, `Avalonia.Skia`.
-- Verify.AspNetCore: `Verify.AspNetCore` + `FrameworkReference Microsoft.AspNetCore.App` + (verbose) `Microsoft.AspNetCore.Mvc.Testing`.
+- Verify.AspNetCore: `Verify.AspNetCore` (the package already declares `FrameworkReference Microsoft.AspNetCore.App`, so none is emitted) + (verbose) `Microsoft.AspNetCore.Mvc.Testing`.
 - LocalDb: `EfLocalDb.Xunit.V3` / `EfLocalDb.NUnit` / `EfLocalDb.MSTest` / `EfLocalDb.TUnit` by test framework; for Fixie/Expecto fall back to `EfLocalDb` + `Verify.EntityFramework` with a note.
 - HeadlessBrowsers: three separate definitions `Playwright`, `Puppeteer`, `Selenium` (repo `Verify.HeadlessBrowsers`, packages `Verify.Playwright`/`Verify.Puppeteer`/`Verify.Selenium`; Selenium also needs `Selenium.WebDriver.ChromeDriver`).
 - EntityFramework: two definitions `EntityFramework` (EF Core; also `Microsoft.EntityFrameworkCore.SqlServer` for the sample) and `EntityFrameworkClassic` (EF6; `EntityFramework`).
 - Terminal: `DotnetTool verify.tool` (no PackageReference, no Initialize; emitted into `.config/dotnet-tools.json` and the docs).
 - DiffEngineTray: not an extension but a tool; handled in the docs generator (Windows only), and added to the tools list.
 
+`Usings` beyond `VerifyTests` (which Verify imports implicitly), as found in the extensions' sources:
+
+| Namespace | Needed for |
+|---|---|
+| `VerifyTests.AngleSharp` | `HtmlPrettyPrint` (wherever `html-prettyprint` fires) |
+| `VerifyTestsAspose` | Aspose settings |
+| `VerifyTestsImageMagick` | ImageMagick settings |
+| `VerifyTests.ICSharpCode.Decompiler` | `TypeToDisassemble` |
+| `VerifyTests.MicrosoftLogging` | `RecordingLogger`, `RecordingProvider` |
+| `VerifyTests.NServiceBus` | `Recording*` types |
+| `VerifyTests.SqlServer` | schema types |
+| `VerifyTestsPlaywright`, `VerifyTests.Puppeteer`, `VerifyTests.Selenium` | `SocketWaiter` |
+| `VerifyQuestPDF` | `ShouldIncludePage` |
+
+Extension usings go in each test file, never in global usings. The three browser namespaces each define their own `SocketWaiter`, so importing two of them is a compile error (CS0104).
+
 ### 9.2 Registry invariants (tests)
 
 - Ids unique; every `Tags` entry exists in `Techs.All`; every `ExclusiveGroups` id exists in `InteractionRules.Groups`; every package id has a version in `package-versions.json`; every fixture referenced by a sample exists in `wwwroot/fixtures`; every extension appears in at least one tech suggestion or is in the explicit `NotSuggestedByTech` list (DiffPlex, Terminal, ParametersHashing, Assertions, Quibble are universal/niche and appear under "Everything else" only).
 - Snapshot of the whole registry as JSON (`Registry.verified.txt`) so any change is reviewed.
+- `DiscoveredByInitializePlugins` matches core's naming rule (`VerifyTests.` + assembly name without dots, case-sensitive) for the shipped assembly. Every `RetiredBy` names an id from section 22.
 
 ---
 
@@ -523,7 +552,7 @@ The tech step renders groups as headed chip sets; the extension step shows "Sugg
 
 ## 11. Interaction rules
 
-`Wizard.Core/Registry/InteractionRules.cs`. A rule is evaluated against the union of existing and selected extensions and produces zero or more `InteractionResult(rule id, severity, involved ids, message, code effect)`. Severity: `Info` (companion suggestion), `Warning` (side effect), `Conflict` (mutually exclusive; the UI blocks Next until resolved, unless the rule has a choice that resolves it). Results are rendered on the extension step (inline, as soon as the combination appears), on the options step (with the choice control), in the docs ("Interactions between selected extensions"), as comments in the `ModuleInitializer`, and in the AI markdown.
+`Wizard.Core/Registry/InteractionRules.cs`. A rule is evaluated against the union of existing and selected extensions and produces zero or more `InteractionResult(rule id, severity, involved ids, message, code effect)`. Severity: `Info` (companion suggestion), `Warning` (side effect), `Conflict` (mutually exclusive; the UI blocks Next until resolved, unless the rule has a choice that resolves it). Results are rendered on the extension step (inline, as soon as the combination appears), on the options step (with the choice control), in the docs ("Interactions between selected extensions"), as comments in the `ModuleInitializer`, and in the AI markdown. A rule or sample restriction that only works around an upstream defect carries `RetiredBy`: the section 22 id of the fix that makes it unnecessary (22.7).
 
 ### 11.1 Exclusive groups (Conflict unless the group allows co-existence with an explicit order)
 
@@ -540,7 +569,18 @@ The tech step renders groups as headed chip sets; the extension step shows "Sugg
 | `ulid-scrubber` | Ulid, NUlid | both register a 26-char `ScrubWindow` | radio |
 | `json-comparer` | Quibble only, but it forces `UseStrictJson` project-wide | Warning: every snapshot becomes `.verified.json` | none |
 
-ImageMagick appears in two groups: its `Initialize()` registers the pdf converter and its `RegisterComparers()` the comparers. The registry models it with a choice `imagemagick-role` = `converter-and-comparer` | `comparer-only` (`RegisterComparers` only) | `pdf-only` (`RegisterPdfToPngConverter` only) and the groups apply per role.
+ImageMagick appears in two groups.
+- What each call registers:
+  - `Initialize()` registers svg, png, webp, tiff and pdf converters, and no comparers.
+  - `RegisterComparers()` registers png/jpg/bmp/tiff/webp comparers and an svg string comparer.
+- Why a role can't come from calling only part of the API: `RegisterComparers()` and `RegisterPdfToPngConverter()` do not set `Initialized`, so the trailing `InitializePlugins()` would still call `Initialize()` (`Verify.ImageMagick\src\Verify.ImageMagick\VerifyImageMagick.cs:7-30, 59-70`).
+- The registry models a choice `imagemagick-role`:
+  - `converter-and-comparer`: `Initialize()` then `RegisterComparers()`.
+  - `comparer-only`: the same calls, with another pdf-converter member selected.
+  - `pdf-only`: `Initialize()` alone.
+- How roles are produced: by ordering. `VerifyImageMagick.Initialize()` is emitted first and the chosen pdf converter's `Initialize` after it, because converter registration is last-wins (`Verify\src\Verify\Splitters\Settings_Extension.cs:26`).
+- A comment lists the image converters that stay registered.
+- Retired by U8.
 
 ### 11.2 Ordering, duplication and dependency rules
 
@@ -548,21 +588,28 @@ ImageMagick appears in two groups: its `Initialize()` registers the pdf converte
 |---|---|---|---|
 | `ef-sql-recording` | EntityFramework + SqlServer (either may be existing) | Warning with choice | Choice `keep-ef` (default): emit `VerifySqlServer.Initialize(recordCommands: false);` **before** `VerifierSettings.InitializePlugins()` with the readme quote as a comment. `keep-sql`: `VerifyEntityFramework.Initialize(GetDbModel(), recordCommands: false);`. `ignore-names`: `VerifierSettings.InitializePlugins(); Recording.IgnoreNames("sql");` (no ordering constraint, listener stays subscribed). `both`: no change, comment explains the double entries. Docs explain all four. |
 | `sql-initialize-before-plugins` | SqlServer with `recordCommands:false` | Info | enforced by the ordering solver (11.3) |
-| `ef-localdb` | EntityFramework + LocalDb | Info | use `EfLocalDb.<TestFramework>` package which already depends on Verify.EntityFramework; generate `LocalDbTestBase<SampleDbContext>` sample; `LocalDbTestBase<T>.Initialize()` after `InitializePlugins()`; scrub `chatbot_` prefix; Windows only |
+| `ef-localdb` | EntityFramework + LocalDb | Info | use `EfLocalDb.<TestFramework>` package which already depends on Verify.EntityFramework; generate `LocalDbTestBase<SampleDbContext>` sample; `LocalDbTestBase<T>.Initialize()` after `InitializePlugins()` (a convention; no code requires the order); `LocalDbTestBase` never passes the model to Verify.EntityFramework, so the explicit `VerifyEntityFramework.Initialize(GetDbModel())` stays; scrub `chatbot_` prefix; `Initialize` throws under `--report-trx` (`LocalDb\src\EfLocalDb\ReportTrxGuard.cs:9-17`), so generated CI omits it; Windows only (the scrub and the `--report-trx` restriction are retired by U15) |
 | `sql-localdb` | SqlServer + LocalDb | Info | schema snapshot sample uses `SqlInstance.Build()` |
 | `localdb-framework` | LocalDb with Fixie/Expecto | Warning | no base-class package; fall back to `EfLocalDb` |
-| `flurl-http` | Flurl (+ Http) | Info | Verify.Flurl depends on and auto-initializes Verify.Http; do not emit a separate `VerifyHttp.Initialize()` unless Http is selected with its own samples, in which case call `VerifyHttp.Initialize()` first (safe: Flurl checks `Initialized`) |
-| `nservicebus-logging` | NServiceBus (+ MicrosoftLogging) | Info with choice | `captureLogs` true/false; if MicrosoftLogging is also selected, initialize it first and NServiceBus leaves it alone |
+| `flurl-http` | Flurl (+ Http) | Info | Verify.Flurl depends on and auto-initializes Verify.Http; do not emit a separate `VerifyHttp.Initialize()` unless Http is selected with its own samples, in which case call `VerifyHttp.Initialize()` first (safe: Flurl checks `Initialized`, while a later explicit `VerifyHttp.Initialize()` throws). Verify.Flurl is built against Verify.Http 7.5.1, so CPM lifts it to 8.x when Http is selected; the integration matrix covers the pair (retired by the Verify.Flurl release in 22.6) |
+| `nservicebus-logging` | NServiceBus (+ MicrosoftLogging) | Info | no choice: `captureLogs` only initializes Verify.MicrosoftLogging when it is not already initialized, and `InitializePlugins()` initializes it anyway as a transitive dependency (`Verify.NServiceBus\src\Verify.NServiceBus\VerifyNServiceBus.cs:30-43`); emit `VerifyNServiceBus.Initialize()`; if MicrosoftLogging is also selected, initialize it first; samples show logging through `RecordingProvider.CreateLogger<T>()` (retired by U21) |
 | `avalonia-mvvm` | Avalonia without CommunityToolkitMvvm | Info | suggest adding CommunityToolkit.Mvvm converter ("Many Avalonia projects use CommunityToolkit.Mvvm…") |
 | `html-prettyprint` | AngleSharp with Blazor, Bunit, Playwright, Puppeteer, Selenium, AspNetCore | Info | add `HtmlPrettyPrint.All(...)` with the Blazor marker scrubbing block to the ModuleInitializer |
 | `bunit-anglesharp-comparer` | Bunit + AngleSharp | Warning | both register an `html` comparer; order emitted: `VerifyBunit.Initialize()` then `VerifyAngleSharpDiffing.Initialize()` so AngleSharp diffing wins, with a comment and a choice to swap |
-| `quibble-strict-json` | Quibble | Warning | emit `VerifierSettings.UseStrictJson();` before `VerifyQuibble.Initialize();` in one method; note project-wide effect |
+| `quibble-strict-json` | Quibble | Warning | emit `VerifierSettings.UseStrictJson();` before `VerifyQuibble.Initialize();` in one method; note project-wide effect; the order is mandatory because `Initialize()` sets `Initialized` before it throws about strict JSON, so a failed call cannot be retried (retired by U20) |
 | `systemjson-strict` | SystemJson | Info with choice | choice `systemjson-strict` true/false toggles `VerifierSettings.UseStrictJson()` and the sample's expected file extension |
-| `rendering-needs-comparer` | any of Avalonia, WinForms, Xaml, Playwright, Puppeteer, Selenium, DocNet, PDFium, QuestPDF, Aspose, Syncfusion, OpenXml, ImageMagick, ImageSharp, EmailPreviewServices without an `image-comparer` choice | Info | default to `VerifierSettings.UseSsimForPng(threshold)` with per-extension recommended threshold (DocNet 0.95, SponsorCheck-style 0.7 for browser screenshots, default 0.98) and a comment |
-| `recording-bus` | two or more of EntityFramework, SqlServer, Http, Diagnostics, OpenTelemetry, MicrosoftLogging, Serilog, ZeroLog, NServiceBus | Info | explain that all land in the same snapshot keyed `ef`/`sql`/`http`/`activity`/`log`, and show `Recording.IgnoreNames(...)` |
-| `logger-takeover` | Serilog, ZeroLog | Warning | `Initialize` replaces the global logger; configure the app logger before calling it or let the extension own it |
-| `diffplex-default-comparer` | DiffPlex with AngleSharp, Bunit, Quibble, ImageMagick | Info | DiffPlex is the default string comparer; extension-specific comparers for html/json/svg take precedence |
+| `rendering-needs-comparer` | any of Avalonia, WinForms, Xaml, Playwright, Puppeteer, Selenium, DocNet, PDFium, QuestPDF, Aspose, Syncfusion, OpenXml, ImageMagick, ImageSharp without an `image-comparer` choice (not EmailPreviewServices: its snapshots are `webp`, so `UseSsimForPng` has no effect) | Info | default to `VerifierSettings.UseSsimForPng(threshold)` with per-extension recommended threshold (DocNet 0.95, SponsorCheck-style 0.7 for browser screenshots, default 0.98) and a comment |
+| `recording-bus` | two or more of EntityFramework, SqlServer, Http, Diagnostics, OpenTelemetry, MicrosoftLogging, Serilog, ZeroLog, NServiceBus | Info | explain that all land in the same snapshot keyed `ef`/`sql`/`httpCall`/`activity`/`log`, and show `Recording.IgnoreNames(...)`. Serilog, ZeroLog and MicrosoftLogging all use `log`, so `IgnoreNames` cannot separate them. The logging extensions call `Recording.Add`, which throws outside a recording, so samples call `Recording.Start()` before anything logs and the guide warns about logging during host startup (retired by U13) |
+| `logger-takeover` | Serilog, ZeroLog | Warning | `Initialize` replaces the global logger; let the extension own it. For ZeroLog, an existing configuration only works with `AppendingStrategy.Synchronous`: the default asynchronous appender loses the recording context and captures nothing (retired by U11, U18) |
+| `diffplex-default-comparer` | DiffPlex with AngleSharp, Bunit, Quibble, ImageMagick | Info | DiffPlex is the default string comparer; extension-specific comparers for html/json/svg take precedence, except that a per-test `UseDiffPlex()` overrides them for that test |
 | `readable-expressions-priority` | ReadableExpressions + EntityFramework | Info | converter inserted at index 0; expression trees inside EF snapshots render as C# |
+| `plugin-not-discovered` | AngleSharp, QuestPDF or Blazor listed as existing (Add flows) | Warning | `InitializePlugins()` never initialized these (1.3); the Add output tells users to add the explicit call even though the package is already referenced (retired by C2, U1, U2) |
+| `settings-method-ambiguity` | two or more of DocNet, PdfPig, QuestPDF, Syncfusion, PDFium, Aspose | Info | each defines `PagesToInclude(int)` and/or `SkipPdfNormalization()` as extension methods (Aspose in `VerifyTestsAspose`, the rest in `VerifyTests`), so the fluent call is a CS0121 compile error even without a runtime conflict (QuestPDF + PdfPig is a suggested pair); samples use the static form, e.g. `PdfPigSettings.PagesToInclude(settings, 2)`, with a comment (retired by C4) |
+| `transitive-sponsorship` | Pandoc | Warning | the `Pandoc` package ships its own sponsorship gate for owner `Papyrine`; without `Papyrine_*` properties the build fails (section 14) |
+| `imagemagick-svg-comparer` | ImageMagick (with comparers) + AngleSharp | Warning | both register an `svg` string comparer and the last registration wins; emitted so the chosen one is last, with a choice |
+| `png-converter` | ImageMagick + ImageSharp | Warning | both register a `png` stream converter and the last registration wins; emitted so the chosen one is last, with a choice |
+| `imagesharp-reencode` | ImageSharp + any of PDFium, DocNet, OpenXml (with a render backend), ImageMagick, Aspose, Syncfusion | Warning | ImageSharp's converters re-encode the png pages those extensions produce and add info files, because core ignores `PerformConversion` for converter output (retired by C5) |
+| `cosmos-etag` | Cosmos + Http or AspNetCore | Info | Verify.Cosmos applies `IgnoreMembers("ETag")` to every type, so ETag headers also disappear from http snapshots (retired by U23) |
 | `windows-only` | WinForms, Xaml, Phash, LocalDb, Cosmos (emulator) with OS MacOS/Linux | Warning | still allowed; tests go in `<Name>.Tests.Windows`; CI workflow gets a `windows-latest` job for it |
 | `licence-required` | Aspose (`AsposeLicense`), Syncfusion (`SyncfusionLicense`), EmailPreviewServices (`EmailPreviewServicesApiKey`), QuestPDF (`Settings.License = LicenseType.Community` or key) | Warning | generated ModuleInitializer reads the environment variable and throws a clear message; docs and CI workflow mention the secret |
 | `external-tool` | ImageMagick pdf (Ghostscript), Pandoc (pandoc), Playwright (`installPlaywright: true` or `playwright.ps1 install`), Selenium (chromedriver), Puppeteer (`BrowserFetcher`), Cosmos (emulator), RavenDB (embedded server download), LocalDb (SqlLocalDB) | Warning | docs "Before running" section; CI workflow steps where automatable (Playwright install, `choco install ghostscript.app`) |
@@ -573,7 +620,7 @@ ImageMagick appears in two groups: its `Initialize()` registers the pdf converte
 
 ### 11.3 Ordering solver
 
-`ModuleInitializerGenerator` orders explicit `Initialize` calls by: (1) rule-imposed "before" edges (e.g. `VerifySqlServer.Initialize(recordCommands:false)` before `InitializePlugins`, `UseStrictJson` before `VerifyQuibble.Initialize`, `VerifyMicrosoftLogging.Initialize` before `VerifyNServiceBus.Initialize`, `VerifyHttp.Initialize` before `VerifyFlurl.Initialize`, `VerifyBunit.Initialize` before `VerifyAngleSharpDiffing.Initialize`, `UseSsimForPng`/comparer registration before converters that emit png), (2) category order (comparers, then converters/plugins, then scrubbers/global settings), (3) alphabetical. A topological sort with the comparison as tie-break; a cycle is a registry bug caught by a test. `VerifierSettings.InitializePlugins()` is always last among plugin calls; `LocalDbTestBase<T>.Initialize()` and `VerifierSettings.Inline(...)`-style global settings come after it.
+`ModuleInitializerGenerator` orders explicit `Initialize` calls by: (1) rule-imposed "before" edges (e.g. `VerifySqlServer.Initialize(recordCommands:false)` before `InitializePlugins`, `UseStrictJson` before `VerifyQuibble.Initialize`, `VerifyMicrosoftLogging.Initialize` before `VerifyNServiceBus.Initialize`, `VerifyHttp.Initialize` before `VerifyFlurl.Initialize`, `VerifyBunit.Initialize` before `VerifyAngleSharpDiffing.Initialize`, `UseSsimForPng`/comparer registration before converters that emit png, `VerifyImageHash.Initialize` before `VerifyImageHash.RegisterComparers` (a threshold registered earlier is overwritten when `InitializePlugins` calls `Initialize`; retired by U9), `VerifyImageSharpCompare.RegisterComparers` before `VerifyImageSharpCompare.Initialize` (its first registration wins; retired by U7), `VerifyImageMagick.Initialize` before any other pdf converter's `Initialize` (11.1)), (2) category order (comparers, then converters/plugins, then scrubbers/global settings), (3) alphabetical. A topological sort with the comparison as tie-break; a cycle is a registry bug caught by a test, and another test asserts that every declared edge holds in the generated output. `VerifierSettings.InitializePlugins()` is always last among plugin calls; `LocalDbTestBase<T>.Initialize()` and `VerifierSettings.Inline(...)`-style global settings come after it.
 
 ---
 
@@ -605,7 +652,7 @@ All generation is in `Wizard.Core/Generation`, pure, and snapshot-tested. Every 
   CLAUDE.md                         AI context (12.6)
   .github/copilot-instructions.md   same content as CLAUDE.md
   .claude/skills/verify-snapshot-testing/SKILL.md   Verify's ai-usage skill text (Appendix A)
-  .github/workflows/build.yml       when GitHub Actions: setup-dotnet with global-json-file, build, test per project, upload **/*.received.* on failure (build-server-githubactions include), Windows job when a Windows test project exists, Playwright install / Ghostscript / secrets steps per external requirement
+  .github/workflows/build.yml       when GitHub Actions: setup-dotnet with global-json-file, build, test per project, upload **/*.received.* on failure (build-server-githubactions include), Windows job when a Windows test project exists, Playwright install / Ghostscript / secrets steps per external requirement; `--report-trx` is never passed when LocalDb is selected (11.2 `ef-localdb`)
   azure-pipelines.yml               when Azure DevOps (build-server-azuredevops include)
   appveyor.yml                      when AppVeyor (build-server-appveyor include)
   src/
@@ -703,7 +750,7 @@ public static class ModuleInitializer
 }
 ```
 
-Rules: every call has a comment; comments quote the readme where the catalogue has a quote; parameters come from `Choices`; verbose depth adds commented-out alternatives (`// VerifyDiffPlex.Initialize(OutputType.Full);`). Licence keys are read from environment variables with a throw-if-missing message copied from the extension's own tests. For MSTest add `[assembly: UsesVerify]` in a separate `AssemblyInfo.cs`. For Fixie the `TestProject` convention file is emitted (Appendix C).
+Rules: every call has a comment; comments quote the readme where the catalogue has a quote; parameters come from `Choices`; verbose depth adds commented-out alternatives (`// VerifyDiffPlex.Initialize(OutputType.Full);`). Licence keys are read from environment variables with a throw-if-missing message copied from the extension's own tests. For MSTest add `[assembly: UsesVerify]` in a separate `AssemblyInfo.cs`. For Fixie the `TestProject` convention file is emitted (Appendix C). Extension usings are per test file (9.1). When `settings-method-ambiguity` applies, the affected calls use the static form.
 
 ### 12.5 Zip layout – Add flows
 
@@ -732,7 +779,7 @@ verify-additions/
 3. **Verify context** – the Verify `ai-usage` context-file template (Appendix A) with the framework-specific test command substituted and the inline-snapshot section dropped when not enabled (inline is still marked beta in the docs; it is not enabled by the wizard).
 4. **Handling snapshot failures** – the skill text (Appendix A).
 5. **For the Add flow only**: an ordered task list for the merge (add PackageVersion lines; add PackageReference lines; merge ModuleInitializer respecting order; copy tests; run; accept first snapshots after review), each pointing at the fragment file.
-6. **Extension cheat sheet** – for each selected extension: the enable call, the 3–5 most important APIs (minimal samples' method signatures), the snapshot key names it uses (`ef`, `sql`, `log`, `activity`), and its gotchas.
+6. **Extension cheat sheet** – for each selected extension: the enable call, the 3–5 most important APIs (minimal samples' method signatures), the snapshot key names it uses (`ef`, `sql`, `httpCall`, `log`, `activity`), and its gotchas.
 7. **Environment**: `DiffEngine_Disabled=true`; licence environment variables required; tools required.
 
 The skill file (`.claude/skills/verify-snapshot-testing/SKILL.md`) is emitted verbatim from Verify's ai-usage doc.
@@ -769,6 +816,13 @@ One step, both flows. Inputs and generated `Directory.Build.props` block (owner 
   - Decide later: the props file contains the whole block commented out with each option and the SC021 note, so the first build's error message and the file agree.
 - The generated block always carries a comment linking to `docs/maintenance-fee.md` and to the SponsorCheck package wizard (`https://simoncropp.github.io/SponsorCheck/package/Verify`).
 - Reuse `ConsumerConfigGenerator`'s outcome prose for owner mode (copy the relevant `BuildOutcome` branches; keep the SC codes) so the guide's "Expected build outcome" sentence is accurate.
+- **Other sponsorship owners.** Some packages the plan can reference carry their own sponsorship gate, built on the same SponsorCheck mechanism.
+  - The `Pandoc` package, a dependency of Verify.Pandoc, gates on owner `Papyrine`, with no severity overrides.
+  - It reads `Papyrine_GitHubSponsorAccount`, `Papyrine_SponsorshipStart`, `Papyrine_SponsorshipExemption[Until]`, `Papyrine_SponsorshipLicensedUntil` and `Papyrine_SponsorshipLicenseIgnored` (`%USERPROFILE%\.nuget\packages\pandoc\6.0.2\buildTransitive\Pandoc.targets:16, 96-103`).
+  - `PackageRequirement.SponsorOwner` records such owners (prefix, account, landing URL).
+  - The step renders one block per owner present in the plan: VerifyTests always, others only when their package is selected. The modes are the same; non-Verify owners default to "Decide later".
+  - Integration states (17.4) choose a mode that builds. The Verify.Pandoc repo itself uses `Papyrine_SponsorshipLicenseIgnored=true`.
+  - The integration compile catches any gated package the registry misses.
 
 ---
 
@@ -818,7 +872,12 @@ bunit: each step component (validation gates Next; choices bind), `Breadcrumb` (
 
 ### 17.4 Integration: the zip compiles and the tests run (opt-in, CI)
 
-`Integration/GeneratedSolutionTests.cs`, marked `[Explicit]` and run by `integration.yml` (`--treenode-filter`): for a curated set of states, generate the solution, extract to a temp directory, run `dotnet build` and then the framework's test command with `DiffEngine_Disabled=true`, and assert the build succeeds and the only failures are Verify "New" snapshot failures (the core sample passes because its verified file is shipped). Matrix: ubuntu for the cross-platform set (every framework; extensions: DiffPlex, Http, AspNetCore, SystemJson, NewtonsoftJson, Yaml, NodaTime, Ulid, MailMessage, SendGrid, CsvHelper, Sep, ClosedXml, OpenXml, PdfPig, PDFium, QuestPDF, ImageSharp, ImageHash, AngleSharp, Bunit, Blazor, Moq, NSubstitute, FakeItEasy, Mockly, MassTransit, NServiceBus, Wolverine, Brighter, MicrosoftLogging, Serilog, ZeroLog, OpenTelemetry, Diagnostics, SourceGenerators, ICSharpCodeDecompiler, ReadableExpressions, ParametersHashing, Assertions, Quibble, Flurl, Playwright with browser install); windows for the Windows set (WinForms, Xaml, Phash, LocalDb + EntityFramework + SqlServer with SqlLocalDB available on `windows-latest`). Excluded from CI: Aspose, Syncfusion, EmailPreviewServices (licences), Cosmos (emulator), RavenDB (server download; try it, drop if flaky), ImageMagick pdf (Ghostscript install is possible via choco on Windows: include), Pandoc (choco/apt install is possible: include), Avalonia (needs a display? Avalonia headless works without one: include). This test is the guarantee behind "working bits" and behind the weekly version bump.
+`Integration/GeneratedSolutionTests.cs`, marked `[Explicit]` and run by `integration.yml` (`--treenode-filter`): for a curated set of states, generate the solution, extract to a temp directory, run `dotnet build` and then the framework's test command with `DiffEngine_Disabled=true`, and assert the build succeeds and the only failures are Verify "New" snapshot failures (the core sample passes because its verified file is shipped). Matrix: ubuntu for the cross-platform set (every framework; extensions: DiffPlex, Http, AspNetCore, SystemJson, NewtonsoftJson, Yaml, NodaTime, Ulid, MailMessage, SendGrid, CsvHelper, Sep, ClosedXml, OpenXml, PdfPig, PDFium, QuestPDF, ImageSharp, ImageHash, AngleSharp, Bunit, Blazor, Moq, NSubstitute, FakeItEasy, Mockly, MassTransit, NServiceBus, Wolverine, Brighter, MicrosoftLogging, Serilog, ZeroLog, OpenTelemetry, Diagnostics, SourceGenerators, ICSharpCodeDecompiler, ReadableExpressions, ParametersHashing, Assertions, Quibble, Flurl, Playwright with browser install); windows for the Windows set (WinForms, Xaml, Phash, LocalDb + EntityFramework + SqlServer with SqlLocalDB available on `windows-latest`). Excluded from CI: Aspose, Syncfusion, EmailPreviewServices (licences), Cosmos (emulator), RavenDB (server download; try it, drop if flaky), ImageMagick pdf (Ghostscript install is possible via choco on Windows: include), Pandoc (choco/apt install is possible: include), Avalonia (needs a display? Avalonia headless works without one: include). This test is the guarantee behind "working bits" and behind the weekly version bump. These combinations run in addition to the per-extension set:
+- Blazor with the core sample in one project, with the order forced so `Sample` runs first (Blazor's `Custom` shape, 9.1).
+- QuestPDF + PdfPig with verbose samples (`settings-method-ambiguity`).
+- Pandoc with `Papyrine_*` properties (14).
+- Flurl + Http (`flurl-http`).
+- ImageMagick comparer-only + PdfPig (11.1).
 
 ### 17.5 Content anti-rot (opt-in, network)
 
@@ -854,6 +913,7 @@ Do these after the site is live:
 2. Each extension readme (optional, incremental): a "Add via the wizard" link to `https://verifytests.github.io/Wizard/add/<Id>`.
 3. Retire `docs/wiz`: replace the 508 files with a single `docs/wiz/readme.md` that links to the site, and delete `src/Verify.Tests/Wizard/*` plus the `mdsnippets` wiring in `claude.md` ("Getting Started Wizard" section). Redirect map: old file name `Windows_Rider_Cli_XunitV3_GitHubActions.md` ↔ `/new?os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&step=output`; generate a table of those links into the new `docs/wiz/readme.md` so existing inbound links still land somewhere useful (the enum names were kept identical for this reason).
 4. `Verify/usages/*NugetUsage` stay as the compile check for the GUI package lists; the wizard's registry test can also read them when the Verify clone is present locally (opt-in) to catch drift in the adapter package lists.
+5. Suggested fixes to Verify core and the extensions are listed separately in section 22. None is a prerequisite for the site.
 
 ---
 
@@ -879,6 +939,16 @@ Each phase ends with green tests and a deployable site. Estimated effort is rela
 
 - **Version drift breaks generated code.** Mitigated by the weekly refresh PR gated by the integration compile; a failing bump stays a PR until the registry sample is fixed.
 - **Sample code must match APIs.** All samples are copied from readmes/tests that are themselves snippet-verified; the integration compile catches drift. Known readme inaccuracies to avoid: Verify.Diagnostics readme references a non-existent `RecordingActivityListener.Start()` (use `Recording.Start()`); Verify.MicrosoftLogging prose references `LoggerRecording`/`LoggerProvider` (use `Recording.Start()`, `RecordingLogger`, `RecordingProvider`); Verify.Phash readme shows a parameterless `RegisterComparer()` that does not exist; Verify.ImageSharp.Compare readme/xmldoc copy-paste from ImageHash (threshold is absolute error, default 5); Verify.CsvHelper/Verify.Sep `TranslateCsvColumn` vs `TranslateCsvColumns` naming; Verify.Wolverine `Broardcasted` spelling.
+  - Further inaccuracies found when the catalogue was re-checked against source:
+    - Verify.Http's readme uses `HttpRecording.StartRecording()`; use `Recording.Start()`, which records under `httpCall`.
+    - Verify.ImageMagick's readme says `Initialize` registers comparers; it registers converters only. Its `PdfPassword` snippet throws without `.ExcludeTargets("pdf")`.
+    - Verify.EntityFramework's exception text names a non-existent `Enable()`.
+    - Verify.Phash registers png only.
+    - Verify.NodaTime's "disable scrubbing" example still shows scrubbed values; it also needs `DontScrubDateTimes()`.
+    - Verify.Brighter records every `Post` as `Publish`, and `Publishes` throws after a Post. Samples do not use `Posts`/`Publishes` (retired by U4).
+    - Verify.Yaml emits mapping keys in reverse order; the sample comment says so (retired by U12).
+    - Verify.ImageSharp's per-test `SsimThreshold()` does nothing unless `Initialize(ssimThreshold < 1)` was called.
+  - The full list, with upstream fixes, is in section 22.
 - **Trimming.** Markdig and `System.Text.Json` under `TrimMode=full`: use a source-generated `JsonSerializerContext`; add `Wizard.Core` to the trimmer root descriptor if reflection surprises appear.
 - **Zip size and fixtures.** Keep fixtures small; the zip is built in memory.
 - **Expecto and Fixie coverage** is deliberately thinner (D9, D10). If demand appears, extend `TestCodeGenerator` with F# samples.
@@ -886,6 +956,163 @@ Each phase ends with green tests and a deployable site. Estimated effort is rela
 - **`Verify.Bunit` stable version.** The repo is at `14.1.0-beta.1`; nuget.org has `14.0.0` stable. The "newest non-prerelease" rule picks 14.0.0; the wizard's own tests use 14.0.0 too.
 - **RavenDB and Cosmos samples** cannot run without a server; they are generated with a skip attribute and instructions.
 - **`Verify.Sample` clone is mid-merge locally** (unresolved conflict markers in its `Directory.Packages.props`); irrelevant to this plan but do not copy from it.
+
+---
+
+## 22. Suggested changes to Verify and its extensions
+
+These fixes were found on 2026-09-22, when the catalogue was re-checked against current source in every extension repo (including Verify.Syncfusion) and in LocalDb.
+- Every item was checked in code, and paths are relative to each repo.
+- None of this work is part of phases 0–5 (see 22.7).
+- The workarounds for these defects live in the sections above; each names the id below in `RetiredBy`.
+
+### 22.1 Verify core
+
+| Id | Change | Evidence | Breaking | Retires |
+|---|---|---|---|---|
+| C1 | Sort plugin files ordinally before initializing them, so conflicting registrations resolve the same way on every OS | `src/Verify/VerifierSettings_PluginConvention.cs:34` (`Directory.EnumerateFiles`, unordered) | no | order-dependent outcomes in every exclusive group |
+| C2 | Look up the plugin type case-insensitively (`GetType(typeName, false, ignoreCase: true)`); report a referenced `Verify.*.dll` that has no plugin type | same file `:173-176`, `:203` | no | QuestPDF being skipped; makes the AngleSharp and Blazor gaps visible (`plugin-not-discovered`) |
+| C3 | Record which assembly registered each stream/string converter and comparer. Report cross-plugin overwrites from `VerifyChecks.Run()`; add an opt-in strict mode that throws | `src/Verify/Splitters/Settings_Extension.cs:26`; `src/Verify/Compare/SharedSettings.cs:32,39,46` | no (strict mode is opt-in) | group conflicts go unnoticed by users who don't use the wizard |
+| C4 | Move `PagesToInclude` and `SkipPdfNormalization` into core as `VerifySettings`/`SettingsTask` methods with a context accessor (as `IsTargetExcluded` works). Extensions read the core value and mark their own copies `[Obsolete]` | defined by six packages, each with its own context key | no, with `[Obsolete]` forwarding | `settings-method-ambiguity` |
+| C5 | Honour `Target.PerformConversion` for targets that converters produce | `src/Verify/InnerVerifier_Stream.cs:188-199`; compare `InnerVerifier_Inner.cs:371` | minor | `imagesharp-reencode` |
+| C6 | Share ULID scrubbing, or add a keyed `Counter.Next<T>`, so Ulid and NUlid share numbering and `DontScrubUlids` exists once | `VerifyUlid.cs` and `VerifyNUlid.cs` are identical at `:19, 49-60` | coordinated major | `ulid-scrubber` group |
+| C7 | Convention: extensions that use sub-namespaces ship `buildTransitive` `<Using>` items, as Verify.NUnit does | `src/Verify/buildTransitive/Verify.props:179` imports only `VerifyTests` | no | the sub-namespace `Usings` data (9.1) |
+| C8 | Fix the link to the old Verify.AngleSharp.Diffing repo | `docs/mdsource/comparer.source.md:138` | no | — |
+
+### 22.2 Bugs and wrong documentation (high priority)
+
+| Id | Repo | Change | Evidence |
+|---|---|---|---|
+| U1 | Verify.Blazor | Make `VerifyTests.VerifyBlazor` public with `Initialized`/`Initialize()`, so both plugin discovery and an explicit call work. Keep the static-constructor fallback only for when nothing has run yet, and give it a message that points to the ModuleInitializer | `src/Verify.Blazor/Render.cs:5-6`, `VerifyBlazor.cs:3,19` |
+| U2 | Verify.AngleSharp | Add `VerifyTests.VerifyAngleSharp` (`Initialized`, plus `Initialize(action?)` forwarding to `VerifyAngleSharpDiffing`). Release note: projects using `InitializePlugins()` start getting semantic html comparison | `src/Verify.AngleSharp/VerifyAngleSharpDiffing.cs:3` |
+| U3 | Verify.QuestPDF | Until C2 ships, the readme says an explicit `VerifyQuestPdf.Initialize()` is required. Move the `QuestPDF.Settings.License` line into the `enable` snippet | `src/Verify.QuestPDF/VerifyQuestPdf.cs:3`, `src/Tests/ModuleInitializer.cs:17` |
+| U4 | Verify.Brighter | Record `Post`/`PostAsync` as `CommandType.Post`. Add tests for `Posts` and `Publishes`. The snapshot key changes | `src/Verify.Brighter/RecordingCommandProcessor_Post.cs:12-45`, `RecordingCommandProcessor_Publish.cs:6-8` |
+| U5 | Verify.SqlServer | Check a settable `RecordCommands` flag and `Recording.IsIgnored("sql")` for each event. Recording can then be disabled in any order, and `IgnoreNames("sql")` stops cloning commands. `Initialize(bool)` sets the flag, then initializes. Rewrite readme lines 221-240 | `src/Verify.SqlServer/VerifySqlServer.cs:9-26`, `Recording/Listener.cs:17-19` |
+| U6 | Verify.EntityFramework | Same for EF: honour `Recording.IsIgnored("ef")` in the interceptor, and make `RecordCommands` and `Model` settable. Fix the exception text "wither … `Enable()`" | `src/Verify.EntityFramework/VerifyEntityFramework.cs:88,113-129`, `LogCommandInterceptor.cs:50-58` |
+| U7 | Verify.ImageSharp.Compare | Rename the per-test `UseImageHash` to `UseImageSharpCompare` and mark the old name `[Obsolete]`. With both packages referenced, `UseImageHash(threshold: 85)` silently becomes "absolute error 85". Make the last registration win, or add `Initialize(threshold)`. Fix the xmldoc, readme and failure text copied from ImageHash | `src/Verify.ImageSharp.Compare/VerifyImageSharpCompare.cs:5,10,34-47,78` |
+| U8 | Verify.ImageMagick | Add `Initialize(bool pdf, bool images, bool svg, bool comparers, double threshold, ErrorMetric metric)`. Readme: say `Initialize` registers converters but no comparers; add the Ghostscript requirement, webp and svg. Point the `PdfPassword` snippet at the tested sample: `#if DEBUG` hides the snippet that throws, and `#if Debug` (wrong case) never compiles | `src/Verify.ImageMagick/VerifyImageMagick.cs:7-30,59-70`, `src/Tests/Samples.cs:1,23-30`, `VerifyImageMagick_Pdf.cs:199-206` |
+| U9 | Verify.ImageHash | Add `Initialize(threshold, algorithm)`. `RegisterComparers` marks the plugin initialized. Fix the readme wording about the default algorithm | `src/Verify.ImageHash/VerifyImageHash.cs:15-53` |
+| U10 | Verify.Http, Verify.Diagnostics | In the readmes, `HttpRecording.StartRecording()` and `RecordingActivityListener.Start()` do not exist; use `Recording.Start()`. Name the `httpCall` key | Http `readme.md:321-323`, Diagnostics `readme.md:43-45` |
+| U11 | Verify.ZeroLog | When a configuration already exists, fail with a clear message unless `AppendingStrategy.Synchronous` is set; the async appender runs outside the recording's AsyncLocal state. Document the `LogManager` takeover | `src/Verify.ZeroLog/VerifyZeroLog.cs:23-27` |
+| U12 | Verify.Yaml | Remove `.Reverse()`, which emits mapping keys in reverse order | `src/Verify.Yaml/Converters/YamlMappingNodeConverter.cs:8` |
+| U13 | Verify.MicrosoftLogging, Verify.Serilog, Verify.ZeroLog | Use `Recording.TryAdd` (or `IsEnabled => Recording.IsRecording()`), because `Recording.Add` throws for anything logged outside a recording. Make MicrosoftLogging's `Initialize()` safe to call twice | `RecordingLogger.cs:12-42`, `VerifySink.cs:12`, `VerifyAppender.cs:4` |
+| U14 | Verify.Xaml | Readme requirements: the STA attribute per test framework, Windows, `net10.0-windows`, `UseWPF` | currently only in `claude.md:27` and `src/Tests/TheTests.cs:3` |
+
+### 22.3 API changes that retire wizard rules (medium priority)
+
+| Id | Repo | Change | Retires |
+|---|---|---|---|
+| U15 | LocalDb | Register the `chatbot_` scrub inside `LocalDbTestBase<T>.Initialize`. Make `Initialize` lazy so `--report-trx` works. Add a minimal docs snippet region instead of the whole test ModuleInitializer | the `ef-localdb` scrub step and `--report-trx` restriction |
+| U16 | Verify.OpenTelemetry | Depend on Verify.Diagnostics and call its `Initialize()` if it hasn't run; add only `LogRecordConverter` (the other converters are byte-identical copies). Optional ActivitySource filter in both packages | `activity-listener` group |
+| U17 | Verify.Aspose, Verify.Syncfusion, Verify.OpenXml, Verify.Pandoc, Verify.ImageSharp | Opt-in registration per format: `RegisterPdfConverter()`, `RegisterExcelConverters()` and so on, or `Initialize(bool excel, bool word, bool powerPoint)`; Pandoc `docx`/`rtf`; ImageSharp `registerStreamConverters`. `Initialize()` still registers everything | pdf, xlsx, docx and pptx groups become per-format choices; `png-converter` |
+| U18 | Verify.PDFium, Verify.HeadlessBrowsers, Verify.Serilog | Static settings instead of `Initialize` parameters: `VerifyPDFium.Dpi`, `VerifyPlaywright.InstallBrowsers()`, and for Serilog a public `WriteTo.Verify()` sink plus `replaceGlobalLogger` | ordering edges; `logger-takeover` becomes a choice |
+| U19 | Verify.Bunit | Add an `Initialize` option that skips the global `html` comparer. Ship 14.1.0 stable on Verify 33 | `bunit-anglesharp-comparer`; the `beta-package` pin |
+| U20 | Verify.Quibble | Drop the `UseStrictJson` precondition: the comparer only sees `.json`, and can fall back when parsing fails. At minimum, check before setting `Initialized` | `quibble-strict-json` ordering |
+| U21 | Verify.NServiceBus | Mark `Initialize(bool captureLogs)` `[Obsolete]` and add `Initialize()`. Document logging, `AddSharedHeader(s)` and the namespace | the `nservicebus-logging` note |
+| U22 | Verify.Phash | Decode images with ImageSharp and target `net8.0`; System.Drawing is the only reason for `-windows`. Add `RegisterComparers(threshold)` for png, jpg, bmp and tiff | `windows-only` for Phash |
+| U23 | Verify.Cosmos | Limit `IgnoreMembers("ETag")` to Cosmos types | `cosmos-etag` |
+| U24 | ImageHash, ImageSharp.Compare, ImageMagick, Phash, ImageSharp | One shape for all image comparers: `Initialize(threshold)` and `RegisterComparers(...)` globally, `Use<Name>Comparer(...)` per test. Name the parameter `minSimilarity` or `maxDifference` according to the metric. Make comparisons inclusive, use the same extension set (`tif` as an alias), and consider a size-independent metric for ImageSharp.Compare | image-comparer UI text |
+| U25 | Verify.DiffPlex, Verify.Assertions, logging extensions | `UseDiffPlex(params extensions)`; opt-in failure when `Assert<T>` never matched; an optional record name instead of the shared `log` | minor notes |
+
+The image comparers today (context for U24):
+
+| Package | Global setup | Per test | Default | Metric | Stricter when |
+|---|---|---|---|---|---|
+| ImageHash | `RegisterComparers` | `UseImageHash` | 95 | similarity % | higher |
+| ImageSharp.Compare | `RegisterComparers` | `UseImageHash` | 5 | absolute error (depends on image size) | lower |
+| ImageMagick | `RegisterComparers` | `ImageMagickComparer` | .005 | fuzz distortion | lower |
+| Phash | `RegisterComparer(extension, …)` | `PhashCompareSettings` | .999 | cross-correlation | higher |
+| ImageSharp | `Initialize(ssimThreshold)` | `SsimThreshold` | 1.0 (off) | SSIM | higher |
+| Verify core | `UseSsimForPng` | — | .98 | SSIM | higher |
+
+### 22.4 Naming and namespace consistency (at each repo's next major where breaking)
+
+- **CsvHelper and Sep:**
+  - Add `TranslateCsvColumns(this SettingsTask…)` and mark the singular `[Obsolete]`.
+  - Rename CsvHelper's `VerifySep_Translate.cs`.
+  - Fix the nullability of Sep's delegate.
+  - Say in both readmes that the two packages can't be used together.
+- **Ulid and NUlid:** say that they can't be used together, until C6 ships.
+- **Wolverine:** rename `Broardcasted` to `Broadcasted` in the file, the API and the snapshots.
+- **Namespaces:** move these into `VerifyTests.*` with obsolete shims:
+  - `VerifyTestsAspose`, `VerifyTestsImageMagick` and `VerifyTestsPlaywright`.
+  - QuestPDF's `ShouldIncludePage`, out of `VerifyQuestPDF`.
+  - LocalDb: rename `EfLocalDbNunit` to `EfLocalDbNUnit`.
+  - ICSharpCode.Decompiler's split namespaces: ship a `<Using>` now, merge at the next major.
+- **NodaTime:** rename `DontScrub()` to `DontScrubNodaTimes()`.
+- **PDFium:** honour `ExcludeTargets("pdf")`, mark `ExcludePdfDocument()` `[Obsolete]`, and add `VerifySettings` overloads.
+- **EntityFrameworkClassic:** write queryable SQL as `.sql`, as EF Core does.
+
+### 22.5 Documentation
+
+Where to make these fixes:
+- Most extension repos use MarkdownSnippets `InPlaceOverwrite`. Fix prose directly in `readme.md` outside snippet blocks, and snippet text in the `#region` under `src/Tests`.
+- Verify.Blazor and Verify.Bunit have a `readme.source.md`.
+- LocalDb uses `pages/mdsource`.
+
+The fixes:
+- **AngleSharp, Blazor, Bunit:** say that `HtmlPrettyPrint` needs Verify.AngleSharp and `using VerifyTests.AngleSharp;`. Fill the empty headings. Fix `Intitialized` in the sample component.
+- **Aspose, Syncfusion:** show how to apply the licence, and add `ApplyLicense` helpers. Document `PagesToInclude`, `PdfPngDevice` and the other settings.
+- **MicrosoftLogging:** replace `LoggerRecording`/`LoggerProvider` with `RecordingLogger`/`RecordingProvider`, and mention the namespace.
+- **ICSharpCode.Decompiler:** `DontNormalizeIL` should be `DontNormalizeIl()`. Fix the typos. Document `ScrubComments`, `ScrubBinaryData` and `AssemblyToDisassemble`.
+- **Phash:** remove the parameterless `RegisterComparer()`, say it is png only, and fix the intro.
+- **QuestPDF:**
+  - The comparer paragraph names ImageMagick, but the snippet uses SSIM.
+  - Document the licence.
+  - Document `SkipPdfNormalization`.
+- **SqlServer:** the schema output include renders nothing (`readme.md:58-61`). Document `SchemaAsSql`/`SchemaAsMarkdown` and the namespace.
+- **Serilog:** fix the typo. Say that the `custom` callback needs an explicit `Initialize` before `InitializePlugins`.
+- **Flurl:** say it initializes Verify.Http itself, so a later explicit `VerifyHttp.Initialize()` throws.
+- **Pandoc:** say it needs the pandoc executable and brings the Papyrine sponsorship gate.
+- **SourceGenerators:** rewrite the sample as an `IIncrementalGenerator`, which drops the RS1042 suppression.
+- **WinForms:** add requirements and the SSIM recommendation; fix the typos.
+- **Smaller fixes:**
+  - RavenDB: embedded-server test setup.
+  - ReadableExpressions: the converter is inserted at index 0 and overrides other `Expression` handling.
+  - EntityFramework: `IgnoreNavigationProperties` extends `VerifySettings`.
+  - NodaTime: turning off scrubbing also needs `DontScrubDateTimes()`.
+  - NServiceBus, MassTransit (DI harness) and Terminal (local tool manifest).
+  - Undocumented options in DocNet, PdfPig and Sylvan.
+
+### 22.6 Packaging and metadata (low priority)
+
+- **Wrong metadata:**
+  - Tags on MailMessage, NewtonsoftJson, Phash and ZeroLog.
+  - ZeroLog's `nuget.md` link returns 404.
+  - SendGrid's `RootNamespace`, tags and description are wrong, and it has no `nuget.md`.
+  - OpenXml's `nuget.md` links to Sylvan; ReadableExpressions' links to NodaTime.
+  - EmailPreviewServices' badge points at Verify.Ulid, and its `AssemblyVersion` is 0.1.0.
+  - Terminal's repository URLs point at the pre-transfer repo.
+  - Yaml says "YamlDotNey".
+  - Cosmos sets `PackageRequireLicenseAcceptance`.
+- **Target frameworks:**
+  - AngleSharp: drop net6/net7, add net10.
+  - Assertions and DocNet: drop end-of-life frameworks.
+  - PdfPig: net8.0 is listed twice.
+  - Quibble: add net8/net9.
+  - RavenDB and Wolverine: net9 only.
+  - WinForms and Xaml: add net8.0-windows.
+  - ClosedXml: lists both net472 and net48.
+- **Strong naming, where dependencies allow:** CsvHelper, DocNet, ImageHash, QuestPDF, Quibble, Sep, Sylvan, Wolverine.
+- **Releases:** Verify.Flurl on Verify.Http 8; a stable Verify.Bunit (U19).
+- **Hygiene:**
+  - AspNetCore adds `ConflictResultConverter` twice and tracks a `.csproj.user` file.
+  - Quibble has orphaned `.verified.json` files.
+  - Avalonia forces the ColorPicker and DataGrid dependencies.
+  - SourceGenerators' targets miss `.vb` and `buildTransitive`.
+
+### 22.7 How to act on these
+
+- Each item is done only on request: one branch per repo, with commits, pushes and PRs confirmed individually.
+- Suggested order:
+  1. C1 and C2: the smallest changes with the biggest effect.
+  2. 22.2.
+  3. 22.3, grouped by the rule each item retires.
+  4. 22.4, at each repo's next major.
+  5. 22.5 and 22.6, batched per repo.
+- The wizard keeps every workaround marked `RetiredBy` until the release that fixes it is baked into `package-versions.json`.
+  - Once that release ships, its minimum version is added to the workaround.
+  - A registry test then fails while the workaround is still active past that version.
 
 ---
 
@@ -920,13 +1147,13 @@ Summary of every selectable extension. Versions are the repo `Directory.Build.pr
 
 | Id | Package(s) | Version | Initialize | Category / group | Platform, requirements, notes | Cat. |
 |---|---|---|---|---|---|---|
-| AngleSharp | Verify.AngleSharp | 5.1.2 | `VerifyAngleSharpDiffing.Initialize(action?)`; `HtmlPrettyPrint.All()` | Web; comparer for html/htm/svg | companion to Blazor/Bunit/HeadlessBrowsers/AspNetCore | A |
-| AspNetCore | Verify.AspNetCore + FrameworkReference Microsoft.AspNetCore.App | 5.0.0 | `VerifyAspNetCore.Initialize()` | Web | net10 only; `UseSpecificControllers`, `ScrubAspTextResponse` | A |
+| AngleSharp | Verify.AngleSharp | 5.1.2 | `VerifyAngleSharpDiffing.Initialize(action?)`; `HtmlPrettyPrint.All()` | Web; comparer for html/htm/svg | companion to Blazor/Bunit/HeadlessBrowsers/AspNetCore; not found by `InitializePlugins()` (1.3) | A |
+| AspNetCore | Verify.AspNetCore (declares FrameworkReference Microsoft.AspNetCore.App itself) | 5.0.0 | `VerifyAspNetCore.Initialize()` | Web | net10 only; `UseSpecificControllers`, `ScrubAspTextResponse` | A |
 | Aspose | Verify.Aspose | 5.28.0 | `VerifyAspose.Initialize()` | Documents; pdf/xlsx/docx/pptx groups | licence (`AsposeLicense`); namespace `VerifyTestsAspose`; `PagesToInclude`, `ExcludeTargets` | A |
 | Assertions | Verify.Assertions | 0.3.0 | `VerifyAssertions.Initialize()` | Testing | `.Assert<T>(…)` fluent/instance/static | A |
 | Avalonia | Verify.Avalonia + Avalonia.Headless.XUnit/NUnit + Avalonia.Themes.Fluent + Avalonia.Skia | 1.4.1 | `VerifyAvalonia.Initialize()`; `IncludeThemeVariant()` | UI; rendering | needs `[assembly: AvaloniaTestApplication]`, `UseSkia()`, `UseHeadlessDrawing=false`; xUnit/NUnit attributes only | A |
-| Blazor | Verify.Blazor | 11.0.0 | none (auto) | Web; blazor-renderer group | `Render.Component<T>(…)`; BL0005 suppressed by package | A |
-| Brighter | Verify.Brighter | 2.0.0 | `VerifyBrighter.Initialize()` | Messaging | `RecordingCommandProcessor` | A |
+| Blazor | Verify.Blazor | 11.0.0 | `RuntimeHelpers.RunClassConstructor(typeof(Render).TypeHandle)` (9.1) | Web; blazor-renderer group | `Render.Component<T>(…)`; BL0005 suppressed by package; not found by `InitializePlugins()` | A |
+| Brighter | Verify.Brighter | 2.0.0 | `VerifyBrighter.Initialize()` | Messaging | `RecordingCommandProcessor`; Post is recorded as Publish and `Publishes` throws after a Post, so samples avoid `Posts`/`Publishes` (U4) | A |
 | Bunit | Verify.Bunit + bunit | 14.0.0 stable (repo 14.1.0-beta.1) | `VerifyBunit.Initialize(excludeComponent)` | Web; blazor-renderer group | bUnit v2 API; html comparer collides with AngleSharp | A |
 | ClosedXml | Verify.ClosedXml | 1.4.0 | `VerifyClosedXml.Initialize()` | Documents; xlsx group | 3+ files per verification; `UniqueForRuntime` for binary | A |
 | CommunityToolkitMvvm | Verify.CommunityToolkit.Mvvm | 1.1.0 | `VerifyCommunityToolkitMvvm.Initialize()` | UI | companion to Avalonia/WPF | A |
@@ -935,7 +1162,7 @@ Summary of every selectable extension. Versions are the repo `Directory.Build.pr
 | Diagnostics | Verify.Diagnostics | 1.0.0 | `VerifyDiagnostics.Initialize()` | Observability; activity-listener group | `Recording.Start()`; readme's `RecordingActivityListener` does not exist | A |
 | DiffPlex | Verify.DiffPlex | 3.3.1 | `VerifyDiffPlex.Initialize(OutputType)` | DeveloperExperience | always suggested; `using VerifyTests.DiffPlex` | A |
 | DocNet | Verify.DocNet | 3.6.0 | `VerifyDocNet.Initialize()` | Documents; pdf group | native pdfium; `UseSsimForPng(0.95)`; `PagesToInclude`, `SinglePage`, `PageDimensions`, `PreserveTransparency` | A |
-| EmailPreviewServices | Verify.EmailPreviewServices | 1.0.0 | `VerifyEmailPreviewServices.Initialize(apiKey?)` | Email | paid API key (`EmailPreviewServicesApiKey`); slow; tests explicit | A |
+| EmailPreviewServices | Verify.EmailPreviewServices | 1.0.0 | `VerifyEmailPreviewServices.Initialize(apiKey?)` | Email | paid API key (`EmailPreviewServicesApiKey`); slow; tests explicit; snapshots are webp | A |
 | EntityFramework | Verify.EntityFramework (+ Microsoft.EntityFrameworkCore.SqlServer for the sample) | 15.4.1 | `VerifyEntityFramework.Initialize(model, recordCommands)` | Data | `EnableRecording()`, `Recording.Start()`, ChangeTracker, queryable → `.sql`, `IgnoreNavigationProperties`, descriptive aliases/parameters, `ReplayRecentMigrations`; EF+SqlServer rule | A |
 | EntityFrameworkClassic | Verify.EntityFrameworkClassic | 15.4.1 | `VerifyEntityFrameworkClassic.Initialize()` | Data | EF6 | A |
 | FakeItEasy | Verify.FakeItEasy | 2.1.0 | `VerifyFakeItEasy.Initialize()` | Mocking | `Fake.GetCalls`, `FakeManager` | B |
@@ -943,10 +1170,10 @@ Summary of every selectable extension. Versions are the repo `Directory.Build.pr
 | Playwright | Verify.Playwright + Microsoft.Playwright | 3.1.1 | `VerifyPlaywright.Initialize(installPlaywright)` | Web; rendering | browser install; `PageScreenshotOptions`, `--disable-lcd-text` | B |
 | Puppeteer | Verify.Puppeteer | 3.1.1 | `VerifyPuppeteer.Initialize()` | Web; rendering | `BrowserFetcher` download; not strong-named | B |
 | Selenium | Verify.Selenium + Selenium.WebDriver.ChromeDriver | 3.1.1 | `VerifySelenium.Initialize()` | Web; rendering | chromedriver | B |
-| Http | Verify.Http | 8.0.0 | `VerifyHttp.Initialize()` | Web | converters, `MockHttpClient`, `AddRecordingHttpClient`, `Recording.Start()`; `using VerifyTests.Http` | B |
+| Http | Verify.Http | 8.0.0 | `VerifyHttp.Initialize()` | Web | converters, `MockHttpClient`, `AddRecordingHttpClient`, `Recording.Start()`; `using VerifyTests.Http`; records under `httpCall` | B |
 | ICSharpCodeDecompiler | Verify.ICSharpCode.Decompiler | 3.5.0 | `VerifyICSharpCodeDecompiler.Initialize()` | Compiler | `.il` output; `TypeToDisassemble`, `MethodToDisassemble`, `PropertyToDisassemble`, `AssemblyToDisassemble`, `DontNormalizeIl` | B |
 | ImageHash | Verify.ImageHash | 2.1.3 | `VerifyImageHash.Initialize()` / `RegisterComparers(threshold, algorithm)` | Images; image-comparer group | similarity threshold (default 95, higher is stricter) | B |
-| ImageMagick | Verify.ImageMagick | 3.10.0 | `VerifyImageMagick.Initialize()`; `RegisterComparers(threshold)`; `RegisterPdfToPngConverter()` | Images; pdf group and image-comparer group by role | Ghostscript for pdf; namespace `VerifyTestsImageMagick` for settings | B |
+| ImageMagick | Verify.ImageMagick | 3.10.0 | `VerifyImageMagick.Initialize()`; `RegisterComparers(threshold)`; `RegisterPdfToPngConverter()` | Images; pdf group and image-comparer group by role | Ghostscript for pdf; namespace `VerifyTestsImageMagick` for settings; `Initialize` registers converters only; roles by ordering (11.1) | B |
 | ImageSharp | Verify.ImageSharp | 5.0.1 | `VerifyImageSharp.Initialize(ssimThreshold)` | Images; rendering + optional comparer | `EncodeAsPng` etc.; per-test `SsimThreshold` only when enabled globally | B |
 | ImageSharpCompare | Verify.ImageSharp.Compare | 3.0.3 | `VerifyImageSharpCompare.Initialize()` / `RegisterComparers(threshold)` | Images; image-comparer group | absolute-error threshold (default 5, lower is stricter) | B |
 | MailMessage | Verify.MailMessage | 1.1.1 | `VerifyMailMessage.Initialize()` | Email | | B |
@@ -954,7 +1181,7 @@ Summary of every selectable extension. Versions are the repo `Directory.Build.pr
 | MicrosoftLogging | Verify.MicrosoftLogging | 5.0.0 | `VerifyMicrosoftLogging.Initialize()` | Logging | `RecordingLogger`, `RecordingProvider.CreateLogger<T>()`, `Recording.Start()` | B |
 | Mockly | Verify.Mockly | 1.0.1 | `VerifyMockly.Initialize()` | Mocking / Web | `HttpMock`, `RequestCollection` | B |
 | Moq | Verify.Moq | 2.2.0 | `VerifyMoq.Initialize()` | Mocking | verify `Mock<T>`; `ScrubMember` | B |
-| NServiceBus | Verify.NServiceBus | 12.2.0 | `VerifyNServiceBus.Initialize(captureLogs)` | Messaging | depends on MicrosoftLogging; `RecordingHandlerContext`, `MessageToHandlerMap`, shared headers; `using VerifyTests.NServiceBus` | B |
+| NServiceBus | Verify.NServiceBus | 12.2.0 | `VerifyNServiceBus.Initialize()` (`captureLogs` has no effect, 11.2) | Messaging | depends on MicrosoftLogging; `RecordingHandlerContext`, `MessageToHandlerMap`, shared headers; `using VerifyTests.NServiceBus` | B |
 | NSubstitute | Verify.NSubstitute | 2.1.0 | `VerifyNSubstitute.Initialize()` | Mocking | `ReceivedCalls()` | B |
 | NUlid | Verify.NUlid | 1.0.1 | `VerifyNUlid.Initialize()` | Scrubbing; ulid group | `DontScrubUlids()` | B |
 | NewtonsoftJson | Verify.NewtonsoftJson | 1.1.0 | `VerifyNewtonsoftJson.Initialize()` | Serialization | JObject/JArray | C |
@@ -966,7 +1193,7 @@ Summary of every selectable extension. Versions are the repo `Directory.Build.pr
 | ParametersHashing | Verify.ParametersHashing | 1.0.0 | no-op | Testing | `.HashParameters()` per test | C |
 | PdfPig | Verify.PdfPig | 2.6.0 | `VerifyPdfPig.Initialize()` | Documents; pdf group | managed; `PagesToInclude`, `PdfPigParsingOptions`, `SkipPdfNormalization`, `ExcludeTargets("pdf")` | C |
 | Phash | Verify.Phash | 3.1.0 | `VerifyPhash.Initialize()`; `RegisterComparer(extension, …)` | Images; image-comparer group | Windows only (`net8.0-windows`); png only by default | C |
-| QuestPDF | Verify.QuestPDF | 2.9.0 | `VerifyQuestPdf.Initialize()` | Documents; rendering | `QuestPDF.Settings.License = LicenseType.Community`; `PagesToInclude(count|delegate)`, `ExcludeTargets("pdf")` | C |
+| QuestPDF | Verify.QuestPDF | 2.9.0 | `VerifyQuestPdf.Initialize()` | Documents; rendering | `QuestPDF.Settings.License = LicenseType.Community`; `PagesToInclude(count|delegate)`, `ExcludeTargets("pdf")`; class `VerifyQuestPdf` is not found by `InitializePlugins()` (1.3) | C |
 | Quibble | Verify.Quibble | 2.1.1 | `VerifierSettings.UseStrictJson(); VerifyQuibble.Initialize()` | Serialization; json comparer | forces strict json project-wide | C |
 | RavenDB | Verify.RavenDB | 2.1.0 | `VerifyRavenDB.Initialize()` | Data | embedded server for tests; net9 package | C |
 | ReadableExpressions | Verify.ReadableExpressions | 0.1.0 | `VerifyReadableExpressions.Initialize()` | Compiler | converter at index 0 | C |
@@ -983,7 +1210,7 @@ Summary of every selectable extension. Versions are the repo `Directory.Build.pr
 | WinForms | Verify.WinForms | 6.0.0 | `VerifyWinForms.Initialize()` | UI; rendering | Windows only; `net10.0-windows`, `UseWindowsForms`; png only | D |
 | Wolverine | Verify.Wolverine | 3.2.0 | no-op | Messaging | `RecordingMessageContext`, `AddInvokeResult<T>`; net9 package | D |
 | Xaml | Verify.Xaml | 5.0.0 | `VerifyXaml.Initialize()` | UI; rendering | Windows only; `UseWPF`; STA apartment; xml + png targets | D |
-| Yaml | Verify.Yaml | 0.1.0 | `VerifyYaml.Initialize()` | Serialization | YamlStream/YamlDocument/nodes | D |
+| Yaml | Verify.Yaml | 0.1.0 | `VerifyYaml.Initialize()` | Serialization | YamlStream/YamlDocument/nodes; mapping keys emitted in reverse order (U12) | D |
 | ZeroLog | Verify.ZeroLog | 2.0.0 | `VerifyZeroLog.Initialize()` | Logging | takes over `LogManager` | D |
 | LocalDb | EfLocalDb.Xunit.V3 / EfLocalDb.NUnit / EfLocalDb.MSTest / EfLocalDb.TUnit (else EfLocalDb); LocalDb for raw SQL | 26.2.0 | `LocalDbTestBase<T>.Initialize()` after `InitializePlugins()` | Data | Windows only (SqlLocalDB); `ArrangeData/ActData/AssertData`, `VerifyEntity`, `VerifyEntities`, `[NewDb]`/`[PooledDb]`/`[SharedDb]`; scrub `chatbot_` | D |
 

@@ -1,0 +1,22 @@
+@page "/"
+<PageTitle>Verify Wizard</PageTitle>
+
+@* Each paragraph is one source line: a line break inside text survives into the rendered markup as a run of spaces. *@
+<p>Pick a starting point. Each flow asks a few questions, then produces a guide, a downloadable solution and markdown for an AI assistant.</p>
+
+<div class="entry-cards">
+    <a class="entry-card" href="new">
+        <h2>New to Verify</h2>
+        <p>Start from scratch: operating system, IDE, test framework and build server, plus any extensions for the stack.</p>
+    </a>
+    <a class="entry-card" href="add">
+        <h2>Add extensions to an existing project</h2>
+        <p>Pick extensions to add. Known interactions with the extensions already in the project are explained, with the configuration they need.</p>
+    </a>
+    <a class="entry-card" href="add/by-tech">
+        <h2>Suggest extensions for my tech stack</h2>
+        <p>Describe the libraries in use (EF Core, ASP.NET Core, Serilog, ...) and get a suggested set of extensions to add.</p>
+    </a>
+</div>
+
+<p class="hint">Every page's url holds the choices made so far, so any point can be bookmarked or shared.</p>
