@@ -1,0 +1,69 @@
+@* The extensions the project already has (plan 7.2 step 2). Optional. They are never generated, but
+   they take part in the interaction rules: adding an extension next to one of them can change how the
+   existing one has to be initialized, and the output says exactly what to edit. *@
+<p class="hint">
+    Tick the Verify extensions the project already references. They are left out of what is generated,
+    and any side effect of adding something next to them is spelled out. The list is remembered in this browser.
+</p>
+
+@if (Restored)
+{
+    <p class="restored">Restored from this browser.</p>
+}
+
+<div class="extension-search">
+    <label for="existingFilter">Filter</label>
+    <input type="text"
+           id="existingFilter"
+           placeholder="Name"
+           value="@filter"
+           @oninput="FilterChanged" />
+    <span class="selected-count">@State.ExistingExtensions.Count ticked</span>
+</div>
+
+@foreach (var category in Categories)
+{
+    <section class="extension-category">
+        <h3>@category.Key.Label()</h3>
+        <div class="existing-list">
+            @foreach (var definition in category)
+            {
+                var existing = State.IsExisting(definition.Id);
+                <label class="existing-item @(existing ? "selected" : "")" data-id="@definition.Id">
+                    <input type="checkbox"
+                           checked="@existing"
+                           @onchange="_ => Toggle(definition.Id, (bool?) _.Value ?? false)" />
+                    <span>@definition.DisplayName</span>
+                </label>
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
+    [Parameter] public bool Restored { get; set; }
+    [Parameter] public EventCallback Changed { get; set; }
+
+    string filter = "";
+
+    IEnumerable<IGrouping<ExtensionCategory, ExtensionDefinition>> Categories =>
+        Extensions.All
+            .Where(Matches)
+            .GroupBy(_ => _.Category)
+            .OrderBy(_ => _.Key);
+
+    bool Matches(ExtensionDefinition definition) =>
+        filter.Length == 0 ||
+        State.IsExisting(definition.Id) ||
+        definition.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase);
+
+    void FilterChanged(ChangeEventArgs args) =>
+        filter = args.Value as string ?? "";
+
+    Task Toggle(string id, bool existing)
+    {
+        State.SetExisting(id, existing);
+        return Changed.InvokeAsync();
+    }
+}

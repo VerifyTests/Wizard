@@ -1,0 +1,437 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>Add extensions · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">Add extensions</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tf">
+                  <span class="step-title">Test framework</span>
+                  <span class="step-value">xUnit v3</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Already using</span>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="extensions">
+                  <span class="step-title">Extensions</span>
+                  <span class="step-value">None</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="sponsor">
+                  <span class="step-title">Maintenance fee</span>
+                  <span class="step-value">No change</span>
+                </button>
+              </li>
+              <li class="open">
+                <button type="button" class="step-link" data-step="output">
+                  <span class="step-title">Result</span>
+                </button>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="have">
+            <h2>Already using</h2>
+            <p class="hint">
+              Tick the Verify extensions the project already references. They are left out of what is generated,     and any side effect of adding something next to them is spelled out. The list is remembered in this browser.
+            </p>
+            <div class="extension-search">
+              <label for="existingFilter">Filter</label>
+              <input type="text" id="existingFilter" placeholder="Name">
+              <span class="selected-count">2 ticked</span>
+            </div>
+            <section class="extension-category">
+              <h3>Developer experience</h3>
+              <div class="existing-list">
+                <label class="existing-item selected" data-id="DiffPlex">
+                  <input type="checkbox">
+                  <span>Verify.DiffPlex</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Data</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Cosmos">
+                  <input type="checkbox">
+                  <span>Verify.Cosmos</span>
+                </label>
+                <label class="existing-item " data-id="CsvHelper">
+                  <input type="checkbox">
+                  <span>Verify.CsvHelper</span>
+                </label>
+                <label class="existing-item " data-id="EntityFramework">
+                  <input type="checkbox">
+                  <span>Verify.EntityFramework (EF Core)</span>
+                </label>
+                <label class="existing-item " data-id="EntityFrameworkClassic">
+                  <input type="checkbox">
+                  <span>Verify.EntityFrameworkClassic (EF6)</span>
+                </label>
+                <label class="existing-item " data-id="LocalDb">
+                  <input type="checkbox">
+                  <span>LocalDb (EfLocalDb)</span>
+                </label>
+                <label class="existing-item " data-id="RavenDB">
+                  <input type="checkbox">
+                  <span>Verify.RavenDB</span>
+                </label>
+                <label class="existing-item " data-id="Sep">
+                  <input type="checkbox">
+                  <span>Verify.Sep</span>
+                </label>
+                <label class="existing-item selected" data-id="SqlServer">
+                  <input type="checkbox">
+                  <span>Verify.SqlServer</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Web</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="AngleSharp">
+                  <input type="checkbox">
+                  <span>Verify.AngleSharp</span>
+                </label>
+                <label class="existing-item " data-id="AspNetCore">
+                  <input type="checkbox">
+                  <span>Verify.AspNetCore</span>
+                </label>
+                <label class="existing-item " data-id="Blazor">
+                  <input type="checkbox">
+                  <span>Verify.Blazor</span>
+                </label>
+                <label class="existing-item " data-id="Bunit">
+                  <input type="checkbox">
+                  <span>Verify.Bunit</span>
+                </label>
+                <label class="existing-item " data-id="Flurl">
+                  <input type="checkbox">
+                  <span>Verify.Flurl</span>
+                </label>
+                <label class="existing-item " data-id="Http">
+                  <input type="checkbox">
+                  <span>Verify.Http</span>
+                </label>
+                <label class="existing-item " data-id="Playwright">
+                  <input type="checkbox">
+                  <span>Verify.Playwright</span>
+                </label>
+                <label class="existing-item " data-id="Puppeteer">
+                  <input type="checkbox">
+                  <span>Verify.Puppeteer</span>
+                </label>
+                <label class="existing-item " data-id="Selenium">
+                  <input type="checkbox">
+                  <span>Verify.Selenium</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Desktop UI</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Avalonia">
+                  <input type="checkbox">
+                  <span>Verify.Avalonia</span>
+                </label>
+                <label class="existing-item " data-id="CommunityToolkitMvvm">
+                  <input type="checkbox">
+                  <span>Verify.CommunityToolkit.Mvvm</span>
+                </label>
+                <label class="existing-item " data-id="WinForms">
+                  <input type="checkbox">
+                  <span>Verify.WinForms</span>
+                </label>
+                <label class="existing-item " data-id="Xaml">
+                  <input type="checkbox">
+                  <span>Verify.Xaml</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Documents</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Aspose">
+                  <input type="checkbox">
+                  <span>Verify.Aspose</span>
+                </label>
+                <label class="existing-item " data-id="ClosedXml">
+                  <input type="checkbox">
+                  <span>Verify.ClosedXml</span>
+                </label>
+                <label class="existing-item " data-id="DocNet">
+                  <input type="checkbox">
+                  <span>Verify.DocNet</span>
+                </label>
+                <label class="existing-item " data-id="OpenXml">
+                  <input type="checkbox">
+                  <span>Verify.OpenXml</span>
+                </label>
+                <label class="existing-item " data-id="PDFium">
+                  <input type="checkbox">
+                  <span>Verify.PDFium</span>
+                </label>
+                <label class="existing-item " data-id="Pandoc">
+                  <input type="checkbox">
+                  <span>Verify.Pandoc</span>
+                </label>
+                <label class="existing-item " data-id="PdfPig">
+                  <input type="checkbox">
+                  <span>Verify.PdfPig</span>
+                </label>
+                <label class="existing-item " data-id="QuestPDF">
+                  <input type="checkbox">
+                  <span>Verify.QuestPDF</span>
+                </label>
+                <label class="existing-item " data-id="Sylvan">
+                  <input type="checkbox">
+                  <span>Verify.Sylvan.Data.Excel</span>
+                </label>
+                <label class="existing-item " data-id="Syncfusion">
+                  <input type="checkbox">
+                  <span>Verify.Syncfusion</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Images</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="ImageHash">
+                  <input type="checkbox">
+                  <span>Verify.ImageHash</span>
+                </label>
+                <label class="existing-item " data-id="ImageMagick">
+                  <input type="checkbox">
+                  <span>Verify.ImageMagick</span>
+                </label>
+                <label class="existing-item " data-id="ImageSharp">
+                  <input type="checkbox">
+                  <span>Verify.ImageSharp</span>
+                </label>
+                <label class="existing-item " data-id="ImageSharpCompare">
+                  <input type="checkbox">
+                  <span>Verify.ImageSharp.Compare</span>
+                </label>
+                <label class="existing-item " data-id="Phash">
+                  <input type="checkbox">
+                  <span>Verify.Phash</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Messaging</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Brighter">
+                  <input type="checkbox">
+                  <span>Verify.Brighter</span>
+                </label>
+                <label class="existing-item " data-id="MassTransit">
+                  <input type="checkbox">
+                  <span>Verify.MassTransit</span>
+                </label>
+                <label class="existing-item " data-id="NServiceBus">
+                  <input type="checkbox">
+                  <span>Verify.NServiceBus</span>
+                </label>
+                <label class="existing-item " data-id="Wolverine">
+                  <input type="checkbox">
+                  <span>Verify.Wolverine</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Logging</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="MicrosoftLogging">
+                  <input type="checkbox">
+                  <span>Verify.MicrosoftLogging</span>
+                </label>
+                <label class="existing-item " data-id="Serilog">
+                  <input type="checkbox">
+                  <span>Verify.Serilog</span>
+                </label>
+                <label class="existing-item " data-id="ZeroLog">
+                  <input type="checkbox">
+                  <span>Verify.ZeroLog</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Observability</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Diagnostics">
+                  <input type="checkbox">
+                  <span>Verify.Diagnostics</span>
+                </label>
+                <label class="existing-item " data-id="OpenTelemetry">
+                  <input type="checkbox">
+                  <span>Verify.OpenTelemetry</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Serialization</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="NewtonsoftJson">
+                  <input type="checkbox">
+                  <span>Verify.NewtonsoftJson</span>
+                </label>
+                <label class="existing-item " data-id="NodaTime">
+                  <input type="checkbox">
+                  <span>Verify.NodaTime</span>
+                </label>
+                <label class="existing-item " data-id="Quibble">
+                  <input type="checkbox">
+                  <span>Verify.Quibble</span>
+                </label>
+                <label class="existing-item " data-id="SystemJson">
+                  <input type="checkbox">
+                  <span>Verify.SystemJson</span>
+                </label>
+                <label class="existing-item " data-id="Yaml">
+                  <input type="checkbox">
+                  <span>Verify.Yaml</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Email</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="EmailPreviewServices">
+                  <input type="checkbox">
+                  <span>Verify.EmailPreviewServices</span>
+                </label>
+                <label class="existing-item " data-id="MailMessage">
+                  <input type="checkbox">
+                  <span>Verify.MailMessage</span>
+                </label>
+                <label class="existing-item " data-id="SendGrid">
+                  <input type="checkbox">
+                  <span>Verify.SendGrid</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Mocking</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="FakeItEasy">
+                  <input type="checkbox">
+                  <span>Verify.FakeItEasy</span>
+                </label>
+                <label class="existing-item " data-id="Mockly">
+                  <input type="checkbox">
+                  <span>Verify.Mockly</span>
+                </label>
+                <label class="existing-item " data-id="Moq">
+                  <input type="checkbox">
+                  <span>Verify.Moq</span>
+                </label>
+                <label class="existing-item " data-id="NSubstitute">
+                  <input type="checkbox">
+                  <span>Verify.NSubstitute</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Compiler and code generation</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="ICSharpCodeDecompiler">
+                  <input type="checkbox">
+                  <span>Verify.ICSharpCode.Decompiler</span>
+                </label>
+                <label class="existing-item " data-id="ReadableExpressions">
+                  <input type="checkbox">
+                  <span>Verify.ReadableExpressions</span>
+                </label>
+                <label class="existing-item " data-id="SourceGenerators">
+                  <input type="checkbox">
+                  <span>Verify.SourceGenerators</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Scrubbing</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="NUlid">
+                  <input type="checkbox">
+                  <span>Verify.NUlid</span>
+                </label>
+                <label class="existing-item " data-id="Ulid">
+                  <input type="checkbox">
+                  <span>Verify.Ulid</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Testing</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Assertions">
+                  <input type="checkbox">
+                  <span>Verify.Assertions</span>
+                </label>
+                <label class="existing-item " data-id="ParametersHashing">
+                  <input type="checkbox">
+                  <span>Verify.ParametersHashing</span>
+                </label>
+              </div>
+            </section>
+            <section class="extension-category">
+              <h3>Tooling</h3>
+              <div class="existing-list">
+                <label class="existing-item " data-id="Terminal">
+                  <input type="checkbox">
+                  <span>Verify.Terminal</span>
+                </label>
+              </div>
+            </section>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+              <button type="button" class="primary">Next: Extensions</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

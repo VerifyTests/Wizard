@@ -17,8 +17,10 @@ public class EndToEndTests
             await page.ClickAsync("button.primary");
         }
 
-        // The extension step starts on the default selection, and the options step on the defaults,
-        // so both are passed by moving on.
+        // The tech stack is optional, the extension step starts on the default selection, and the
+        // options step on the defaults, so all three are passed by moving on.
+        await page.WaitForSelectorAsync(".tech-group");
+        await page.ClickAsync("button.primary");
         await page.WaitForSelectorAsync(".extension-card[data-id=DiffPlex]");
         await page.ClickAsync("button.primary");
         await page.WaitForSelectorAsync(".depth-row[data-id=DiffPlex]");
@@ -57,7 +59,7 @@ public class EndToEndTests
         await Assert.That(second.Url).IsEqualTo(first.Url);
         await Assert.That(await second.InputValueAsync("#solutionName")).IsEqualTo("Acme");
         var values = await second.Locator(".breadcrumb .step-value").AllTextContentsAsync();
-        await Assert.That(string.Join(" | ", values)).IsEqualTo("MacOS | JetBrains Rider | Prefer CLI | Expecto | No build server | DiffPlex | Defaults | Private arrangement");
+        await Assert.That(string.Join(" | ", values)).IsEqualTo("MacOS | JetBrains Rider | Prefer CLI | Expecto | No build server | None | DiffPlex | Defaults | Private arrangement");
     }
 
     /// <summary>
@@ -93,6 +95,82 @@ public class EndToEndTests
         // The wizard replaces the history entry rather than navigating, so there is no load to wait for.
         await page.WaitForFunctionAsync(
             "() => location.search.includes('min=DiffPlex') && location.search.includes('opt=diffplex-output:Full')");
+    }
+
+    /// <summary>
+    /// Plan 17.3: an extension readme's deep link, in a browser that remembers the project already has
+    /// Verify.SqlServer. The recording interaction appears though only EF Core is being added, and the
+    /// download is the changes to merge, with SqlServer's call rewritten.
+    /// </summary>
+    [Test]
+    public async Task AddFlowFromADeepLinkWithRememberedExtensions()
+    {
+        var page = await wizard.NewIsolatedPage();
+        try
+        {
+            await page.GotoAsync(wizard.Url());
+            await page.WaitForSelectorAsync(".entry-cards");
+            await page.EvaluateAsync($"localStorage.setItem('{BrowserMemory.ExistingKey}', 'SqlServer')");
+
+            await page.GotoAsync(wizard.Url("/add/EntityFramework"));
+            await page.ClickAsync("#tf-NUnit");
+            await page.ClickAsync("button.primary");
+
+            // the "already using" step, restored from the browser
+            await page.WaitForSelectorAsync(".restored");
+            await Assert.That(await page.IsCheckedAsync(".existing-item[data-id=SqlServer] input")).IsTrue();
+            await page.ClickAsync("button.primary");
+
+            await page.WaitForSelectorAsync(".interaction-notice[data-rule=ef-sql-recording]");
+            await Assert.That(page.Url).EndsWith("/add?step=extensions&tf=NUnit&have=SqlServer&ext=EntityFramework");
+
+            await page.GotoAsync(wizard.Url("/add?step=output&tf=NUnit&have=SqlServer&ext=EntityFramework"));
+            var download = await page.RunAndWaitForDownloadAsync(() => page.ClickAsync("button.download-zip"));
+            await Assert.That(download.SuggestedFilename).IsEqualTo("verify-additions.zip");
+            var path = Path.Combine(Path.GetTempPath(), $"wizard-{Guid.NewGuid():N}.zip");
+            await download.SaveAsAsync(path);
+            try
+            {
+                using var archive = ZipFile.OpenRead(path);
+                var initializer = archive.GetEntry("verify-additions/ModuleInitializer.cs");
+                await Assert.That(initializer).IsNotNull();
+                using var reader = new StreamReader(initializer!.Open());
+                await Assert.That(await reader.ReadToEndAsync()).Contains("VerifySqlServer.Initialize(recordCommands: false);");
+                await Assert.That(archive.GetEntry($"verify-additions/{AdditionGenerator.PackagesFragment}")).IsNotNull();
+            }
+            finally
+            {
+                File.Delete(path);
+            }
+        }
+        finally
+        {
+            await page.Context.CloseAsync();
+        }
+    }
+
+    /// <summary>A stack chosen on one visit is there on the next, and the step says where it came from (plan 8.2).</summary>
+    [Test]
+    public async Task TheTechStackIsRememberedBetweenVisits()
+    {
+        var page = await wizard.NewIsolatedPage();
+        try
+        {
+            await page.GotoAsync(wizard.Url("/add/by-tech?step=tech&tf=XunitV3"));
+            await page.ClickAsync(".chip[data-tech=serilog]");
+            await page.WaitForFunctionAsync("() => location.search.includes('tech=serilog')");
+
+            var next = await page.Context.NewPageAsync();
+            await next.GotoAsync(wizard.Url("/add/by-tech?step=tech&tf=XunitV3"));
+            await next.WaitForSelectorAsync(".restored");
+            await Assert.That(await next.GetAttributeAsync(".chip[data-tech=serilog]", "aria-pressed")).IsEqualTo("true");
+            // the remembered stack's recommendation came with it
+            await Assert.That(next.Url).Contains("ext=Serilog");
+        }
+        finally
+        {
+            await page.Context.CloseAsync();
+        }
     }
 
     [Test]

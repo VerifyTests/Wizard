@@ -177,7 +177,7 @@ public static class CodeFiles
 
         """;
 
-    static IEnumerable<string> ExpectoOpens(Plan plan) =>
+    internal static IEnumerable<string> ExpectoOpens(Plan plan) =>
         ModuleInitializerGenerator.Blocks(plan, windows: false)
             .SelectMany(_ => _.Usings)
             .Distinct(StringComparer.Ordinal)
@@ -189,7 +189,7 @@ public static class CodeFiles
     /// semicolons, and helper members become local functions, which the registry does not carry, so an
     /// extension needing one is not offered for Expecto.
     /// </summary>
-    static string ExpectoInitialize(Plan plan)
+    internal static string ExpectoInitialize(Plan plan)
     {
         var builder = new StringBuilder();
         foreach (var line in ModuleInitializerGenerator.Statements(plan, windows: false, skipBlocksNeedingMembers: true))

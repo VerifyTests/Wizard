@@ -32,6 +32,11 @@ Building `Wizard.Tests` also publishes `Wizard.Web` into `src/Wizard.Tests/bin/<
 (the `PublishBlazorForTests` target). `PublishedWizard` serves that output from Kestrel for the Playwright
 tests, with a `{*path}` fallback that mirrors GitHub Pages serving `404.html` for deep links.
 
+The Playwright tests share one browser context, so each page from `PublishedWizard.NewPage()` gets an
+in-memory localStorage of its own: the wizard restores remembered answers on load (plan 8.2), and a shared
+storage would let parallel tests leak into each other. A test about remembering between visits uses
+`NewIsolatedPage()`, which has real storage in a context of its own, and closes that context when done.
+
 ## Layout
 
 - `src/Wizard.Core`: models, registry, generators. A plain class library with no Blazor dependency, so

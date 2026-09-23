@@ -1,10 +1,18 @@
 namespace Wizard.Core;
 
-/// <summary>The file tree of the downloadable solution for the new-project flow (plan 12.2).</summary>
+/// <summary>
+/// The file tree of the download: a whole solution for the new-project flow (plan 12.2), or the
+/// changes to merge into one for the add flows (plan 12.5).
+/// </summary>
 public static class SolutionGenerator
 {
     public static IReadOnlyList<GeneratedFile> Build(Plan plan)
     {
+        if (plan.IsAddition)
+        {
+            return AdditionGenerator.Build(plan);
+        }
+
         var files = new List<GeneratedFile>();
         void Add(string path, string text, bool bom = false) =>
             files.Add(new(path, text, bom));

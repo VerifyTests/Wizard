@@ -7,10 +7,22 @@ public class HomeTests : WebTestContext
     {
         var cut = Render<Wizard.Web.Pages.Home>();
 
-        await Assert.That(cut.FindAll(".entry-card").Count).IsEqualTo(3);
-        // the add flows are not linked until they exist (plan phase 3)
         var hrefs = cut.FindAll("a.entry-card").Select(_ => _.GetAttribute("href"));
-        await Assert.That(string.Join(" ", hrefs)).IsEqualTo("new");
+        await Assert.That(string.Join(" ", hrefs)).IsEqualTo("new add add/by-tech");
+    }
+
+    /// <summary>"Forget them" clears every key the wizard keeps (plan 8.2).</summary>
+    [Test]
+    public async Task ForgetClearsEveryRememberedAnswer()
+    {
+        var cut = Render<Wizard.Web.Pages.Home>();
+        await cut.Find("button.link-button").ClickAsync(new());
+
+        var removed = JSInterop.Invocations
+            .Where(_ => _.Identifier == "verifyWizard.storageRemove")
+            .Select(_ => (string) _.Arguments[0]!);
+        await Assert.That(removed).IsEquivalentTo(BrowserMemory.Keys);
+        await Assert.That(cut.Find("button.link-button").TextContent).IsEqualTo("Forgotten");
     }
 
     /// <summary>

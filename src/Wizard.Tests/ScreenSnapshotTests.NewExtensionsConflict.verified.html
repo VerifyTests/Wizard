@@ -59,6 +59,12 @@
                   <span class="step-value">GitHub Actions</span>
                 </button>
               </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tech">
+                  <span class="step-title">Tech stack</span>
+                  <span class="step-value">None</span>
+                </button>
+              </li>
               <li class="current" aria-current="step">
                 <span class="step-title">Extensions</span>
               </li>
@@ -76,7 +82,7 @@
           <section class="step-body" data-step="extensions">
             <h2>Extensions</h2>
             <p class="hint">
-              Extensions teach Verify about one kind of value each. Nothing here is required, and anything chosen     can be deleted from the generated solution later. 66 are available.
+              Extensions teach Verify about one kind of value each. Nothing here is required, and anything chosen     can be deleted from what is generated later. 66 are available.
             </p>
             <div class="extension-search">
               <label for="extensionFilter">Filter</label>
@@ -99,14 +105,23 @@
                 <p>These extensions all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.</p>
               </div>
             </div>
-            <section class="extension-category">
-              <h3>Developer experience</h3>
+            <section class="extension-category suggested">
+              <h3>Suggested</h3>
               <div class="extension-cards">
                 <label class="extension-card " data-id="DiffPlex">
                   <input type="checkbox">
                   <span class="extension-body">
                     <span class="extension-name">Verify.DiffPlex</span>
+                    <span class="extension-tag">For every project</span>
                     <span class="extension-description">Shows an inline diff in the failure message of a text snapshot, instead of both files in full.</span>
+                  </span>
+                </label>
+                <label class="extension-card " data-id="Terminal">
+                  <input type="checkbox">
+                  <span class="extension-body">
+                    <span class="extension-name">Verify.Terminal</span>
+                    <span class="extension-tag">Related to every project</span>
+                    <span class="extension-description">A dotnet tool for reviewing, accepting and rejecting pending snapshots from the terminal.</span>
                   </span>
                 </label>
               </div>
@@ -675,18 +690,6 @@
                   <span class="extension-body">
                     <span class="extension-name">Verify.ParametersHashing</span>
                     <span class="extension-description">Hashes test parameters into the snapshot file name with XxHash64, so large parameters cannot exceed path limits.</span>
-                  </span>
-                </label>
-              </div>
-            </section>
-            <section class="extension-category">
-              <h3>Tooling</h3>
-              <div class="extension-cards">
-                <label class="extension-card " data-id="Terminal">
-                  <input type="checkbox">
-                  <span class="extension-body">
-                    <span class="extension-name">Verify.Terminal</span>
-                    <span class="extension-description">A dotnet tool for reviewing, accepting and rejecting pending snapshots from the terminal.</span>
                   </span>
                 </label>
               </div>

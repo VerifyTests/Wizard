@@ -27,6 +27,37 @@ public class WizardStateUrlTests
             state.SetChoice("diffplex-output", "Full");
             return state;
         };
+        yield return () => GeneratorTests.Addition(Flow.Add, ["SqlServer"], ["EntityFramework"]);
+        yield return () =>
+        {
+            var state = GeneratorTests.Addition(Flow.AddByTech, ["DiffPlex"], ["Http"]);
+            state.Techs = new HashSet<string>(["http", "aspnetcore"], StringComparer.Ordinal);
+            return state;
+        };
+    }
+
+    /// <summary>The add flows start from nothing, rather than from Verify.DiffPlex (plan 7.2).</summary>
+    [Test]
+    public async Task AddFlowsStartWithNothingSelected()
+    {
+        var state = WizardStateUrl.Parse(Flow.Add, "tf=NUnit");
+        await Assert.That(state.SelectedExtensions).IsEmpty();
+        await Assert.That(WizardStateUrl.ToQuery(state)).DoesNotContain("ext=");
+    }
+
+    /// <summary>Answers to questions a flow does not ask are dropped, so the link holds only what matters.</summary>
+    [Test]
+    public async Task QuestionsAFlowDoesNotAskAreDropped()
+    {
+        var added = WizardStateUrl.Parse(Flow.Add, "os=Windows&ci=None&tech=efcore&have=SqlServer&ext=SqlServer,Http");
+        await Assert.That(added.Os).IsNull();
+        await Assert.That(added.BuildServer).IsNull();
+        await Assert.That(added.Techs).IsEmpty();
+        // something the project already has cannot be added again
+        await Assert.That(added.SelectedExtensions).IsEquivalentTo(new[] {"Http"});
+
+        var created = WizardStateUrl.Parse(Flow.New, "have=SqlServer");
+        await Assert.That(created.ExistingExtensions).IsEmpty();
     }
 
     /// <summary>
@@ -37,7 +68,7 @@ public class WizardStateUrlTests
     public async Task AbsentExtensionsMeansTheDefault()
     {
         var state = WizardStateUrl.Parse(Flow.New, "os=Windows");
-        await Assert.That(state.SelectedExtensions).IsEquivalentTo(WizardState.DefaultExtensions);
+        await Assert.That(state.SelectedExtensions).IsEquivalentTo(WizardState.DefaultExtensions(Flow.New));
     }
 
     [Test]

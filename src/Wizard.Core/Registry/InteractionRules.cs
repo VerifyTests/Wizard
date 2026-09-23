@@ -137,10 +137,14 @@ public sealed record RuleStatements(
 /// </summary>
 public static partial class InteractionRules
 {
-    /// <summary>Every rule and group that fires for a selection, ordered most severe first.</summary>
+    /// <summary>
+    /// Every rule and group that fires for a selection, ordered most severe first. Existing extensions
+    /// count: adding one next to something the project already has can change how that one has to be
+    /// initialized (plan 7.2).
+    /// </summary>
     public static IReadOnlyList<InteractionResult> For(WizardState state)
     {
-        var selected = state.SelectedExtensions;
+        var selected = state.AllExtensions;
         var results = new List<InteractionResult>();
 
         foreach (var group in Groups)
@@ -189,12 +193,12 @@ public static partial class InteractionRules
     public static IEnumerable<OrderEdge> Edges(WizardState state) =>
         Active(state)
             .SelectMany(_ => _.Rule.Order.Where(edge => edge.WhenValue is "" || edge.WhenValue == _.Value))
-            .Where(_ => state.Has(_.Before) && state.Has(_.After));
+            .Where(_ => state.Uses(_.Before) && state.Uses(_.After));
 
     /// <summary>The rules in force for a state, paired with the choice value that applies.</summary>
     public static IEnumerable<(InteractionRule Rule, string Value)> Active(WizardState state)
     {
-        foreach (var rule in Rules.Where(_ => _.Fires(state.SelectedExtensions)))
+        foreach (var rule in Rules.Where(_ => _.Fires(state.AllExtensions)))
         {
             yield return (rule, Value(rule.Choice, state) ?? "");
         }

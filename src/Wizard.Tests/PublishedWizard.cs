@@ -39,11 +39,33 @@ public sealed class PublishedWizard : IAsyncDisposable
     /// <summary>
     /// The one context every page opens in. <see cref="IBrowser.NewPageAsync"/> creates a fresh context
     /// per page, and a context is an isolated profile with its own HTTP cache, so each test would
-    /// re-fetch and re-compile the WASM runtime from cold. The wizard keeps no browser storage yet, so
-    /// sharing the context leaks no state between tests. Once localStorage is used (plan 8.2), tests that
-    /// depend on it clear it first.
+    /// re-fetch and re-compile the WASM runtime from cold. Sharing it would share localStorage too, which
+    /// the wizard reads on load (plan 8.2), so every page in it gets a storage of its own; see
+    /// <see cref="PageStorage"/>.
     /// </summary>
     readonly IBrowserContext context;
+
+    /// <summary>
+    /// Replaces localStorage, in each page of the shared context, with one that lives and dies with that
+    /// page. Tests run in parallel against one context, so a real, shared storage would let one test's
+    /// answers be restored into another's page. A test about remembering across visits uses
+    /// <see cref="NewIsolatedPage"/> instead, where storage is real and belongs to that test alone.
+    /// </summary>
+    const string PageStorage =
+        """
+        (() => {
+            const items = new Map();
+            const storage = {
+                getItem: key => items.has(key) ? items.get(key) : null,
+                setItem: (key, value) => items.set(key, String(value)),
+                removeItem: key => items.delete(key),
+                clear: () => items.clear(),
+                key: index => Array.from(items.keys())[index] ?? null,
+                get length() { return items.size; }
+            };
+            Object.defineProperty(window, 'localStorage', { value: storage, configurable: true });
+        })();
+        """;
 
     PublishedWizard(WebApplication app, IPlaywright playwright, IBrowser browser, IBrowserContext context, int port)
     {
@@ -56,8 +78,38 @@ public sealed class PublishedWizard : IAsyncDisposable
 
     public string Url(string path = "/") => $"http://localhost:{Port}{path}";
 
-    public Task<IPage> NewPage() =>
-        context.NewPageAsync();
+    public async Task<IPage> NewPage()
+    {
+        var page = await context.NewPageAsync();
+        await page.AddInitScriptAsync(PageStorage);
+        return page;
+    }
+
+    /// <summary>
+    /// A page in a context of its own, with real storage that no other test can see: for journeys about
+    /// what the browser remembers between visits. Its runtime boots cold, which takes longer.
+    /// </summary>
+    public async Task<IPage> NewIsolatedPage()
+    {
+        var isolated = await Browser.NewContextAsync(ContextOptions);
+        await isolated.Clock.SetFixedTimeAsync(FixedTime);
+        var page = await isolated.NewPageAsync();
+        page.SetDefaultTimeout(120_000);
+        return page;
+    }
+
+    // Fixed viewport and locale so screenshots are deterministic across machines: date and month
+    // pickers render in the browser's locale.
+    static BrowserNewContextOptions ContextOptions =>
+        new()
+        {
+            Locale = "en-US",
+            ViewportSize = new()
+            {
+                Width = 1280,
+                Height = 900
+            }
+        };
 
     /// <summary>What every page believes "now" is, so dates the wizard derives are the same every run.</summary>
     public static readonly DateTime FixedTime = new(2026, 9, 22, 10, 0, 0, DateTimeKind.Utc);
@@ -116,18 +168,7 @@ public sealed class PublishedWizard : IAsyncDisposable
 
         var playwright = await Playwright.CreateAsync();
         var browser = await playwright.Chromium.LaunchAsync();
-        // Fixed viewport and locale so screenshots are deterministic across machines: date and month
-        // pickers render in the browser's locale.
-        var context = await browser.NewContextAsync(
-            new()
-            {
-                Locale = "en-US",
-                ViewportSize = new()
-                {
-                    Width = 1280,
-                    Height = 900
-                }
-            });
+        var context = await browser.NewContextAsync(ContextOptions);
         // Fixed on the context rather than per page: the wizard derives dates from today, and installing
         // the clock on a page that has not navigated yet fails, because the script it calls into is
         // injected on navigation.

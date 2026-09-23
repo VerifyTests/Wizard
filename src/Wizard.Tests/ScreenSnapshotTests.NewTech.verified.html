@@ -1,0 +1,230 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>New project · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">New project</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="os">
+                  <span class="step-title">Operating system</span>
+                  <span class="step-value">Windows</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ide">
+                  <span class="step-title">IDE</span>
+                  <span class="step-value">JetBrains Rider</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="cli">
+                  <span class="step-title">CLI or GUI</span>
+                  <span class="step-value">Prefer CLI</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tf">
+                  <span class="step-title">Test framework</span>
+                  <span class="step-value">xUnit v3</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ci">
+                  <span class="step-title">Build server</span>
+                  <span class="step-value">GitHub Actions</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Tech stack</span>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="extensions">
+                  <span class="step-title">Extensions</span>
+                  <span class="step-value">DiffPlex</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="options">
+                  <span class="step-title">Extension options</span>
+                  <span class="step-value">Defaults</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="sponsor">
+                  <span class="step-title">Maintenance fee</span>
+                  <span class="step-value">Decide later</span>
+                </button>
+              </li>
+              <li class="open">
+                <button type="button" class="step-link" data-step="output">
+                  <span class="step-title">Result</span>
+                </button>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="tech">
+            <h2>Tech stack</h2>
+            <p class="hint">
+              Choose what the code under test uses, and the next step starts with the matching extensions selected.     Nothing here is required. The choices are remembered in this browser.
+            </p>
+            <fieldset class="tech-group">
+              <legend>Data</legend>
+              <div class="chips">
+                <button type="button" class="chip selected" data-tech="efcore" aria-pressed="true">Entity Framework Core</button>
+                <button type="button" class="chip " data-tech="ef6" aria-pressed="false">Entity Framework 6</button>
+                <button type="button" class="chip " data-tech="sqlserver" aria-pressed="false">SQL Server</button>
+                <button type="button" class="chip " data-tech="cosmos" aria-pressed="false">Azure Cosmos DB</button>
+                <button type="button" class="chip " data-tech="ravendb" aria-pressed="false">RavenDB</button>
+                <button type="button" class="chip " data-tech="csv" aria-pressed="false">CSV files</button>
+                <button type="button" class="chip " data-tech="excel" aria-pressed="false">Excel files</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Documents</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="word" aria-pressed="false">Word documents</button>
+                <button type="button" class="chip " data-tech="powerpoint" aria-pressed="false">PowerPoint</button>
+                <button type="button" class="chip " data-tech="pdf" aria-pressed="false">PDF files</button>
+                <button type="button" class="chip " data-tech="questpdf" aria-pressed="false">PDF generation with QuestPDF</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Web</legend>
+              <div class="chips">
+                <button type="button" class="chip selected" data-tech="aspnetcore" aria-pressed="true">ASP.NET Core</button>
+                <button type="button" class="chip " data-tech="http" aria-pressed="false">HttpClient and REST calls</button>
+                <button type="button" class="chip " data-tech="flurl" aria-pressed="false">Flurl</button>
+                <button type="button" class="chip " data-tech="blazor" aria-pressed="false">Blazor</button>
+                <button type="button" class="chip " data-tech="html" aria-pressed="false">HTML and Razor output</button>
+                <button type="button" class="chip " data-tech="browser" aria-pressed="false">Browser UI tests</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Desktop UI</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="wpf" aria-pressed="false">WPF</button>
+                <button type="button" class="chip " data-tech="winforms" aria-pressed="false">WinForms</button>
+                <button type="button" class="chip " data-tech="avalonia" aria-pressed="false">Avalonia</button>
+                <button type="button" class="chip " data-tech="mvvmtoolkit" aria-pressed="false">CommunityToolkit.Mvvm</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Messaging</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="masstransit" aria-pressed="false">MassTransit</button>
+                <button type="button" class="chip " data-tech="nservicebus" aria-pressed="false">NServiceBus</button>
+                <button type="button" class="chip " data-tech="wolverine" aria-pressed="false">Wolverine</button>
+                <button type="button" class="chip " data-tech="brighter" aria-pressed="false">Brighter</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Logging</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="melogging" aria-pressed="false">Microsoft.Extensions.Logging</button>
+                <button type="button" class="chip " data-tech="serilog" aria-pressed="false">Serilog</button>
+                <button type="button" class="chip " data-tech="zerolog" aria-pressed="false">ZeroLog</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Observability</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="otel" aria-pressed="false">OpenTelemetry and Activity</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Serialization</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="stj" aria-pressed="false">System.Text.Json</button>
+                <button type="button" class="chip " data-tech="newtonsoft" aria-pressed="false">Newtonsoft.Json</button>
+                <button type="button" class="chip " data-tech="yaml" aria-pressed="false">YAML</button>
+                <button type="button" class="chip " data-tech="nodatime" aria-pressed="false">NodaTime</button>
+                <button type="button" class="chip " data-tech="ulid" aria-pressed="false">ULIDs</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Email</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="mailmessage" aria-pressed="false">System.Net.Mail</button>
+                <button type="button" class="chip " data-tech="sendgrid" aria-pressed="false">SendGrid</button>
+                <button type="button" class="chip " data-tech="htmlemail" aria-pressed="false">HTML email rendering</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Images</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="images" aria-pressed="false">Images and screenshots</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Mocking</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="moq" aria-pressed="false">Moq</button>
+                <button type="button" class="chip " data-tech="nsubstitute" aria-pressed="false">NSubstitute</button>
+                <button type="button" class="chip " data-tech="fakeiteasy" aria-pressed="false">FakeItEasy</button>
+                <button type="button" class="chip " data-tech="mockly" aria-pressed="false">Mockly</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Compiler</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="sourcegen" aria-pressed="false">Source generators</button>
+                <button type="button" class="chip " data-tech="il" aria-pressed="false">IL and assembly comparison</button>
+                <button type="button" class="chip " data-tech="expressions" aria-pressed="false">Expression trees</button>
+              </div>
+            </fieldset>
+            <fieldset class="tech-group">
+              <legend>Testing</legend>
+              <div class="chips">
+                <button type="button" class="chip " data-tech="assertions" aria-pressed="false">Assertion libraries inside snapshots</button>
+                <button type="button" class="chip " data-tech="longnames" aria-pressed="false">Long parameterised test names</button>
+              </div>
+            </fieldset>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+              <button type="button" class="primary">Next: Extensions</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

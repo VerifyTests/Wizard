@@ -1,25 +1,34 @@
 @page "/"
+@inject BrowserStorage Storage
 <PageTitle>Verify Wizard</PageTitle>
 
 @* Each paragraph is one source line: a line break inside text survives into the rendered markup as a run of spaces. *@
-<p>Pick a starting point. Each flow asks a few questions, then produces a guide, a downloadable solution and markdown for an AI assistant.</p>
+<p>Pick a starting point. Each flow asks a few questions, then produces a guide, a download and markdown for an AI assistant.</p>
 
 <div class="entry-cards">
     <a class="entry-card" href="new">
         <h2>New to Verify</h2>
         <p>Start from scratch: operating system, IDE, test framework and build server, plus any extensions for the stack.</p>
     </a>
-    @* The add flows arrive in plan phase 3; until then they are shown but not linked. *@
-    <div class="entry-card soon">
+    <a class="entry-card" href="add">
         <h2>Add extensions to an existing project</h2>
         <p>Pick extensions to add. Known interactions with the extensions already in the project are explained, with the configuration they need.</p>
-        <p class="optional-tag">Coming soon</p>
-    </div>
-    <div class="entry-card soon">
+    </a>
+    <a class="entry-card" href="add/by-tech">
         <h2>Suggest extensions for my tech stack</h2>
         <p>Describe the libraries in use (EF Core, ASP.NET Core, Serilog, ...) and get a suggested set of extensions to add.</p>
-        <p class="optional-tag">Coming soon</p>
-    </div>
+    </a>
 </div>
 
 <p class="hint">Every page's url holds the choices made so far, so any point can be bookmarked or shared.</p>
+<p class="hint forget">This browser remembers the tech stack, the extensions a project already has, and the maintenance fee declaration, to fill them in next time. <button type="button" class="link-button" @onclick="Forget">@forgetLabel</button></p>
+
+@code {
+    string forgetLabel = "Forget them";
+
+    async Task Forget()
+    {
+        await Storage.ForgetAsync();
+        forgetLabel = "Forgotten";
+    }
+}

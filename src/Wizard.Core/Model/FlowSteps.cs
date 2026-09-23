@@ -49,6 +49,20 @@ public static class FlowSteps
         _ => _.BuildServer?.Name(),
         (state, _) => state.BuildServer != null);
 
+    /// <summary>Optional: choosing nothing just means no suggestions (plan 7.1 step 6).</summary>
+    public static readonly StepDefinition Tech = new(
+        "tech",
+        "Tech stack",
+        TechSummary,
+        (_, _) => true);
+
+    /// <summary>Optional: the extensions the project already has (plan 7.2 step 2).</summary>
+    public static readonly StepDefinition Existing = new(
+        "have",
+        "Already using",
+        ExistingSummary,
+        (_, _) => true);
+
     public static readonly StepDefinition ExtensionsStep = new(
         "extensions",
         "Extensions",
@@ -95,6 +109,38 @@ public static class FlowSteps
         return string.Join(", ", selected.Select(_ => _.Id));
     }
 
+    static string? TechSummary(WizardState state)
+    {
+        var count = state.Techs.Count;
+        if (count == 0)
+        {
+            return "None";
+        }
+
+        if (count == 1)
+        {
+            return Techs.ById[state.Techs.First()].DisplayName;
+        }
+
+        return $"{count} techs";
+    }
+
+    static string? ExistingSummary(WizardState state)
+    {
+        var existing = Extensions.All.Where(_ => state.IsExisting(_.Id)).ToList();
+        if (existing.Count == 0)
+        {
+            return "None";
+        }
+
+        if (existing.Count > 3)
+        {
+            return $"{existing.Count} extensions";
+        }
+
+        return string.Join(", ", existing.Select(_ => _.Id));
+    }
+
     static string? OptionsSummary(WizardState state)
     {
         var minimal = state.SelectedExtensions.Count(_ => state.DepthOf(_) == Depth.Minimal);
@@ -125,6 +171,30 @@ public static class FlowSteps
         Cli,
         TestFramework,
         BuildServer,
+        Tech,
+        ExtensionsStep,
+        Options,
+        Sponsor,
+        Output
+    ];
+
+    // Adding to an existing project: the environment is already set up, so only the test framework is
+    // asked, which decides the attributes in the generated tests (plan 7.2).
+    static readonly IReadOnlyList<StepDefinition> addFlow =
+    [
+        TestFramework,
+        Existing,
+        ExtensionsStep,
+        Options,
+        Sponsor,
+        Output
+    ];
+
+    static readonly IReadOnlyList<StepDefinition> addByTechFlow =
+    [
+        TestFramework,
+        Existing,
+        Tech,
         ExtensionsStep,
         Options,
         Sponsor,
@@ -136,15 +206,14 @@ public static class FlowSteps
         [.. For(state.Flow).Where(_ => _.Applies(state))];
 
     /// <summary>Every step the flow can have, including ones a particular state skips.</summary>
-    public static IReadOnlyList<StepDefinition> For(Flow flow)
-    {
-        if (flow == Flow.New)
+    public static IReadOnlyList<StepDefinition> For(Flow flow) =>
+        flow switch
         {
-            return newFlow;
-        }
-
-        throw new NotSupportedException($"The {flow} flow is added in a later phase (plan 20).");
-    }
+            Flow.New => newFlow,
+            Flow.Add => addFlow,
+            Flow.AddByTech => addByTechFlow,
+            _ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
+        };
 
     /// <summary>
     /// The nearest step that still applies: the one asked for, or, when it has been dropped from the

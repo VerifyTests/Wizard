@@ -303,7 +303,14 @@ Verify is configured once, before the first verification. F# has no module initi
 ```fs
 let initialize =
     lazy (
+        // Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline
+        // diff instead of the whole received and verified text.
+        // OutputType.Compact prints only the changed lines, with a line of context either side.
+        // Alternatives: OutputType.Full, OutputType.Minimal.
         VerifyDiffPlex.Initialize(OutputType.Compact)
+
+        // Initializes every Verify.* plugin the project references and has not initialized above.
+        // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
         VerifierSettings.InitializePlugins())
 ```
 

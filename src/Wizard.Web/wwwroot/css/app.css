@@ -243,17 +243,6 @@ a.entry-card:hover {
     color: var(--muted);
 }
 
-.entry-card.soon {
-    background: var(--panel);
-    border: 1px dashed var(--border);
-    border-radius: 8px;
-    padding: 1.25rem 1.5rem;
-}
-
-.entry-card.soon h2 {
-    color: var(--muted);
-}
-
 /* flow layout: the breadcrumb rail on the left (plan 7.4), the step on the right */
 .wizard-layout {
     display: grid;
@@ -478,15 +467,6 @@ select {
     font-size: .92rem;
 }
 
-.optional-tag {
-    font-size: .75rem;
-    color: var(--muted);
-    border: 1px solid var(--border);
-    border-radius: 999px;
-    padding: 0 .5rem;
-    margin-left: .4rem;
-    vertical-align: middle;
-}
 
 /* choice cards */
 .mode-cards {
@@ -960,4 +940,102 @@ pre.ai-markdown {
 .choice-hint {
     color: var(--muted);
     font-size: .9rem;
+}
+
+/* tech step (plan 7.1 step 6) */
+.tech-group {
+    margin: 1rem 0;
+    padding: 0;
+    border: none;
+}
+
+.tech-group legend {
+    margin-bottom: .5rem;
+    font-weight: 600;
+    color: var(--muted);
+    text-transform: uppercase;
+    letter-spacing: .04em;
+    font-size: .85rem;
+}
+
+.chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .4rem;
+}
+
+.chip {
+    padding: .35rem .8rem;
+    border: 1px solid var(--border);
+    border-radius: 999px;
+    background: var(--panel);
+    color: var(--text);
+    font: inherit;
+    font-size: .9rem;
+    cursor: pointer;
+}
+
+.chip:hover {
+    border-color: var(--primary);
+}
+
+.chip.selected {
+    background: var(--primary);
+    border-color: var(--primary);
+    color: var(--primary-contrast);
+}
+
+/* "already using" step (plan 7.2 step 2) */
+.existing-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: .3rem .75rem;
+}
+
+.existing-item {
+    display: flex;
+    gap: .5rem;
+    align-items: center;
+    padding: .3rem .4rem;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.existing-item.selected {
+    background: var(--code-bg);
+}
+
+.extension-card.existing {
+    opacity: .7;
+    cursor: default;
+}
+
+.extension-tag {
+    font-size: .8rem;
+    color: var(--accent);
+    font-weight: 600;
+}
+
+.extension-category.suggested h3 {
+    color: var(--accent);
+}
+
+.restored {
+    display: inline-block;
+    margin: 0 0 .75rem;
+    padding: .2rem .6rem;
+    border-radius: 6px;
+    background: var(--code-bg);
+    color: var(--muted);
+    font-size: .85rem;
+}
+
+.link-button {
+    padding: 0;
+    border: none;
+    background: none;
+    color: var(--link);
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
 }

@@ -23,13 +23,35 @@ public sealed record WizardState
     /// so the url and the generated output do not depend on insertion order. Collections are replaced
     /// rather than mutated, so <c>with { }</c> copies do not share them.
     /// </summary>
-    public IReadOnlySet<string> SelectedExtensions { get; set; } = new HashSet<string>(DefaultExtensions, StringComparer.Ordinal);
+    public IReadOnlySet<string> SelectedExtensions { get; set; } = new HashSet<string>(DefaultExtensions(Flow.New), StringComparer.Ordinal);
 
     /// <summary>
-    /// Verify.DiffPlex is selected until it is deselected: an inline diff on a failed text snapshot
-    /// helps in any project, and the wizard has recommended it unconditionally since the old pages.
+    /// In a new project Verify.DiffPlex is selected until it is deselected: an inline diff on a failed
+    /// text snapshot helps in any project, and the wizard has recommended it unconditionally since the
+    /// old pages. Adding to an existing project starts from nothing, because the project already has
+    /// whatever it had.
     /// </summary>
-    public static IReadOnlyList<string> DefaultExtensions { get; } = [Extensions.DiffPlexId];
+    public static IReadOnlyList<string> DefaultExtensions(Flow flow)
+    {
+        if (flow == Flow.New)
+        {
+            return [Extensions.DiffPlexId];
+        }
+
+        return [];
+    }
+
+    /// <summary>
+    /// Extensions the project already has (plan 7.2 step 2). They are never generated, but they take
+    /// part in the interaction rules, because adding an extension next to one of them can change how
+    /// the existing one has to be initialized.
+    /// </summary>
+    public IReadOnlySet<string> ExistingExtensions { get; set; } = EmptySet;
+
+    /// <summary>Tech ids (plan 10). They only seed the extension selection; nothing is generated from them.</summary>
+    public IReadOnlySet<string> Techs { get; set; } = EmptySet;
+
+    static readonly IReadOnlySet<string> EmptySet = new HashSet<string>(StringComparer.Ordinal);
 
     /// <summary>Extension id to depth. Missing means <see cref="Depth.Verbose"/> (plan D7).</summary>
     public IReadOnlyDictionary<string, Depth> Depths { get; set; } = EmptyDepths;
@@ -42,6 +64,32 @@ public sealed record WizardState
 
     public bool Has(string extensionId) =>
         SelectedExtensions.Contains(extensionId);
+
+    public bool IsExisting(string extensionId) =>
+        ExistingExtensions.Contains(extensionId);
+
+    /// <summary>Selected or already in the project: what the interaction rules are evaluated against.</summary>
+    public bool Uses(string extensionId) =>
+        Has(extensionId) || IsExisting(extensionId);
+
+    /// <summary>Everything the project will have, existing and selected.</summary>
+    public IReadOnlySet<string> AllExtensions =>
+        new HashSet<string>(SelectedExtensions.Concat(ExistingExtensions), StringComparer.Ordinal);
+
+    public void SetExisting(string extensionId, bool existing)
+    {
+        var set = new HashSet<string>(ExistingExtensions, StringComparer.Ordinal);
+        if (existing)
+        {
+            set.Add(extensionId);
+        }
+        else
+        {
+            set.Remove(extensionId);
+        }
+
+        ExistingExtensions = set;
+    }
 
     public Depth DepthOf(string extensionId) =>
         Depths.GetValueOrDefault(extensionId, Depth.Verbose);
@@ -107,6 +155,7 @@ public sealed record WizardState
 
         SolutionName = SolutionNames.Clean(SolutionName);
 
+        NormalizeFlow();
         NormalizeExtensions();
 
         // Values for other sponsor modes are dropped, so the url holds everything the state does.
@@ -162,6 +211,8 @@ public sealed record WizardState
                SponsorUntil == other.SponsorUntil &&
                Step == other.Step &&
                SelectedExtensions.SetEquals(other.SelectedExtensions) &&
+               ExistingExtensions.SetEquals(other.ExistingExtensions) &&
+               Techs.SetEquals(other.Techs) &&
                SameEntries(Depths, other.Depths) &&
                SameEntries(Choices, other.Choices);
     }
@@ -194,9 +245,36 @@ public sealed record WizardState
         hash.Add(SponsorUntil);
         hash.Add(Step);
         hash.Add(SelectedExtensions.Count);
+        hash.Add(ExistingExtensions.Count);
+        hash.Add(Techs.Count);
         hash.Add(Depths.Count);
         hash.Add(Choices.Count);
         return hash.ToHashCode();
+    }
+
+    /// <summary>
+    /// Drops answers to questions the flow does not ask (plan 7.2): adding to an existing project skips
+    /// the environment questions and the build server, and a new project has nothing existing. Only the
+    /// flow that has a tech step keeps techs.
+    /// </summary>
+    void NormalizeFlow()
+    {
+        if (Flow != Flow.New)
+        {
+            Os = null;
+            Ide = null;
+            Cli = null;
+            BuildServer = null;
+        }
+        else
+        {
+            ExistingExtensions = EmptySet;
+        }
+
+        if (Flow == Flow.Add)
+        {
+            Techs = EmptySet;
+        }
     }
 
     /// <summary>
@@ -205,8 +283,17 @@ public sealed record WizardState
     /// </summary>
     void NormalizeExtensions()
     {
+        ExistingExtensions = new HashSet<string>(
+            ExistingExtensions.Where(Extensions.Contains),
+            StringComparer.Ordinal);
+
+        // Something the project already has cannot be added again.
         SelectedExtensions = new HashSet<string>(
-            SelectedExtensions.Where(Extensions.Contains),
+            SelectedExtensions.Where(_ => Extensions.Contains(_) && !IsExisting(_)),
+            StringComparer.Ordinal);
+
+        Techs = new HashSet<string>(
+            Techs.Where(Core.Techs.Contains),
             StringComparer.Ordinal);
 
         Depths = new Dictionary<string, Depth>(
@@ -215,7 +302,7 @@ public sealed record WizardState
 
         var available = SelectedExtensions
             .SelectMany(_ => Extensions.ById[_].Choices)
-            .Concat(InteractionRules.ChoicesFor(SelectedExtensions))
+            .Concat(InteractionRules.ChoicesFor(AllExtensions))
             .ToDictionary(_ => _.Id, StringComparer.Ordinal);
 
         Choices = new Dictionary<string, string>(

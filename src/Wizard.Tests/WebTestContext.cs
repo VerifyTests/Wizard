@@ -11,6 +11,7 @@ public abstract class WebTestContext : BunitContext
         JSInterop.Mode = JSRuntimeMode.Loose;
         Services.AddScoped<ClipboardService>();
         Services.AddScoped<DownloadService>();
+        Services.AddScoped<BrowserStorage>();
         Services.AddSingleton<TimeProvider>(new FixedTimeProvider());
     }
 

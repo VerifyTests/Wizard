@@ -18,9 +18,6 @@ public sealed record ExtensionDefinition
 
     public required ExtensionCategory Category { get; init; }
 
-    /// <summary>Tech ids this extension serves (plan 10). Filled in phase 3.</summary>
-    public IReadOnlyList<string> Tags { get; init; } = [];
-
     public required IReadOnlyList<PackageRequirement> Packages { get; init; }
 
     /// <summary>

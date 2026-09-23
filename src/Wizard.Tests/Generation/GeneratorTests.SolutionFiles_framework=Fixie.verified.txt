@@ -446,7 +446,7 @@ Enabled by:
 VerifyDiffPlex.Initialize(OutputType.Compact);
 ```
 
-`Extensions/DiffPlexTests.cs` in the solution shows every documented API:
+`Extensions/DiffPlexTests.cs` in the download shows every documented API:
 
 **PerTestOutput** — The module initializer sets the mode for every test. UseDiffPlex overrides it for one, which is useful when a single snapshot is easier to read in full.
 

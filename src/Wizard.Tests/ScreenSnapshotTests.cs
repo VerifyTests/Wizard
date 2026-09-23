@@ -117,6 +117,37 @@ public class ScreenSnapshotTests
     }
 
     [Test]
+    public async Task NewTech()
+    {
+        var page = await Open($"/new?step=tech&{beforeOutput}&tech=efcore,aspnetcore", ".chip.selected");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    [Test]
+    public async Task AddExisting()
+    {
+        var page = await Open("/add?step=have&tf=XunitV3&have=DiffPlex,SqlServer", ".existing-item.selected");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    /// <summary>Suggestions first, the project's existing extensions locked, and the interaction between them.</summary>
+    [Test]
+    public async Task AddByTechExtensions()
+    {
+        var page = await Open(
+            "/add/by-tech?step=extensions&tf=XunitV3&have=SqlServer&tech=efcore&ext=EntityFramework,LocalDb",
+            ".interaction-notice[data-rule=ef-sql-recording]");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    [Test]
+    public async Task AddOutputGuide()
+    {
+        var page = await Open("/add?step=output&tf=XunitV3&have=SqlServer&ext=EntityFramework", ".markdown h1");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    [Test]
     public async Task NewSponsorDecideLater()
     {
         var page = await Open($"/new?step=sponsor&{beforeOutput}", "#sponsor-Sponsor");

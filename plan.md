@@ -330,16 +330,16 @@ Every flow is a linear list of steps; each step is a Razor component bound to `W
 
 1. **Test framework** (needed to generate tests and the correct LocalDb package).
 2. **Already using** (optional): multi-select of extensions already in the project. Pre-filled from `localStorage`. Everything checked here is excluded from step 3's pick list (shown greyed as "already in your project") and participates in interaction rules with a "Existing" role so the side effects of adding a new extension next to an existing one are listed.
-3. **Extensions to add** (same card grid as A7, without tech pre-selection; deep-link id pre-checked).
+3. **Extensions to add** (same card grid as A7, without tech pre-selection; deep-link id pre-checked). Nothing is selected by default: Verify.DiffPlex, pre-checked for a new project, is not assumed for an existing one. An existing extension's card is shown ticked and locked. When a rule the new selection triggers changes how an existing extension has to be initialized (EntityFramework added next to an existing SqlServer turns SqlServer's recording off), the generated `ModuleInitializer.cs` carries that existing call too, with a comment saying to replace the project's own; an existing extension that plugin discovery cannot find (A1) raises an `existing-not-discovered` warning, because a project relying on `InitializePlugins()` alone never enabled it.
 4. **Extension options** (as A8).
-5. **Sponsor**: shown only when the persisted sponsor account is empty and the user has not dismissed it; pre-filled otherwise. The "add" output includes the sponsor `Directory.Build.props` snippet only if the user chooses a mode here.
+5. **Sponsor**: always shown, with **No change** as the first and default option, because an existing project already declares its status; a remembered declaration pre-fills it. The output has a `Directory.Build.props` fragment only when a mode is chosen, or when an added package brings another owner's fee check (A8), whose block is emitted even when Verify's is left alone.
 6. **Output**: docs with "Change to make" sections (PackageVersion/PackageReference lines, ModuleInitializer merge instructions, new test files), a zip of just the new/changed files, and AI markdown that instructs an assistant to perform the merge.
 
-Optional environment questions (OS / IDE / CLI) are **not** asked in flow B; the output links to the tooling sections of the new-user docs instead.
+Optional environment questions (OS / IDE / CLI) and the build server are **not** asked in flow B, and answers to them in a url are dropped. The guide assumes the tooling is already set up.
 
 ### 7.3 Flow C – Suggest extensions for my tech stack (`/add/by-tech`)
 
-Identical to flow B with a **Tech stack** step inserted before "Extensions to add", which pre-checks the suggestions (10). Persisted tech pre-fills the step.
+Identical to flow B with a **Tech stack** step inserted before "Extensions to add", which pre-checks the suggestions (10). Persisted tech pre-fills the step. Flow A has the same step, between the build server and the extensions.
 
 ### 7.4 Left breadcrumb rail
 
@@ -400,14 +400,17 @@ Because GitHub Pages serves `404.html` (a copy of `index.html`) for unknown path
 
 | key | content | written when |
 |---|---|---|
-| `tech` | JSON array of tech ids | tech step changes |
-| `existing` | JSON array of extension ids | "already using" step changes |
-| `sponsor` | `{ account, mode, start, exemption, until }` | sponsor step changes |
-| `depth` | JSON object extension id → depth | options step changes (convenience; not required) |
+| `tech` | comma list of tech ids, as in the url | tech step changes |
+| `existing` | comma list of extension ids, as in the url | "already using" step changes |
+| `sponsor` | the declaration as a query string (`sponsor=Exempt&exempt=SmallRevenue&until=2027-09`) | sponsor step changes |
 
-Precedence: a value present in the URL wins over `localStorage`; when the URL has none, the stored value seeds the state and the URL is updated (so the resulting link is complete). On the "Already using" step, a small note says where the list came from ("Restored from this browser").
+Values are stored in their url form rather than as JSON, so reading one back is the url parser's job and the two cannot disagree. Depth is not remembered: it is a per-project answer, and the url already holds it.
 
-bunit tests stub `IJSRuntime` for storage; Playwright tests set and read `localStorage` through `page.EvaluateAsync`.
+Precedence: a value present in the URL wins over `localStorage`; when the URL has none, the stored value seeds the state and the URL is updated (so the resulting link is complete). A remembered stack applies its recommendations only when the url says nothing about extensions. Each step that was filled in from memory says so ("Restored from this browser"). The rules are the pure `BrowserMemory` class in Core, so they are unit-tested without a browser.
+
+A flow reads and writes only the answers to questions it asks: the new-project flow never clears the list of existing extensions an add flow kept. Changing an answer to nothing forgets it. The Home page has a "Forget them" button that clears every key.
+
+bunit tests stub `IJSRuntime` for storage. The Playwright tests share one browser context for speed, so each page in it gets an in-memory localStorage of its own from an init script, and parallel tests cannot restore each other's answers; the two journeys about remembering between visits use a context of their own, with real storage.
 
 ---
 
@@ -548,6 +551,8 @@ Extension usings go in each test file, never in global usings. The three browser
 Universal: `DiffPlex` is always recommended; `Terminal` is recommended when CLI preference is Cli (new flow) and always listed. Windows-only recommendations (LocalDb, Xaml, WinForms, Phash) are downgraded to `Related` when the chosen OS is MacOS or Linux.
 
 The tech step renders groups as headed chip sets; the extension step shows "Suggested for your stack" first (recommended checked, related unchecked but listed with a "related" tag), then "Everything else" grouped by `ExtensionCategory`.
+
+As built (phase 3): this table is the only source of suggestions. `ExtensionDefinition` has no tags of its own, so the mapping cannot disagree with itself, and a registry test checks every extension is reachable from a tech or is universal. Choosing a tech selects what it recommends; unchoosing it deselects only what no remaining tech also recommends. A recommendation is skipped when the project already has it, or when selecting it would conflict with something already selected: the table's own Excel and Word rows recommend ClosedXml and OpenXml, which both convert xlsx.
 
 ---
 
@@ -759,13 +764,12 @@ Same generators, different assembly of files, rooted in a folder named `verify-a
 verify-additions/
   readme.md                                      the guide, phrased as "changes to make"
   CLAUDE.md                                      AI instructions to perform the merge (12.6)
-  Directory.Packages.props.fragment.xml          <PackageVersion> lines to merge (or <PackageReference Version=…> when the user said "no CPM"; ask on the options step: choice `cpm` yes/no, default yes)
-  <TestProject>.csproj.fragment.xml              <PackageReference>/<FrameworkReference>/properties to merge
-  ModuleInitializer.cs                           complete file; the guide explains how to merge into an existing initializer (explicit calls go before InitializePlugins)
-  Extensions/<Id>Tests.cs                        per added extension
-  Fixtures/sample.*                              as needed
+  Directory.Packages.props.fragment.xml          <PackageVersion> lines to merge. The guide also shows the <PackageReference Version=…> form and the `dotnet add package` commands, rather than asking whether the project uses Central Package Management
+  TestProject.csproj.fragment.xml                <PackageReference>/<FrameworkReference>/properties to merge; Windows-only extensions add a note that the project has to target the -windows TFM, since an existing project has one test project and the reader decides where they go
+  ModuleInitializer.cs                           complete file; the guide explains how to merge into an existing initializer (explicit calls go before InitializePlugins), and any existing extension's changed call is in it with a comment (7.2). Expecto gets initialize.fragment.fs instead
+  Directory.Build.props.fragment.xml             only when a fee mode is chosen, or an added package brings another owner's check (A8)
+  Extensions/<Id>Tests.cs                        per added extension, with any shipped snapshot beside it (D6)
   src-samples/…                                  production-side sample types the tests need (SampleDbContext etc.), with a note that they are placeholders for the user's own types
-  .github/workflows/verify-received.fragment.yml the upload-on-failure step, when a build server is chosen (optional step in flow B)
   .config/dotnet-tools.json.fragment.json        when Terminal selected
 ```
 
@@ -920,7 +924,7 @@ Do these after the site is live:
 
 Each phase ends with green tests and a deployable site. Estimated effort is relative.
 
-Status: Phase 0 done and deployed. Phase 1 done: flow A without the tech and extension steps. Phase 2 done: the registry, the interaction rules, the ordering solver, the extension and options steps. The Home page shows the two add flows as "coming soon" until Phase 3 builds them.
+Status: Phase 0 done and deployed. Phase 1 done: flow A without the tech and extension steps. Phase 2 done: the registry, the interaction rules, the ordering solver, the extension and options steps. Phase 3 done: the tech stack step and its suggestions, flows B and C, `/add/{Id}` deep links, the browser's memory, and the add-flow download.
 
 **Phase 0 – Scaffold (small).** Repo layout (4), props, `global.json`, `nuget.config`, empty `Wizard.Core`/`Web`/`Tests`, copied SponsorCheck plumbing (index.html, css, fonts, interop.js, `PublishedWizard`, `WebTestContext`, `ModuleInitializer`), Home page with three cards, `deploy.yml` deploying the placeholder to Pages. Verify the base href and 404 fallback work at `https://verifytests.github.io/Wizard/`.
 

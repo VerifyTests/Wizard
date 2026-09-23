@@ -134,7 +134,7 @@ public static class ModuleInitializerGenerator
         var state = plan.State;
         var blocks = new List<InitializeBlock>();
 
-        foreach (var extension in plan.Extensions.Where(_ => _.IsWindowsOnly == windows))
+        foreach (var extension in plan.ExtensionsIn(windows))
         {
             if (extension.Statements.Count == 0)
             {
@@ -150,6 +150,39 @@ public static class ModuleInitializerGenerator
         }
 
         var keys = blocks.Select(_ => _.Key).ToHashSet(StringComparer.Ordinal);
+
+        // A call the project already makes, which a rule the new selection triggers changes. The
+        // project's own initializer has it; the comment says what to do with it there.
+        if (!windows)
+        {
+            foreach (var existing in plan.ExistingChanges)
+            {
+                keys.Add(existing.Id);
+                if (existing.Statements.Count == 0)
+                {
+                    continue;
+                }
+
+                var statements = existing.Statements.ToList();
+                statements[0] = statements[0] with
+                {
+                    Comment =
+                    [
+                        $"{existing.Definition.DisplayName} is already in the project, and the extensions being added",
+                        "change how it has to be initialized. Replace its existing call with this one, or, where the",
+                        "project relies on InitializePlugins() to enable it, add this call above that.",
+                        .. statements[0].Comment
+                    ]
+                };
+                blocks.Add(
+                    new(existing.Id, existing.Definition.Phase, statements)
+                    {
+                        Usings = existing.Definition.InitializeUsings,
+                        Members = existing.Definition.InitializeMembers
+                    });
+            }
+        }
+
         foreach (var addition in InteractionRules.Additions(state).Where(_ => keys.Contains(_.Target)))
         {
             blocks.Add(

@@ -36,6 +36,25 @@ public class GeneratorTests
         return copy;
     }
 
+    /// <summary>An add-flow state: what the project has, and what is being added to it.</summary>
+    public static WizardState Addition(
+        Flow flow,
+        string[] existing,
+        string[] added,
+        TestFramework framework = TestFramework.XunitV3)
+    {
+        var state = new WizardState
+        {
+            Flow = flow,
+            TestFramework = framework,
+            ExistingExtensions = new HashSet<string>(existing, StringComparer.Ordinal),
+            SelectedExtensions = new HashSet<string>(added, StringComparer.Ordinal),
+            Step = "output"
+        };
+        state.Normalize();
+        return state;
+    }
+
     static Plan PlanFor(WizardState state) =>
         Plan.Build(state, PackageVersions.Baked, Today);
 
@@ -232,6 +251,58 @@ public class GeneratorTests
         var plan = PlanFor(WithExtensions(State(), "Diagnostics", "OpenTelemetry"));
         await Assert.That(plan.Blocked).IsTrue();
         await Assert.That(SolutionGenerator.Build(plan)).IsNotEmpty();
+    }
+
+    public static IEnumerable<Func<(string Name, WizardState State)>> Additions()
+    {
+        // The case the interaction rules were written for: EF Core added next to an existing SqlServer,
+        // whose recording the project's own initializer now has to turn off.
+        yield return () => ("EfNextToExistingSql", Addition(Flow.Add, ["DiffPlex", "SqlServer"], ["EntityFramework"]));
+        // An existing extension plugin discovery never found, which the project may never have enabled.
+        yield return () => ("ExistingUndiscovered", Addition(Flow.Add, ["AngleSharp"], ["Bunit"]));
+        // A package with a maintenance fee check of its own, into a project whose Verify declaration
+        // is left alone.
+        yield return () => ("TransitiveSponsorship", Addition(Flow.Add, [], ["OpenXml"]));
+        yield return () => ("ChangedDeclaration", Addition(Flow.Add, [], ["Http"]) with
+        {
+            SponsorMode = SponsorMode.Exempt,
+            Exemption = Exemption.SmallRevenue,
+            SponsorUntil = "2027-09"
+        });
+        yield return () => ("Windows", Addition(Flow.Add, [], ["WinForms", "Terminal"], TestFramework.NUnit));
+        yield return () => ("Expecto", Addition(Flow.Add, [], ["Http", "EntityFramework"], TestFramework.Expecto));
+        yield return () =>
+        {
+            var state = Addition(Flow.AddByTech, ["DiffPlex"], []);
+            TechSuggestions.Choose(state, "aspnetcore", true);
+            return ("ByTech", state);
+        };
+    }
+
+    /// <summary>Every file the add flows download, and the guide and AI instructions with them (plan 12.5).</summary>
+    [Test]
+    [MethodDataSource(nameof(Additions))]
+    public Task Addition((string Name, WizardState State) addition)
+    {
+        var plan = PlanFor(addition.State);
+        return Verify(
+                $"""
+                 ==== interactions
+
+                 {string.Join("\n", plan.Interactions.Select(_ => $"{_.Severity} {_.RuleId} [{string.Join(", ", _.Involved)}]"))}
+
+                 {Render(SolutionGenerator.Build(plan))}
+                 """)
+            .UseParameters(addition.Name);
+    }
+
+    [Test]
+    public async Task AdditionsZipUnderTheirOwnFolder()
+    {
+        var plan = PlanFor(Addition(Flow.Add, [], ["Http"]));
+        await Assert.That(plan.ZipRoot).IsEqualTo("verify-additions");
+        using var archive = new ZipArchive(new MemoryStream(ZipBuilder.Build(plan.ZipRoot, SolutionGenerator.Build(plan))));
+        await Assert.That(archive.Entries.All(_ => _.FullName.StartsWith("verify-additions/", StringComparison.Ordinal))).IsTrue();
     }
 
     static string Render(IEnumerable<GeneratedFile> files)

@@ -18,6 +18,12 @@ public sealed record Plan(
     /// <summary>The selected extensions in registry order, each resolved against the whole state.</summary>
     public required IReadOnlyList<ResolvedExtension> Extensions { get; init; }
 
+    /// <summary>Existing extensions whose initialization the new selection changes (plan 7.2).</summary>
+    public IReadOnlyList<ResolvedExtension> ExistingChanges { get; init; } = [];
+
+    /// <summary>Adding to an existing project rather than generating a new one (plan 12.5).</summary>
+    public bool IsAddition => State.Flow != Flow.New;
+
     /// <summary>Every rule and group that fires, plus the notices derived from the extensions themselves.</summary>
     public required IReadOnlyList<InteractionResult> Interactions { get; init; }
 
@@ -42,11 +48,43 @@ public sealed record Plan(
     /// initializer, and the F# project's packages do not belong in a C# one.
     /// </summary>
     public bool HasWindowsProject =>
+        !IsAddition &&
         WindowsExtensions.Count > 0 &&
         !Framework.IsFSharp;
 
-    public IEnumerable<ResolvedExtension> ExtensionsIn(bool windows) =>
-        Extensions.Where(_ => _.IsWindowsOnly == windows);
+    /// <summary>
+    /// The extensions a test project holds. Adding to an existing project writes everything for the one
+    /// test project the reader already has; whether that one can target windows is theirs to decide,
+    /// and the guide says which extensions need it.
+    /// </summary>
+    public IEnumerable<ResolvedExtension> ExtensionsIn(bool windows)
+    {
+        if (IsAddition)
+        {
+            if (windows)
+            {
+                return [];
+            }
+
+            return Extensions;
+        }
+
+        return Extensions.Where(_ => _.IsWindowsOnly == windows);
+    }
+
+    /// <summary>The root folder of the zip: the solution, or the changes to merge into one (plan 12.5).</summary>
+    public string ZipRoot
+    {
+        get
+        {
+            if (IsAddition)
+            {
+                return "verify-additions";
+            }
+
+            return SolutionName;
+        }
+    }
 
     public bool Blocked =>
         Interactions.Any(_ => _.Severity == Severity.Conflict);
@@ -58,6 +96,10 @@ public sealed record Plan(
     /// <summary>Packages the test project references, framework first, then the extensions in registry order.</summary>
     public IReadOnlyList<string> TestPackages =>
         [.. Framework.Packages, .. ExtensionPackages(windows: false)];
+
+    /// <summary>What an existing test project needs added: the extensions' packages, not the framework's.</summary>
+    public IReadOnlyList<string> AddedPackages =>
+        [.. ExtensionPackages(windows: false)];
 
     public IReadOnlyList<string> WindowsTestPackages =>
         [.. Framework.Packages, .. ExtensionPackages(windows: true)];
@@ -129,6 +171,7 @@ public sealed record Plan(
             today)
         {
             Extensions = PlanBuilder.Resolve(state, framework),
+            ExistingChanges = PlanBuilder.ResolveExistingChanges(state),
             Interactions =
             [
                 .. InteractionRules.For(state)

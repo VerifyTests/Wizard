@@ -20,6 +20,30 @@ window.verifyWizard = {
         return Promise.resolve();
     },
 
+    // localStorage, for the answers the wizard remembers between visits. Every access is guarded:
+    // private windows and blocked site data make it throw, and the wizard works without it.
+    storageGet: function (key) {
+        try {
+            return window.localStorage.getItem(key);
+        } catch {
+            return null;
+        }
+    },
+
+    storageSet: function (key, value) {
+        try {
+            window.localStorage.setItem(key, value);
+        } catch {
+        }
+    },
+
+    storageRemove: function (key) {
+        try {
+            window.localStorage.removeItem(key);
+        } catch {
+        }
+    },
+
     // Saves bytes from .NET (a DotNetStreamReference, which avoids base64 for larger zips) as a file.
     downloadFile: async function (fileName, contentType, streamReference) {
         const buffer = await streamReference.arrayBuffer();

@@ -1,0 +1,42 @@
+@* The tech stack (plan 7.1 step 6, 7.3). Optional: nothing chosen just means no suggestions. Choosing
+   a tech pre-checks the extensions it recommends on the next step; unchoosing it takes back what only
+   it recommended. *@
+<p class="hint">
+    Choose what the code under test uses, and the next step starts with the matching extensions selected.
+    Nothing here is required. The choices are remembered in this browser.
+</p>
+
+@if (Restored)
+{
+    <p class="restored">Restored from this browser.</p>
+}
+
+@foreach (var group in Techs.Groups)
+{
+    <fieldset class="tech-group">
+        <legend>@group.Key</legend>
+        <div class="chips">
+            @foreach (var tech in group)
+            {
+                var chosen = State.Techs.Contains(tech.Id);
+                <button type="button"
+                        class="chip @(chosen ? "selected" : "")"
+                        data-tech="@tech.Id"
+                        aria-pressed="@(chosen ? "true" : "false")"
+                        @onclick="() => Toggle(tech.Id, !chosen)">@tech.DisplayName</button>
+            }
+        </div>
+    </fieldset>
+}
+
+@code {
+    [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
+    [Parameter] public bool Restored { get; set; }
+    [Parameter] public EventCallback Changed { get; set; }
+
+    Task Toggle(string id, bool chosen)
+    {
+        TechSuggestions.Choose(State, id, chosen);
+        return Changed.InvokeAsync();
+    }
+}

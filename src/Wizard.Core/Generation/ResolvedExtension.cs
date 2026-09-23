@@ -9,6 +9,12 @@ public sealed record ResolvedExtension(
     IReadOnlyList<Sample> Samples,
     IReadOnlyList<InitializeStatement> Statements)
 {
+    /// <summary>
+    /// Already in the project (plan 7.2). Nothing is generated for it except a change to its existing
+    /// initialization, when a rule the new selection triggers requires one.
+    /// </summary>
+    public bool Existing { get; init; }
+
     public string Id => Definition.Id;
 
     /// <summary>Windows-only extensions go in a second test project, so the main one stays portable (plan D5).</summary>

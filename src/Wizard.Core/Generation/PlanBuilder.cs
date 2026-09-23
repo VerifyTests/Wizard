@@ -26,6 +26,34 @@ public static class PlanBuilder
     }
 
     /// <summary>
+    /// Extensions the project already has whose initialization a rule now changes: EntityFramework
+    /// added next to an existing SqlServer turns SqlServer's recording off, which is an edit to a call
+    /// the project already makes. Existing extensions no rule touches are left out entirely.
+    /// </summary>
+    public static IReadOnlyList<ResolvedExtension> ResolveExistingChanges(WizardState state)
+    {
+        var additions = InteractionRules.Additions(state).Select(_ => _.Target).ToHashSet(StringComparer.Ordinal);
+        var changes = new List<ResolvedExtension>();
+        foreach (var definition in Extensions.All.Where(_ => state.IsExisting(_.Id)))
+        {
+            var replacement = InteractionRules.Replacement(state, definition.Id);
+            if (replacement == null &&
+                !additions.Contains(definition.Id))
+            {
+                continue;
+            }
+
+            changes.Add(
+                new(definition, Depth.Minimal, [], [], replacement ?? [])
+                {
+                    Existing = true
+                });
+        }
+
+        return changes;
+    }
+
+    /// <summary>
     /// Samples are only generated for a framework the extension supports, and never for F#: the Expecto
     /// project gets the core sample only (plan D9).
     /// </summary>
@@ -90,7 +118,7 @@ public static class PlanBuilder
     public static IEnumerable<ExtensionChoice> AvailableChoices(WizardState state) =>
         Extensions.Selected(state)
             .SelectMany(_ => _.Choices)
-            .Concat(InteractionRules.ChoicesFor(state.SelectedExtensions))
+            .Concat(InteractionRules.ChoicesFor(state.AllExtensions))
             .DistinctBy(_ => _.Id);
 
     /// <summary>
@@ -133,6 +161,24 @@ public static class PlanBuilder
                     $"VerifierSettings.InitializePlugins() cannot find {InteractionRules.Join(undiscovered)}: it " +
                     "looks for a type named after the assembly, and silently skips an assembly that has none. " +
                     "The module initializer calls each of them explicitly, so they are enabled either way."));
+        }
+
+        // Plan A1: a project that relies on InitializePlugins() alone never enabled these.
+        var existingUndiscovered = Extensions.All
+            .Where(_ => state.IsExisting(_.Id) && _.PluginType != null && !_.DiscoveredByInitializePlugins)
+            .Select(_ => _.Id)
+            .ToList();
+        if (existingUndiscovered.Count > 0)
+        {
+            notices.Add(
+                new(
+                    "existing-not-discovered",
+                    Severity.Warning,
+                    existingUndiscovered,
+                    $"VerifierSettings.InitializePlugins() cannot find {InteractionRules.Join(existingUndiscovered)}: " +
+                    "it looks for a type named after the assembly, and silently skips an assembly that has none. " +
+                    "If the project relies on InitializePlugins() alone, they were never enabled, and each needs " +
+                    "its own Initialize call in the module initializer."));
         }
 
         var unsupported = selected

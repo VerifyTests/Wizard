@@ -37,6 +37,8 @@ public static class SponsorRules
         {
             SponsorMode.Sponsor when state.SponsorAccount.Length > 0 => $"Sponsor: {state.SponsorAccount}",
             SponsorMode.Exempt when state.Exemption != null => $"Exempt: {state.Exemption}",
+            // An existing project already declares its status; leaving it alone is the usual answer.
+            SponsorMode.NotChosen when state.Flow != Flow.New => "No change",
             _ => state.SponsorMode.Name()
         };
 

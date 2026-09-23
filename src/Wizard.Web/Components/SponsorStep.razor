@@ -8,8 +8,18 @@
     Every build checks for a declaration in <code>Directory.Build.props</code>.
 </p>
 
+@if (State.Flow != Flow.New)
+{
+    <p class="hint">A project that already uses Verify already declares its status, so this is only needed to change it. Leaving it as it is changes nothing.</p>
+}
+
+@if (Restored)
+{
+    <p class="restored">Restored from this browser.</p>
+}
+
 <ChoiceCards TValue="SponsorMode"
-             Options="modes"
+             Options="Modes"
              Value="State.SponsorMode"
              ValueChanged="ModeChanged"
              IdPrefix="sponsor"
@@ -90,7 +100,11 @@
         <p class="callout">Every build will log an SC023 breach-of-license warning, and a build that treats warnings as errors fails. The generated solution does not treat warnings as errors for this reason.</p>
         break;
     default:
-        <p class="callout">The generated <code>Directory.Build.props</code> will contain every option, commented out. Until one is chosen, the build fails with SC021, whose message explains the options too.</p>
+        @if (State.Flow == Flow.New)
+        {
+            <p class="callout">The generated <code>Directory.Build.props</code> will contain every option, commented out. Until one is chosen, the build fails with SC021, whose message explains the options too.</p>
+        }
+
         break;
 }
 
@@ -100,23 +114,54 @@
 }
 
 @* The outcome prose is shared with the guide, so it is markdown. *@
-<div class="hint outcome">
-    <MarkdownView Markdown="@($"**Expected build outcome:** {SponsorRules.Outcome(State)}")" />
-</div>
+@if (State.Flow == Flow.New || State.SponsorMode != SponsorMode.NotChosen)
+{
+    <div class="hint outcome">
+        <MarkdownView Markdown="@($"**Expected build outcome:** {SponsorRules.Outcome(State)}")" />
+    </div>
+}
 
 @code {
     [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
     [Parameter, EditorRequired] public Date Today { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
 
-    static readonly IReadOnlyList<Choice<SponsorMode>> modes =
+    /// <summary>The declaration was filled in from this browser's memory (plan 8.2).</summary>
+    [Parameter] public bool Restored { get; set; }
+
+    static readonly IReadOnlyList<Choice<SponsorMode>> declared =
     [
         new(SponsorMode.Sponsor, "Sponsoring", "The organization or user sponsors VerifyTests on GitHub."),
         new(SponsorMode.Exempt, "Exempt", "Open source, small revenue, or a consulting client of the maintainers."),
         new(SponsorMode.PrivateArrangement, "Private arrangement", "A licensing agreement made directly with the maintainers."),
-        new(SponsorMode.Ignore, "Opting out", "The build passes with a breach-of-license warning."),
+        new(SponsorMode.Ignore, "Opting out", "The build passes with a breach-of-license warning.")
+    ];
+
+    static readonly IReadOnlyList<Choice<SponsorMode>> newModes =
+    [
+        .. declared,
         new(SponsorMode.NotChosen, "Decide later", "Every option is left commented out in Directory.Build.props.")
     ];
+
+    // An existing project already declares its status, so leaving it alone comes first.
+    static readonly IReadOnlyList<Choice<SponsorMode>> additionModes =
+    [
+        new(SponsorMode.NotChosen, "No change", "The project already declares its status."),
+        .. declared
+    ];
+
+    IReadOnlyList<Choice<SponsorMode>> Modes
+    {
+        get
+        {
+            if (State.Flow == Flow.New)
+            {
+                return newModes;
+            }
+
+            return additionModes;
+        }
+    }
 
     static readonly IReadOnlyList<Choice<Exemption>> exemptions =
     [

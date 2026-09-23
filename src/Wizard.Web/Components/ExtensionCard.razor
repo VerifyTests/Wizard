@@ -1,11 +1,20 @@
 @* One selectable extension (plan 7.1 step 7). The whole card is the checkbox's label, so clicking
    anywhere toggles it. Badges say up front what selecting it will cost: a licence, a tool, Windows. *@
-<label class="extension-card @(Selected ? "selected" : "")" data-id="@Definition.Id">
+<label class="extension-card @CardClass" data-id="@Definition.Id">
     <input type="checkbox"
-           checked="@Selected"
+           checked="@(Selected || Existing)"
+           disabled="@Existing"
            @onchange="_ => SelectedChanged.InvokeAsync((bool?) _.Value ?? false)" />
     <span class="extension-body">
         <span class="extension-name">@Definition.DisplayName</span>
+        @if (Existing)
+        {
+            <span class="extension-tag">Already in the project</span>
+        }
+        else if (Tag.Length > 0)
+        {
+            <span class="extension-tag">@Tag</span>
+        }
         <span class="extension-description">@Definition.Description</span>
         @if (Badges.Count > 0)
         {
@@ -23,6 +32,30 @@
     [Parameter, EditorRequired] public ExtensionDefinition Definition { get; set; } = null!;
     [Parameter] public bool Selected { get; set; }
     [Parameter] public EventCallback<bool> SelectedChanged { get; set; }
+
+    /// <summary>Already in the project (plan 7.2): shown ticked and locked, never generated.</summary>
+    [Parameter] public bool Existing { get; set; }
+
+    /// <summary>Why the card is suggested, from the tech stack.</summary>
+    [Parameter] public string Tag { get; set; } = "";
+
+    string CardClass
+    {
+        get
+        {
+            if (Existing)
+            {
+                return "existing";
+            }
+
+            if (Selected)
+            {
+                return "selected";
+            }
+
+            return "";
+        }
+    }
 
     /// <summary>The chosen test framework, which decides whether the samples can be generated.</summary>
     [Parameter] public TestFramework Framework { get; set; }

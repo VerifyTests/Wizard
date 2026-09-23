@@ -17,9 +17,12 @@ public static class WizardStateUrl
     public const string ExtensionsKey = "ext";
     public const string MinimalKey = "min";
     public const string ChoicesKey = "opt";
+    public const string TechKey = "tech";
+    public const string ExistingKey = "have";
 
     /// <summary>The <see cref="ExtensionsKey"/> value meaning "nothing at all", as opposed to "unset".</summary>
     public const string NoExtensions = "none";
+
     public const string SponsorKey = "sponsor";
     public const string AccountKey = "account";
     public const string StartKey = "start";
@@ -75,12 +78,15 @@ public static class WizardStateUrl
             Add(NameKey, state.SolutionName);
         }
 
+        Add(TechKey, string.Join(",", Techs.All.Where(_ => state.Techs.Contains(_.Id)).Select(_ => _.Id)));
+        Add(ExistingKey, string.Join(",", Extensions.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id)));
+
         // Registry order, not insertion order, so the same selection is always the same link.
         var selected = Extensions.All
             .Where(_ => state.Has(_.Id))
             .Select(_ => _.Id)
             .ToList();
-        if (!selected.SequenceEqual(WizardState.DefaultExtensions, StringComparer.Ordinal))
+        if (!selected.SequenceEqual(WizardState.DefaultExtensions(state.Flow), StringComparer.Ordinal))
         {
             // A link that selects nothing still has to say so, or it would read as the default.
             Add(ExtensionsKey, selected.Count == 0 ? NoExtensions : string.Join(",", selected));
@@ -88,6 +94,27 @@ public static class WizardStateUrl
 
         Add(MinimalKey, string.Join(",", selected.Where(_ => state.DepthOf(_) == Depth.Minimal)));
         Add(ChoicesKey, string.Join(",", state.Choices.OrderBy(_ => _.Key, StringComparer.Ordinal).Select(_ => $"{_.Key}:{_.Value}")));
+
+        pairs.AddRange(SponsorPairs(state));
+
+        return string.Join("&", pairs.Select(_ => $"{_.Key}={Escape(_.Value)}"));
+    }
+
+    /// <summary>The maintenance fee declaration alone, as a query string, which is what the browser keeps.</summary>
+    public static string SponsorQuery(WizardState state) =>
+        string.Join("&", SponsorPairs(state).Select(_ => $"{_.Key}={Escape(_.Value)}"));
+
+    static List<(string Key, string Value)> SponsorPairs(WizardState state)
+    {
+        var pairs = new List<(string Key, string Value)>();
+
+        void Add(string key, string? value)
+        {
+            if (!string.IsNullOrEmpty(value))
+            {
+                pairs.Add((key, value));
+            }
+        }
 
         switch (state.SponsorMode)
         {
@@ -111,7 +138,7 @@ public static class WizardStateUrl
                 break;
         }
 
-        return string.Join("&", pairs.Select(_ => $"{_.Key}={Escape(_.Value)}"));
+        return pairs;
     }
 
     /// <param name="query">The query string, with or without the leading <c>?</c>.</param>
@@ -130,41 +157,61 @@ public static class WizardStateUrl
             TestFramework = ParseEnum<TestFramework>(Get(TestFrameworkKey)),
             BuildServer = ParseEnum<BuildServer>(Get(BuildServerKey)),
             SolutionName = Get(NameKey) ?? WizardState.DefaultSolutionName,
-            SelectedExtensions = ParseExtensions(Get(ExtensionsKey)),
+            SelectedExtensions = ParseExtensions(flow, Get(ExtensionsKey)),
+            ExistingExtensions = new HashSet<string>(SplitList(Get(ExistingKey)), StringComparer.Ordinal),
+            Techs = new HashSet<string>(SplitList(Get(TechKey)), StringComparer.Ordinal),
             Choices = ParseChoices(Get(ChoicesKey)),
             Depths = SplitList(Get(MinimalKey))
                 .ToDictionary(_ => _, _ => Depth.Minimal, StringComparer.Ordinal)
         };
 
-        switch (Get(SponsorKey))
+        ApplySponsor(state, Get);
+        state.Normalize();
+        return state;
+    }
+
+    /// <summary>Reads a declaration kept by <see cref="SponsorQuery"/> into a state.</summary>
+    public static void ApplySponsorQuery(WizardState state, string query)
+    {
+        var values = ParseQuery(query);
+        ApplySponsor(state, _ => values.GetValueOrDefault(_));
+    }
+
+    static void ApplySponsor(WizardState state, Func<string, string?> get)
+    {
+        switch (get(SponsorKey))
         {
             case "Sponsor":
                 state.SponsorMode = SponsorMode.Sponsor;
-                state.SponsorAccount = Get(AccountKey) ?? "";
-                if (Date.TryParseExact(Get(StartKey), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start))
+                state.SponsorAccount = get(AccountKey) ?? "";
+                if (Date.TryParseExact(get(StartKey), "yyyy-MM-dd", CultureInfo.InvariantCulture, DateTimeStyles.None, out var start))
                 {
                     state.SponsorshipStart = start;
                 }
 
-                state.SponsorshipPrivateUntil = Get(PrivateKey) ?? "";
+                state.SponsorshipPrivateUntil = get(PrivateKey) ?? "";
                 break;
             case "Exempt":
                 state.SponsorMode = SponsorMode.Exempt;
-                state.Exemption = ParseEnum<Exemption>(Get(ExemptKey));
-                state.SponsorUntil = Get(UntilKey) ?? "";
+                state.Exemption = ParseEnum<Exemption>(get(ExemptKey));
+                state.SponsorUntil = get(UntilKey) ?? "";
                 break;
             case "Private":
                 state.SponsorMode = SponsorMode.PrivateArrangement;
-                state.SponsorUntil = Get(UntilKey) ?? "";
+                state.SponsorUntil = get(UntilKey) ?? "";
                 break;
             case "Ignore":
                 state.SponsorMode = SponsorMode.Ignore;
                 break;
         }
-
-        state.Normalize();
-        return state;
     }
+
+    /// <summary>
+    /// Whether a query names a key at all. The browser's remembered values only fill in what a url
+    /// leaves out, so a shared link always means the same thing (plan 8.2).
+    /// </summary>
+    public static bool HasKey(string? query, string key) =>
+        ParseQuery(query).ContainsKey(key);
 
     /// <summary>
     /// Commas and colons separate the list and pair values, and both are legal unescaped in a query
@@ -179,11 +226,11 @@ public static class WizardStateUrl
     /// An absent key means the default selection, so a link made before an extension existed still
     /// means what it meant. <see cref="NoExtensions"/> is how "nothing selected" is written.
     /// </summary>
-    static HashSet<string> ParseExtensions(string? value)
+    static HashSet<string> ParseExtensions(Flow flow, string? value)
     {
         if (value == null)
         {
-            return new(WizardState.DefaultExtensions, StringComparer.Ordinal);
+            return new(WizardState.DefaultExtensions(flow), StringComparer.Ordinal);
         }
 
         if (value == NoExtensions)

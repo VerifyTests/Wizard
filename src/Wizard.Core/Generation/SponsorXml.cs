@@ -95,15 +95,20 @@ public static class SponsorXml
 
     static void AppendOwnerUndecided(WizardState state, SponsorOwner owner, Action<string> line)
     {
-        if (state.SponsorMode == SponsorMode.Exempt)
+        switch (state.SponsorMode)
         {
-            line($"     {owner.DisplayName} does not offer the exemption claimed above, so it cannot be");
-            line("     repeated here. The build fails with SC021 until one of these is chosen.");
-        }
-        else
-        {
-            line("     A sponsorship is per project, so this one has to be decided separately. The build");
-            line("     fails with SC021 until it is.");
+            case SponsorMode.Exempt:
+                line($"     {owner.DisplayName} does not offer the exemption claimed above, so it cannot be");
+                line("     repeated here. The build fails with SC021 until one of these is chosen.");
+                break;
+            case SponsorMode.NotChosen:
+                line("     The project's existing declaration uses the Verify_ prefix and does not cover this");
+                line("     owner. The build fails with SC021 until one of these is chosen.");
+                break;
+            default:
+                line("     A sponsorship is per project, so this one has to be decided separately. The build");
+                line("     fails with SC021 until it is.");
+                break;
         }
 
         line("     Uncomment and complete exactly one: -->");
@@ -113,7 +118,8 @@ public static class SponsorXml
         foreach (var exemption in owner.Exemptions)
         {
             line("");
-            line($"     {SponsorRules.Criteria(exemption)}:");
+            var criteria = SponsorRules.Criteria(exemption);
+            line($"     {char.ToUpperInvariant(criteria[0])}{criteria[1..]}:");
             line("     <PropertyGroup>");
             line($"       <{owner.Prefix}_SponsorshipExemption>{exemption}</{owner.Prefix}_SponsorshipExemption>");
             line($"       <{owner.Prefix}_SponsorshipExemptionUntil>yyyy-MM</{owner.Prefix}_SponsorshipExemptionUntil>");
@@ -125,6 +131,29 @@ public static class SponsorXml
         line("     <PropertyGroup>");
         line($"       <{owner.Prefix}_SponsorshipLicenseIgnored>true</{owner.Prefix}_SponsorshipLicenseIgnored>");
         line("     </PropertyGroup> -->");
+    }
+
+    /// <summary>
+    /// For a project that already declares its Verify status: only the owners the added packages bring
+    /// in, each with a declaration that carries over or its options commented out.
+    /// </summary>
+    public static string OwnersOnly(WizardState state, string indent, IReadOnlyList<SponsorOwner> owners)
+    {
+        var builder = new StringBuilder();
+        AppendOtherOwners(
+            state,
+            owners,
+            text =>
+            {
+                if (text.Length == 0)
+                {
+                    builder.Append('\n');
+                    return;
+                }
+
+                builder.Append(indent).Append(text).Append('\n');
+            });
+        return builder.ToString().TrimStart('\n');
     }
 
     static string Explanation(WizardState state) =>

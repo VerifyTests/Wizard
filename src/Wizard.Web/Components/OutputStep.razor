@@ -4,17 +4,24 @@
 
 @* The terminating step (plan 12.1): the guide, the files of the downloadable solution, and the AI
    instructions, with copy and download actions for each. *@
-<div class="field">
-    <label for="solutionName">Solution name</label>
-    <p class="hint">Used for the solution file, the class library, and the test project (<code>@(output.Plan.TestProject)</code>).</p>
-    <input type="text"
-           id="solutionName"
-           value="@State.SolutionName"
-           @onchange="NameChanged" />
-</div>
+@if (output.Plan.IsAddition)
+{
+    <p class="hint">The download holds the changes to merge into the project, each file named for where it goes. The guide walks through them in order, and the AI instructions ask an assistant to do the same.</p>
+}
+else
+{
+    <div class="field">
+        <label for="solutionName">Solution name</label>
+        <p class="hint">Used for the solution file, the class library, and the test project (<code>@(output.Plan.TestProject)</code>).</p>
+        <input type="text"
+               id="solutionName"
+               value="@State.SolutionName"
+               @onchange="NameChanged" />
+    </div>
+}
 
 <div class="output-actions">
-    <button type="button" class="primary download-zip" @onclick="DownloadZip">Download solution (.zip)</button>
+    <button type="button" class="primary download-zip" @onclick="DownloadZip">@DownloadLabel</button>
     <button type="button" class="copy-guide" @onclick="() => Copy(output.Guide, nameof(output.Guide))">@CopyLabel(nameof(output.Guide), "Copy guide as markdown")</button>
     <button type="button" class="download-guide" @onclick="() => Download.DownloadTextAsync(GuideFileName, output.Guide)">Download guide (.md)</button>
     <button type="button" class="copy-ai" @onclick="() => Copy(output.Ai, nameof(output.Ai))">@CopyLabel(nameof(output.Ai), "Copy AI instructions")</button>
@@ -43,7 +50,7 @@
         case "Files":
             <div class="file-browser">
                 <div>
-                    <p class="file-root">@(output.Plan.SolutionName)/</p>
+                    <p class="file-root">@(output.Plan.ZipRoot)/</p>
                     <ul class="file-list">
                         @foreach (var file in output.Files)
                         {
@@ -101,9 +108,22 @@
     static MarkupString PathWithBreaks(string path) =>
         new(string.Join("/<wbr>", path.Split('/').Select(System.Net.WebUtility.HtmlEncode)));
 
-    string GuideFileName => $"{output.Plan.SolutionName}-verify-guide.md";
+    string GuideFileName => $"{output.Plan.ZipRoot}-verify-guide.md";
 
-    string AiFileName => $"{output.Plan.SolutionName}-ai-instructions.md";
+    string AiFileName => $"{output.Plan.ZipRoot}-ai-instructions.md";
+
+    string DownloadLabel
+    {
+        get
+        {
+            if (output.Plan.IsAddition)
+            {
+                return "Download changes (.zip)";
+            }
+
+            return "Download solution (.zip)";
+        }
+    }
 
     string CopyLabel(string key, string label)
     {
@@ -123,8 +143,8 @@
 
     Task DownloadZip()
     {
-        var zip = ZipBuilder.Build(output.Plan.SolutionName, output.Files);
-        return Download.DownloadAsync($"{output.Plan.SolutionName}.zip", "application/zip", zip).AsTask();
+        var zip = ZipBuilder.Build(output.Plan.ZipRoot, output.Files);
+        return Download.DownloadAsync($"{output.Plan.ZipRoot}.zip", "application/zip", zip).AsTask();
     }
 
     Task NameChanged(ChangeEventArgs args)
