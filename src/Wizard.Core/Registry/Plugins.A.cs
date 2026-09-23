@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 public static partial class Plugins
 {
     /// <summary>Entries researched in plan-research/plugin-catalogue-A.md.</summary>

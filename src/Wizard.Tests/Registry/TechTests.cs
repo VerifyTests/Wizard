@@ -1,6 +1,3 @@
-// System.Xml.Linq, which the test project's implicit usings bring in, also has an Plugins class.
-using Plugins = Wizard.Core.Plugins;
-
 /// <summary>The tech stack table and what choosing from it does to the selection (plan 10).</summary>
 public class TechTests
 {

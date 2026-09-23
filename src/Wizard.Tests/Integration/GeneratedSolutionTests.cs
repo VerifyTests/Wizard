@@ -1,5 +1,3 @@
-using Plugins = Wizard.Core.Plugins;
-
 /// <summary>
 /// Generates solutions, writes them to disk, and runs <c>dotnet build</c> and <c>dotnet test</c> on
 /// them (plan 17.4). Slow and needs network for restore, so explicit: run by integration.yml, or with

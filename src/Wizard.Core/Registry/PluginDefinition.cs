@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// One selectable Verify plugin (plan 9.1). Hand-written data, sourced from the per-plugin
 /// research in plan-research/plugin-catalogue-*.md.

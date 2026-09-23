@@ -1,5 +1,3 @@
-using Plugins = Wizard.Core.Plugins;
-
 /// <summary>Snapshots of everything the generators produce (plan 17.1). The clock is frozen.</summary>
 public class GeneratorTests
 {

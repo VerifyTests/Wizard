@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The plugin registry (plan 9). The data is split across partial files by catalogue letter, and
 /// <see cref="All"/> is the single ordered list everything else reads: urls, the plugin step, the

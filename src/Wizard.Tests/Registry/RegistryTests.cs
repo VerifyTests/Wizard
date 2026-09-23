@@ -1,6 +1,3 @@
-// System.Xml.Linq, which the test project's implicit usings bring in, also has an Plugins class.
-using Plugins = Wizard.Core.Plugins;
-
 /// <summary>Invariants the plugin registry has to hold (plan 9.2, 17.2).</summary>
 public class RegistryTests
 {
