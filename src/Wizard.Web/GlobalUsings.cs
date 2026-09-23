@@ -6,4 +6,3 @@ global using Microsoft.AspNetCore.Components.WebAssembly.Hosting;
 global using Microsoft.Extensions.DependencyInjection;
 global using Microsoft.JSInterop;
 global using Wizard.Web;
-global using Wizard.Web.Services;

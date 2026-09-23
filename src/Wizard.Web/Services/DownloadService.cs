@@ -1,5 +1,3 @@
-namespace Wizard.Web.Services;
-
 /// <summary>Hands bytes to the <c>verifyWizard.downloadFile</c> JS helper, which saves them in the browser.</summary>
 public sealed class DownloadService(IJSRuntime js)
 {

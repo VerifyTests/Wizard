@@ -23,5 +23,4 @@ global using Wizard.Tests;
 global using Wizard.Web;
 global using Wizard.Web.Components;
 global using Wizard.Web.Pages;
-global using Wizard.Web.Services;
 global using static VerifyTUnit.Verifier;

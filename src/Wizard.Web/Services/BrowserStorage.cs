@@ -1,5 +1,3 @@
-namespace Wizard.Web.Services;
-
 /// <summary>
 /// The answers the wizard remembers between visits (plan 8.2), kept in localStorage through the
 /// <c>verifyWizard.storage*</c> helpers in <c>wwwroot/js/interop.js</c>. What to keep, and when a kept

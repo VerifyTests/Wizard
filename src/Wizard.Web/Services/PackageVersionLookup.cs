@@ -2,8 +2,6 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Microsoft.AspNetCore.Components.WebAssembly.Http;
 
-namespace Wizard.Web.Services;
-
 /// <summary>
 /// Checks nuget.org, from the browser, for the newest stable version of each package the output names
 /// (plan 15.3). nuget.org's flat container allows cross-origin requests. The whole check has a time
