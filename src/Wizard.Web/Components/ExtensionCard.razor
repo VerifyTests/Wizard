@@ -1,9 +1,9 @@
 @* One selectable extension (plan 7.1 step 7). The whole card is the checkbox's label, so clicking
    anywhere toggles it. Badges say up front what selecting it will cost: a licence, a tool, Windows. *@
-<label class="extension-card @CardClass" data-id="@Definition.Id">
+<label class="extension-card @CardClass" data-id="@Definition.Id" title="@Unavailable">
     <input type="checkbox"
            checked="@(Selected || Existing)"
-           disabled="@Existing"
+           disabled="@(Existing || Unavailable != null)"
            @onchange="_ => SelectedChanged.InvokeAsync((bool?) _.Value ?? false)" />
     <span class="extension-body">
         <span class="extension-name">@Definition.DisplayName</span>
@@ -36,6 +36,9 @@
     /// <summary>Already in the project (plan 7.2): shown ticked and locked, never generated.</summary>
     [Parameter] public bool Existing { get; set; }
 
+    /// <summary>Why it cannot be selected on the chosen operating system; the card is greyed out and says so on hover.</summary>
+    [Parameter] public string? Unavailable { get; set; }
+
     /// <summary>Why the card is suggested, from the tech stack.</summary>
     [Parameter] public string Tag { get; set; } = "";
 
@@ -48,6 +51,11 @@
                 return "existing";
             }
 
+            if (Unavailable != null)
+            {
+                return "unavailable";
+            }
+
             if (Selected)
             {
                 return "selected";
@@ -57,9 +65,6 @@
         }
     }
 
-    /// <summary>The chosen test framework, which decides whether the samples can be generated.</summary>
-    [Parameter] public TestFramework Framework { get; set; }
-
     record Badge(string Label, string Hint);
 
     IReadOnlyList<Badge> Badges
@@ -67,7 +72,8 @@
         get
         {
             var badges = new List<Badge>();
-            if (Definition.Platform == Platform.WindowsOnly)
+            if (Definition.Platform == Platform.WindowsOnly &&
+                Unavailable == null)
             {
                 badges.Add(new("Windows only", "The samples go in a second test project that only builds on Windows."));
             }
@@ -81,11 +87,6 @@
                 }
 
                 badges.Add(new(label, $"{requirement.Name}: {requirement.Description}"));
-            }
-
-            if (!Definition.Supports(Framework))
-            {
-                badges.Add(new($"No {Framework.Name()} samples", Definition.UnsupportedTestFrameworks.First(_ => _.Framework == Framework).Reason));
             }
 
             if (Definition.Beta)

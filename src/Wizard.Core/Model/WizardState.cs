@@ -281,15 +281,39 @@ public sealed record WizardState
     /// Drops ids the registry does not have, and depths and choices that nothing selected uses, so the
     /// url holds exactly what the state holds and a stale link cannot carry hidden values.
     /// </summary>
+    /// <summary>
+    /// Why an extension cannot be selected with the chosen operating system and test framework, or null
+    /// when it can. An answer not given yet rules nothing out; the add flows never ask for the OS.
+    /// </summary>
+    public string? Unavailable(string extensionId)
+    {
+        var definition = Extensions.ById[extensionId];
+        if (Os is Core.Os.MacOS or Core.Os.Linux &&
+            definition.Platform == Platform.WindowsOnly)
+        {
+            return $"Only runs on Windows, and the operating system chosen is {Os.Value.Name()}.";
+        }
+
+        if (TestFramework is { } framework &&
+            !definition.Supports(framework))
+        {
+            var reason = definition.UnsupportedTestFrameworks.First(_ => _.Framework == framework).Reason;
+            return $"Not available for {framework.Name()}: {reason}";
+        }
+
+        return null;
+    }
+
     void NormalizeExtensions()
     {
         ExistingExtensions = new HashSet<string>(
             ExistingExtensions.Where(Extensions.Contains),
             StringComparer.Ordinal);
 
-        // Something the project already has cannot be added again.
+        // Something the project already has cannot be added again, and nothing that cannot run on the
+        // chosen operating system can be added at all.
         SelectedExtensions = new HashSet<string>(
-            SelectedExtensions.Where(_ => Extensions.Contains(_) && !IsExisting(_)),
+            SelectedExtensions.Where(_ => Extensions.Contains(_) && !IsExisting(_) && Unavailable(_) == null),
             StringComparer.Ordinal);
 
         Techs = new HashSet<string>(

@@ -131,20 +131,6 @@ public static class PlanBuilder
         var notices = new List<InteractionResult>();
         var selected = Extensions.Selected(state);
 
-        var windowsOnly = selected.Where(_ => _.Platform == Platform.WindowsOnly).Select(_ => _.Id).ToList();
-        if (windowsOnly.Count > 0 &&
-            os != Os.Windows)
-        {
-            notices.Add(
-                new(
-                    "windows-only",
-                    Severity.Warning,
-                    windowsOnly,
-                    $"{InteractionRules.Join(windowsOnly)} only runs on Windows. The samples go in a second test " +
-                    "project targeting windows, which the main one does not reference, so the rest of the " +
-                    $"solution still builds and runs on {os.Name()}."));
-        }
-
         // An extension with no plugin type at all, such as a dotnet tool, is not something discovery
         // could have found, so saying it was missed would be misleading.
         var undiscovered = selected
@@ -179,20 +165,6 @@ public static class PlanBuilder
                     "it looks for a type named after the assembly, and silently skips an assembly that has none. " +
                     "If the project relies on InitializePlugins() alone, they were never enabled, and each needs " +
                     "its own Initialize call in the module initializer."));
-        }
-
-        var unsupported = selected
-            .Where(_ => !_.Supports(framework))
-            .Select(_ => (_.Id, _.UnsupportedTestFrameworks.First(framework2 => framework2.Framework == framework).Reason))
-            .ToList();
-        foreach (var (id, reason) in unsupported)
-        {
-            notices.Add(
-                new(
-                    "test-framework-unsupported",
-                    Severity.Warning,
-                    [id],
-                    $"{id} has no samples for {framework.Name()}: {reason} Everything else is still generated."));
         }
 
         foreach (var definition in selected)

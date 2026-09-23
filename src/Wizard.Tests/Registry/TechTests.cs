@@ -94,16 +94,15 @@ public class TechTests
         await Assert.That(state.Has("SqlServer")).IsFalse();
     }
 
-    /// <summary>Windows-only recommendations drop to related on another OS (plan 10).</summary>
+    /// <summary>Windows-only extensions cannot be selected on another OS, so they are not suggested there (plan 10).</summary>
     [Test]
-    public async Task WindowsOnlyRecommendationsAreOnlyRelatedElsewhere()
+    public async Task WindowsOnlyExtensionsAreNotSuggestedElsewhere()
     {
         var state = GeneratorTests.State(os: Os.Linux, ide: Ide.Rider);
         TechSuggestions.Choose(state, "wpf", true);
 
         await Assert.That(state.Has("Xaml")).IsFalse();
-        var xaml = TechSuggestions.For(state).Single(_ => _.ExtensionId == "Xaml");
-        await Assert.That(xaml.Recommended).IsFalse();
+        await Assert.That(TechSuggestions.For(state).Select(_ => _.ExtensionId)).DoesNotContain("Xaml");
     }
 
     [Test]

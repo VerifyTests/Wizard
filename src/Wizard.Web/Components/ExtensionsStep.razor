@@ -34,7 +34,6 @@
             @foreach (var suggestion in suggested)
             {
                 <ExtensionCard Definition="Extensions.ById[suggestion.ExtensionId]"
-                               Framework="Framework"
                                Selected="State.Has(suggestion.ExtensionId)"
                                Existing="State.IsExisting(suggestion.ExtensionId)"
                                Tag="@Tag(suggestion)"
@@ -52,9 +51,9 @@
             @foreach (var definition in category)
             {
                 <ExtensionCard Definition="definition"
-                               Framework="Framework"
                                Selected="State.Has(definition.Id)"
                                Existing="State.IsExisting(definition.Id)"
+                               Unavailable="@State.Unavailable(definition.Id)"
                                SelectedChanged="_ => Toggle(definition.Id, _)" />
             }
         </div>
@@ -70,7 +69,6 @@
     IReadOnlyList<InteractionResult> interactions = [];
     IReadOnlyList<Suggestion> suggested = [];
 
-    TestFramework Framework => State.TestFramework ?? TestFramework.XunitV3;
 
     protected override void OnParametersSet()
     {

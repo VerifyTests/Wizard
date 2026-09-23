@@ -8,8 +8,8 @@ public sealed record Suggestion(string ExtensionId, bool Recommended, IReadOnlyL
 public static class TechSuggestions
 {
     /// <summary>
-    /// The extensions the stack suggests, in registry order. A Windows-only extension is only
-    /// recommended when the chosen OS is Windows or unknown; elsewhere it is still listed, as related.
+    /// The extensions the stack suggests, in registry order. A Windows-only extension is left out when
+    /// the chosen OS is not Windows, since it cannot be selected there.
     /// Verify.DiffPlex is recommended in every new project, and Verify.Terminal is listed alongside it.
     /// </summary>
     public static IReadOnlyList<Suggestion> For(WizardState state)
@@ -31,12 +31,6 @@ public static class TechSuggestions
         {
             foreach (var id in tech.Recommended)
             {
-                if (Downgraded(state, id))
-                {
-                    Note(related, id, tech.DisplayName);
-                    continue;
-                }
-
                 Note(recommended, id, tech.DisplayName);
             }
 
@@ -53,7 +47,7 @@ public static class TechSuggestions
         }
 
         var suggestions = new List<Suggestion>();
-        foreach (var definition in Extensions.All)
+        foreach (var definition in Extensions.All.Where(_ => state.Unavailable(_.Id) == null))
         {
             if (recommended.TryGetValue(definition.Id, out var because))
             {
@@ -69,10 +63,6 @@ public static class TechSuggestions
 
         return suggestions;
     }
-
-    static bool Downgraded(WizardState state, string extensionId) =>
-        state.Os is Os.MacOS or Os.Linux &&
-        Extensions.ById[extensionId].Platform == Platform.WindowsOnly;
 
     /// <summary>
     /// Chooses or unchooses a tech, and updates the selection to match: choosing one selects what it
@@ -93,7 +83,7 @@ public static class TechSuggestions
         {
             techs.Add(techId);
             state.Techs = techs;
-            foreach (var id in tech.Recommended.Where(_ => !Downgraded(state, _)))
+            foreach (var id in tech.Recommended.Where(_ => state.Unavailable(_) == null))
             {
                 if (state.IsExisting(id) ||
                     WouldConflict(state, id))

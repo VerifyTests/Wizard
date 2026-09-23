@@ -318,7 +318,7 @@ Every flow is a linear list of steps; each step is a Razor component bound to `W
 1. **Operating system** (Windows / MacOS / Linux). Same as today.
 2. **IDE** (filtered by OS as `WizardGen.GetIdesForOs`, plus VS Code on every OS).
 3. **CLI or GUI preference**. Same text as today ("This will affect the approach to installing NuGet packages and snapshot management options").
-4. **Test framework** (xUnit v3, NUnit, TUnit, MSTest, Fixie, Expecto). Show one-line notes: Fixie has no MTP runner; Expecto is F#; MSTest needs `[UsesVerify]`.
+4. **Test framework** (xUnit v3, NUnit, TUnit, MSTest, Fixie, Expecto). Names only: the notes that were planned here (MTP, F#, `[UsesVerify]`) added nothing to the choice, and the guide covers each.
 5. **Build server** (GitHub Actions, Azure DevOps, AppVeyor, none).
 6. **Tech stack** (optional, multi-select chips grouped by category; persisted). Skippable with "I just want the basics". Selecting tech pre-checks extensions on the next step.
 7. **Extensions** (multi-select cards grouped by category; suggested ones pre-checked and shown first under "Suggested for your stack", the rest under "Everything else"). Verify.DiffPlex is pre-checked always. Cards show badges: Windows only, licence required, external tool required, needs running service, beta, net10 only. Interaction notices appear inline as soon as two interacting extensions are both checked (section 11).
@@ -548,7 +548,7 @@ Extension usings go in each test file, never in global usings. The three browser
 | Testing | Assertion libraries inside snapshots (`assertions`) | Assertions | |
 | Testing | Long parameterised test names (`longnames`) | ParametersHashing | |
 
-Universal: `DiffPlex` is always recommended; `Terminal` is recommended when CLI preference is Cli (new flow) and always listed. Windows-only recommendations (LocalDb, Xaml, WinForms, Phash) are downgraded to `Related` when the chosen OS is MacOS or Linux.
+Universal: `DiffPlex` is always recommended; `Terminal` is recommended when CLI preference is Cli (new flow) and always listed. Windows-only extensions (LocalDb, Xaml, WinForms, Phash) are not suggested when the chosen OS is MacOS or Linux; on the extension step they are greyed out, cannot be selected, and say why on hover, and the `windows-only` notice is gone with them.
 
 The tech step renders groups as headed chip sets; the extension step shows "Suggested for your stack" first (recommended checked, related unchecked but listed with a "related" tag), then "Everything else" grouped by `ExtensionCategory`.
 
@@ -620,7 +620,7 @@ ImageMagick appears in two groups.
 | `licence-required` | Aspose (`AsposeLicense`), Syncfusion (`SyncfusionLicense`), EmailPreviewServices (`EmailPreviewServicesApiKey`), QuestPDF (`Settings.License = LicenseType.Community` or key) | Warning | generated ModuleInitializer reads the environment variable and throws a clear message; docs and CI workflow mention the secret |
 | `external-tool` | ImageMagick pdf (Ghostscript), Pandoc (pandoc), Playwright (`installPlaywright: true` or `playwright.ps1 install`), Selenium (chromedriver), Puppeteer (`BrowserFetcher`), Cosmos (emulator), RavenDB (embedded server download), LocalDb (SqlLocalDB) | Warning | docs "Before running" section; CI workflow steps where automatable (Playwright install, `choco install ghostscript.app`) |
 | `paid-service` | EmailPreviewServices | Warning | tests generated as `[Explicit]`/skipped by default (framework-specific attribute) |
-| `test-framework-unsupported` | Avalonia headless with TUnit/MSTest/Fixie/Expecto; LocalDb base class with Fixie/Expecto; MSTest `[UsesVerify]` requirement | Warning | generate what is possible, explain the gap |
+| `test-framework-unsupported` | Avalonia headless with TUnit/MSTest/Fixie/Expecto; LocalDb base class with Fixie/Expecto; MSTest `[UsesVerify]` requirement | — | replaced: the extension step greys the extension out and says why on hover, and it cannot be selected for that framework |
 | `net10-only` | AspNetCore, Blazor, Bunit, Avalonia, Diagnostics, OpenTelemetry, PDFium, Flurl, Http, NServiceBus, HeadlessBrowsers, EmailPreviewServices, EntityFramework (EF Core) | Info | irrelevant while the emitted TFM is `net10.0`; keep the data so a future TFM change surfaces it |
 | `beta-package` | any registry entry with `Beta` or when the live lookup finds only prereleases | Info | mention in docs |
 
@@ -657,7 +657,6 @@ All generation is in `Wizard.Core/Generation`, pure, and snapshot-tested. Every 
   readme.md                         the generated guide (same markdown as the page)
   CLAUDE.md                         AI context (12.6)
   .github/copilot-instructions.md   same content as CLAUDE.md
-  .claude/skills/verify-snapshot-testing/SKILL.md   Verify's ai-usage skill text (Appendix A)
   .github/workflows/build.yml       when GitHub Actions: setup-dotnet with global-json-file, build, test per project, upload **/*.received.* on failure (build-server-githubactions include), Windows job when a Windows test project exists, Playwright install / Ghostscript / secrets steps per external requirement; `--report-trx` is never passed when LocalDb is selected (11.2 `ef-localdb`)
   azure-pipelines.yml               when Azure DevOps (build-server-azuredevops include)
   appveyor.yml                      when AppVeyor (build-server-appveyor include)
@@ -780,12 +779,12 @@ verify-additions/
 1. Purpose line ("Instructions for an AI coding assistant working in this repository / applying these changes"), generated-by link.
 2. **Project facts**: test framework, runner command per project (`dotnet test`, `dotnet run --project`, Fixie), TFM/SDK, CPM, the list of Verify packages and versions, the extensions and their depth, the interaction decisions taken (from `InteractionResult`s, as imperative statements: "Do not enable recording in Verify.SqlServer; Verify.EntityFramework owns it").
 3. **Verify context** – the Verify `ai-usage` context-file template (Appendix A) with the framework-specific test command substituted and the inline-snapshot section dropped when not enabled (inline is still marked beta in the docs; it is not enabled by the wizard).
-4. **Handling snapshot failures** – covered by the context template; the skill text (Appendix A) ships as its own file, `.claude/skills/verify-snapshot-testing/SKILL.md`, rather than being repeated here.
+4. **Handling snapshot failures** – covered by the context template. The zip ships no `.claude` directory (no skill file): the context file in `CLAUDE.md` and `copilot-instructions.md` is enough, and a tool-specific directory in a starter solution is clutter.
 5. **For the Add flow only**: an ordered task list for the merge (add PackageVersion lines; add PackageReference lines; merge ModuleInitializer respecting order; copy tests; run; accept first snapshots after review), each pointing at the fragment file.
 6. **Extension cheat sheet** – for each selected extension: the enable call, the 3–5 most important APIs (minimal samples' method signatures), the snapshot key names it uses (`ef`, `sql`, `httpCall`, `log`, `activity`), and its gotchas.
 7. **Environment**: `DiffEngine_Disabled=true`; licence environment variables required; tools required.
 
-The skill file (`.claude/skills/verify-snapshot-testing/SKILL.md`) is emitted verbatim from Verify's ai-usage doc.
+No skill file is emitted (see item 4).
 
 ---
 
@@ -900,7 +899,7 @@ Diff each `Content/*.md` against `https://raw.githubusercontent.com/VerifyTests/
 As built (phase 5): `ContentDriftTests`, run each Monday by `content-drift.yml`.
 
 - The include files are verbatim copies, so each is compared with its original for equality.
-- `skill.md` and `context.md` are the two templates in `ai-usage.source.md` without the inline snapshot sections, and the core samples are adapted to the generated solution. These are not compared with the wizard's text. Instead the upstream file is snapshot as it was when the wizard's copy was last brought in line, so a failure shows exactly what changed upstream.
+- `context.md` is the context file template in `ai-usage.source.md` without the inline snapshot sections, and the core samples are adapted to the generated solution. These are not compared with the wizard's text. Instead the upstream file is snapshot as it was when the wizard's copy was last brought in line, so a failure shows exactly what changed upstream.
 - Extension samples are not compared with their readmes. The registry's samples are already corrected where the readmes are wrong (§21, A15), so a diff would always fail; the integration build (17.4) catches the API drift that matters.
 
 ---
@@ -1153,7 +1152,7 @@ Copy the current text of each into `Wizard.Core/Content/` (same file names) and 
 | `pure.include.md` | Rider / ReSharper `.editorconfig` |
 | `rider-resharper-orphaned-process.include.md` | Rider / ReSharper (`.slnx.DotSettings`) |
 | `build-server-githubactions.include.md`, `build-server-azuredevops.include.md`, `build-server-appveyor.include.md` | build server files and guide §13 |
-| `ai-usage.source.md` | AI markdown and `SKILL.md` (strip the inline-snapshot beta sections unless enabled) |
+| `ai-usage.source.md` | AI markdown (strip the inline-snapshot beta sections unless enabled) |
 | `maintenance-fee.source.md` | sponsor step texts and guide §14 |
 | `plugins.source.md` | "Enabling plugins" explanation in the ModuleInitializer section |
 | `plugin-list.include.md` | "Other community extensions" links (D20) |

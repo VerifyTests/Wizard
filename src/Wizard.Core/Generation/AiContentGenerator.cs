@@ -167,9 +167,6 @@ public static class AiContentGenerator
         return text;
     }
 
-    /// <summary>The Verify skill file (plan 12.6), for .claude/skills/verify-snapshot-testing/SKILL.md.</summary>
-    public static string Skill() =>
-        ContentFiles.Raw("skill.md");
 
     static string LanguageNote(Plan plan)
     {

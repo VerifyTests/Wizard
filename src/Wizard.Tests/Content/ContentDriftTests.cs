@@ -35,8 +35,8 @@ public class ContentDriftTests
     }
 
     /// <summary>
-    /// Sources the wizard adapts rather than copies: ai-usage.source.md (skill.md and context.md are its
-    /// two templates, without the inline snapshot sections), the core sample and its target library, and
+    /// Sources the wizard adapts rather than copies: ai-usage.source.md (context.md is its context
+    /// file template, without the inline snapshot sections), the core sample and its target library, and
     /// the Fixie convention. Each is snapshot as it was when the wizard's version was last brought in
     /// line; a failure is the upstream diff, to apply to the wizard's copy before accepting.
     /// </summary>

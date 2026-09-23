@@ -194,9 +194,9 @@ public partial class FlowPage : IDisposable
         new(TestFramework.XunitV3, "xUnit v3"),
         new(TestFramework.NUnit, "NUnit"),
         new(TestFramework.TUnit, "TUnit"),
-        new(TestFramework.MSTest, "MSTest", "Test classes opt in with [UsesVerify]."),
-        new(TestFramework.Fixie, "Fixie", "No Microsoft.Testing.Platform runner, so it uses VSTest."),
-        new(TestFramework.Expecto, "Expecto", "Tests in F#.")
+        new(TestFramework.MSTest, "MSTest"),
+        new(TestFramework.Fixie, "Fixie"),
+        new(TestFramework.Expecto, "Expecto")
     ];
 
     static readonly IReadOnlyList<Choice<BuildServer>> buildServerChoices =

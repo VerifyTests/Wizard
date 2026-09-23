@@ -1010,6 +1010,15 @@ pre.ai-markdown {
     cursor: default;
 }
 
+.extension-card.unavailable {
+    opacity: .45;
+    cursor: not-allowed;
+}
+
+.extension-card.unavailable:hover {
+    border-color: var(--border);
+}
+
 .extension-tag {
     font-size: .8rem;
     color: var(--accent);
@@ -1038,4 +1047,10 @@ pre.ai-markdown {
     font: inherit;
     text-decoration: underline;
     cursor: pointer;
+}
+
+.choice-divider {
+    border: none;
+    border-top: 1px solid var(--border);
+    margin: 1rem 0;
 }

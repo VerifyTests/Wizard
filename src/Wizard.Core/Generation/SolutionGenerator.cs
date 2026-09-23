@@ -55,7 +55,6 @@ public static class SolutionGenerator
         Add("readme.md", guide);
         Add("CLAUDE.md", ai);
         Add(".github/copilot-instructions.md", ai);
-        Add(".claude/skills/verify-snapshot-testing/SKILL.md", AiContentGenerator.Skill());
         if (buildServer is { } definition)
         {
             Add(definition.Path, definition.Content);

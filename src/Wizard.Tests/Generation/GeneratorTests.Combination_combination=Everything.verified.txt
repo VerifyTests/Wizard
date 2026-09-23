@@ -418,7 +418,6 @@ VerifySample.slnx.DotSettings
 readme.md
 CLAUDE.md
 .github/copilot-instructions.md
-.claude/skills/verify-snapshot-testing/SKILL.md
 .github/workflows/build.yml
 src/VerifySample/VerifySample.csproj
 src/VerifySample/ClassBeingTested.cs

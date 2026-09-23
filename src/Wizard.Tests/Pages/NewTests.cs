@@ -112,6 +112,31 @@ public class NewTests : WebTestContext
         await Assert.That(CurrentUrl).Contains("&ext=none");
     }
 
+    /// <summary>A Windows-only extension is greyed out on another OS, says why, and is dropped from the url.</summary>
+    [Test]
+    public async Task WindowsOnlyExtensionsAreUnavailableOffWindows()
+    {
+        var page = Open("new?step=extensions&os=Linux&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=DiffPlex,WinForms");
+        await Assert.That(CurrentUrl).DoesNotContain("WinForms");
+
+        var card = page.Find(".extension-card[data-id=WinForms]");
+        await Assert.That(card.ClassList.Contains("unavailable")).IsTrue();
+        await Assert.That(card.GetAttribute("title")).IsEqualTo("Only runs on Windows, and the operating system chosen is Linux.");
+        await Assert.That(page.Find(".extension-card[data-id=WinForms] input").HasAttribute("disabled")).IsTrue();
+    }
+
+    /// <summary>An extension the chosen test framework cannot run is greyed out too, with the reason.</summary>
+    [Test]
+    public async Task ExtensionsTheFrameworkCannotRunAreUnavailable()
+    {
+        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=TUnit&ci=None&ext=DiffPlex,Avalonia");
+        await Assert.That(CurrentUrl).DoesNotContain("Avalonia");
+
+        var card = page.Find(".extension-card[data-id=Avalonia]");
+        await Assert.That(card.ClassList.Contains("unavailable")).IsTrue();
+        await Assert.That(card.GetAttribute("title")).StartsWith("Not available for TUnit: Avalonia.Headless ships test attributes");
+    }
+
     /// <summary>Two extensions registering the same thing cannot both be generated (plan 11.1).</summary>
     [Test]
     public async Task ConflictingExtensionsBlockNext()
