@@ -1428,7 +1428,8 @@ public static partial class Plugins
                     Url = "https://emailpreviewservices.com/en/pricing",
                     EnvironmentVariable = "EmailPreviewServicesApiKey",
                     CannotRunUnattended = true
-                }
+                },
+                imageSharpLicence
             ],
             Usings = ["VerifyTests.EmailPreviewServices"],
             MinimalSamples =

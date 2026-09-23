@@ -67,3 +67,4 @@ Verify.EmailPreviewServices
 ==== interactions
 
 Warning licence-required: EmailPreviewServices needs An EmailPreviewServices api key: EmailPreviewServices is a paid service. The key is read from the EmailPreviewServicesApiKey environment variable, or passed to Initialize, and the rendering happens over the network.
+Warning licence-required: EmailPreviewServices needs A Six Labors licence: SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey environment variable so it never lands in source control.

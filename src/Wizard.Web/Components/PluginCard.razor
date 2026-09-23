@@ -86,7 +86,15 @@
                     label = "Needs a licence";
                 }
 
-                badges.Add(new(label, $"{requirement.Name}: {requirement.Description}"));
+                var hint = $"{requirement.Name}: {requirement.Description}";
+                var index = badges.FindIndex(_ => _.Label == label);
+                if (index >= 0)
+                {
+                    badges[index] = badges[index] with {Hint = $"{badges[index].Hint}\n{hint}"};
+                    continue;
+                }
+
+                badges.Add(new(label, hint));
             }
 
             if (Definition.Beta)

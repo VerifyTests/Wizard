@@ -27,11 +27,11 @@
 
 @if (choices.Count > 0)
 {
-    <h3>Choices this combination raised</h3>
+    <h3>Choices the selection raised</h3>
     @foreach (var choice in choices)
     {
         <fieldset class="choice" data-choice="@choice.Id">
-            <legend>@choice.Label</legend>
+            <legend>@Legend(choice)</legend>
             <p class="hint">@choice.Hint</p>
             @foreach (var option in choice.Options)
             {
@@ -84,6 +84,19 @@
 
     static int Count(PluginDefinition definition, Depth depth) =>
         definition.SamplesFor(depth).Count();
+
+    // A plugin's own choice names the plugin, since the heading covers every selected plugin.
+    // A choice an interaction rule raises belongs to no single plugin, so it keeps its label.
+    string Legend(PluginChoice choice)
+    {
+        var owner = selected.FirstOrDefault(_ => _.Choices.Contains(choice));
+        if (owner == null)
+        {
+            return choice.Label;
+        }
+
+        return $"{owner.DisplayName}: {choice.Label}";
+    }
 
     string Value(PluginChoice choice) =>
         State.Choices.GetValueOrDefault(choice.Id, choice.Default);

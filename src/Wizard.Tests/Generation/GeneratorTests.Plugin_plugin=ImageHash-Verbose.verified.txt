@@ -100,3 +100,4 @@ Verify.ImageHash
 
 ==== interactions
 
+Warning licence-required: ImageHash needs A Six Labors licence: SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey environment variable so it never lands in source control.

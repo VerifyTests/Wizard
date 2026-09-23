@@ -147,6 +147,18 @@ Aspose needs An Aspose licence: Aspose is commercial. Without a licence its rend
 Warning licence-required [EmailPreviewServices]
 EmailPreviewServices needs An EmailPreviewServices api key: EmailPreviewServices is a paid service. The key is read from the EmailPreviewServicesApiKey environment variable, or passed to Initialize, and the rendering happens over the network.
 
+Warning licence-required [EmailPreviewServices]
+EmailPreviewServices needs A Six Labors licence: SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey environment variable so it never lands in source control.
+
+Warning licence-required [ImageHash]
+ImageHash needs A Six Labors licence: SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey environment variable so it never lands in source control.
+
+Warning licence-required [ImageSharp]
+ImageSharp needs A Six Labors licence: SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey environment variable so it never lands in source control.
+
+Warning licence-required [ImageSharpCompare]
+ImageSharpCompare needs A Six Labors licence: SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey environment variable so it never lands in source control.
+
 Warning licence-required [Syncfusion]
 Syncfusion needs A Syncfusion licence: Syncfusion File Formats is commercial. The key is read from an environment variable so it never lands in source control.
 

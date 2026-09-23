@@ -1,5 +1,18 @@
 public static partial class Plugins
 {
+    /// <summary>
+    /// SixLabors.ImageSharp 4 reads its licence key from the SixLaborsLicenseKey MSBuild property,
+    /// and MSBuild takes an environment variable of the same name as that property.
+    /// </summary>
+    static ExternalRequirement imageSharpLicence = new(
+        "A Six Labors licence",
+        "SixLabors.ImageSharp is under the Six Labors Split License. The key is read from the SixLaborsLicenseKey " +
+        "environment variable so it never lands in source control.")
+    {
+        Url = "https://sixlabors.com/pricing/",
+        EnvironmentVariable = "SixLaborsLicenseKey"
+    };
+
     /// <summary>Entries researched in plan-research/plugin-catalogue-B.md.</summary>
     static IReadOnlyList<PluginDefinition> CatalogueB =>
     [
@@ -428,6 +441,7 @@ public static partial class Plugins
             Category = PluginCategory.Images,
             Packages = [new("Verify.ImageHash")],
             PluginType = "VerifyImageHash",
+            ExternalRequirements = [imageSharpLicence],
             Phase = InitializePhase.Comparers,
             ExclusiveGroups = ["image-comparer"],
             Initialize =
@@ -716,6 +730,7 @@ public static partial class Plugins
             Category = PluginCategory.Images,
             Packages = [new("Verify.ImageSharp")],
             PluginType = "VerifyImageSharp",
+            ExternalRequirements = [imageSharpLicence],
             RetiredBy = "U17",
             Initialize =
             [
@@ -816,6 +831,7 @@ public static partial class Plugins
             Category = PluginCategory.Images,
             Packages = [new("Verify.ImageSharp.Compare")],
             PluginType = "VerifyImageSharpCompare",
+            ExternalRequirements = [imageSharpLicence],
             Phase = InitializePhase.Comparers,
             RetiredBy = "U7",
             ExclusiveGroups = ["image-comparer"],
