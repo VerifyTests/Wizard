@@ -1529,7 +1529,9 @@ public static partial class Extensions
             VerboseSamples =
             [
                 new(
-                    "Recording",
+                    // Not named Recording: a method by that name would hide Verify's Recording type,
+                    // which the body calls Start() on.
+                    "RecordHandlerContext",
                     """
                     Recording.Start();
                     var handler = new MyHandler();
@@ -1991,7 +1993,6 @@ public static partial class Extensions
                     options.AddArgument("--disable-lcd-text");
                     using var driver = new ChromeDriver(options);
                     driver.Navigate().GoToUrl("http://localhost:5000");
-                    driver.WaitForIsReady();
 
                     await Verify(driver);
                     """)
@@ -2001,8 +2002,8 @@ public static partial class Extensions
                     Comment =
                     [
                         "Two files are written: the page html and a png screenshot.",
-                        "WaitForIsReady comes with the package and blocks until the document has finished loading,",
-                        "which is what keeps the html from being captured half rendered."
+                        "The converter waits for document.readyState itself before capturing, so nothing here has",
+                        "to poll for the page to finish loading."
                     ]
                 }
             ],
@@ -2017,7 +2018,6 @@ public static partial class Extensions
                     options.AddArgument("--headless=new");
                     using var driver = new ChromeDriver(options);
                     driver.Navigate().GoToUrl("http://localhost:5000");
-                    driver.WaitForIsReady();
 
                     await Verify(driver.FindElement(By.Id("someId")));
                     """)
@@ -2026,8 +2026,8 @@ public static partial class Extensions
                     SkipReason = "needs Chrome and a matching chromedriver, and the site under test listening on http://localhost:5000",
                     Comment =
                     [
-                        "An element narrows the snapshot to one part of the page. GetSource() returns the same",
-                        "markup as a string, for a test that wants to assert on it instead."
+                        "An element narrows the snapshot to one part of the page, so an unrelated change",
+                        "elsewhere on it never touches this test's snapshot."
                     ]
                 }
             ],
@@ -2038,6 +2038,7 @@ public static partial class Extensions
                 "`--disable-lcd-text` makes text rendering reproducible; existing screenshots have to be re-accepted once after adding it.",
                 "The `Selenium.WebDriver.ChromeDriver` package puts a chromedriver in the output directory, so nothing has to be on the PATH, but its version has to match the installed Chrome.",
                 "`SocketWaiter` is defined separately by each of the three headless browser packages, here in `VerifyTests.Selenium`.",
+                "`WaitForIsReady()` and `GetSource()` are internal to the package. The converter calls them before capturing, so a test never has to wait for the page itself.",
                 "The assembly is not strong named, and the package targets net10.0 only."
             ]
         }

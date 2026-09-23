@@ -90,11 +90,21 @@ public class GeneratorTests
     [Test]
     public async Task VerifiedFileHasBomAndNoTrailingNewline()
     {
-        var files = SolutionGenerator.Build(PlanFor(State()));
-        var verified = files.Single(_ => _.Path.EndsWith(".verified.txt", StringComparison.Ordinal));
-        var bytes = verified.ToBytes();
-        await Assert.That(bytes.Take(3).SequenceEqual(new byte[] {0xEF, 0xBB, 0xBF})).IsTrue();
-        await Assert.That(bytes[^1]).IsEqualTo((byte) '}');
+        var files = SolutionGenerator.Build(PlanFor(State()))
+            .Where(_ => _.Path.EndsWith(".verified.txt", StringComparison.Ordinal))
+            .ToList();
+        // The core sample's snapshot, and any extension sample whose output is known (plan D6).
+        await Assert.That(files).IsNotEmpty();
+        foreach (var file in files)
+        {
+            var bytes = file.ToBytes();
+            await Assert.That(bytes.Take(3).SequenceEqual(new byte[] {0xEF, 0xBB, 0xBF}))
+                .IsTrue()
+                .Because($"{file.Path} should start with a byte order mark");
+            await Assert.That((char) bytes[^1])
+                .IsNotEqualTo('\n')
+                .Because($"{file.Path} should have no trailing newline");
+        }
     }
 
     public static IEnumerable<Func<(string Name, WizardState State)>> SponsorStates()

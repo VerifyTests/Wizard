@@ -32,8 +32,9 @@ public static partial class Extensions
                     ]
                 }
             ],
-            // AngleSharp.Diffing.Core holds FilterDecision and ComparisonSource, which a filter needs.
-            Usings = ["AngleSharp.Diffing.Core", "VerifyTests.AngleSharp"],
+            // AngleSharp.Diffing.Core holds FilterDecision and ComparisonSource, which a filter needs,
+            // and AngleSharp.Diffing holds AddDefaultOptions, an extension method on the collection.
+            Usings = ["AngleSharp.Diffing", "AngleSharp.Diffing.Core", "VerifyTests.AngleSharp"],
             MinimalSamples =
             [
                 new(
@@ -172,7 +173,10 @@ public static partial class Extensions
                     }
                     """)
             ],
+            // The sample controller lives in the class library, which otherwise knows nothing about
+            // ASP.NET Core, so the reference is needed there as well as in the tests.
             ProjectItems = ["<FrameworkReference Include=\"Microsoft.AspNetCore.App\" />"],
+            LibraryProjectItems = ["<FrameworkReference Include=\"Microsoft.AspNetCore.App\" />"],
             Usings = ["Microsoft.AspNetCore.Http", "Microsoft.AspNetCore.Mvc"],
             MinimalSamples =
             [
@@ -639,7 +643,7 @@ public static partial class Extensions
                     }
 
                     public class BrighterCommand(string value) :
-                        Command(Id.Random)
+                        Command(Id.Random())
                     {
                         public string Value { get; } = value;
                     }
@@ -1314,7 +1318,11 @@ public static partial class Extensions
                     [
                         "The module initializer sets the mode for every test. UseDiffPlex overrides it for one,",
                         "which is useful when a single snapshot is easier to read in full."
-                    ]
+                    ],
+                    // Verifying a string writes it verbatim, so the snapshot is known and can ship.
+                    // Verify.DiffPlex is selected by default, and a download whose first test run fails
+                    // is a poor way to meet a tool.
+                    VerifiedOutput = "The text"
                 }
             ],
             Notes =

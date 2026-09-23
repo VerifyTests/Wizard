@@ -66,3 +66,4 @@ Verify.Pandoc
 
 Warning external-tool: Pandoc needs Pandoc: PandocNet shells out to the pandoc executable, so pandoc has to be installed on the machine running the tests.
 Warning external-tool: Pandoc needs Papyrine sponsorship declaration: The Pandoc package this depends on ships a second SponsorCheck gate, for the owner Papyrine. Without Papyrine_ prefixed sponsorship properties the build fails, on top of Verify's own Verify_ properties.
+Warning transitive-sponsorship: Pandoc carries an Open Source Maintenance Fee check of its own, for Papyrine, and Papyrine does not offer the exemption claimed for Verify, and accepts only SmallRevenue and MaintainerConsulting. The generated Directory.Build.props has that owner's options commented out; until one is chosen the build fails with SC021.

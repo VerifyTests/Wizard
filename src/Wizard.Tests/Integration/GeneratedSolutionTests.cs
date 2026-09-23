@@ -24,8 +24,15 @@ public class GeneratedSolutionTests
         var received = Directory.EnumerateFiles(directory, "*.received.*", SearchOption.AllDirectories).ToList();
         await Assert.That(received).IsEmpty();
 
-        // An undiscovered test is not a failure, so count them: the sample and the conventions check.
-        await Assert.That(PassedCount(output)).IsEqualTo(2).Because(output);
+        // An undiscovered test is not a failure, so count them: the core sample, the conventions check,
+        // and every extension sample that ships its snapshot. The default selection is Verify.DiffPlex,
+        // whose sample verifies a literal string, so a first run of the download is green.
+        var expected = 2 + Plan
+            .Build(State(framework), PackageVersions.Baked, Date.FromDateTime(DateTime.UtcNow))
+            .Extensions
+            .SelectMany(_ => _.Samples)
+            .Count(_ => _.VerifiedOutput != null);
+        await Assert.That(PassedCount(output)).IsEqualTo(expected).Because(output);
     }
 
     /// <summary>
@@ -98,7 +105,10 @@ public class GeneratedSolutionTests
             BuildServer = BuildServer.GitHubActions,
             SolutionName = "VerifySample",
             SponsorMode = SponsorMode.Exempt,
-            Exemption = Exemption.OpenSource
+            // SmallRevenue rather than OpenSource: a few extensions depend on a package with a
+            // maintenance fee check of its own, and not every owner offers an open source exemption,
+            // so the declaration would not carry over and the build would stop for a decision.
+            Exemption = Exemption.SmallRevenue
         };
         SponsorRules.ApplyDefaults(state, Date.FromDateTime(DateTime.UtcNow));
         return state;

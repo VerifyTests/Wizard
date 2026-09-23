@@ -90,3 +90,4 @@ src/VerifySample.Tests/VerifyChecksTests.cs
 src/VerifySample.Tests/Extensions/AngleSharpTests.cs
 src/VerifySample.Tests/Extensions/BunitTests.cs
 src/VerifySample.Tests/Extensions/DiffPlexTests.cs
+src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt

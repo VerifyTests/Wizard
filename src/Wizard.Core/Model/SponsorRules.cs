@@ -123,7 +123,11 @@ public static class SponsorRules
     }
 
     /// <summary>The <c>Verify_*</c> properties for the chosen mode; empty for <see cref="SponsorMode.NotChosen"/>.</summary>
-    public static IReadOnlyList<(string Name, string Value)> Properties(WizardState state)
+    /// <param name="prefix">
+    /// The owner's property prefix. Defaults to Verify's; another owner's gate reads the same property
+    /// names under its own prefix (plan A8).
+    /// </param>
+    public static IReadOnlyList<(string Name, string Value)> Properties(WizardState state, string prefix = Prefix)
     {
         switch (state.SponsorMode)
         {
@@ -143,24 +147,25 @@ public static class SponsorRules
                     properties.Add(("SponsorshipStart", start.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)));
                 }
 
-                return Prefixed(properties);
+                return Prefixed(properties, prefix);
             case SponsorMode.Exempt:
                 return Prefixed(
                 [
                     ("SponsorshipExemption", state.Exemption?.ToString() ?? ""),
                     ("SponsorshipExemptionUntil", state.SponsorUntil)
-                ]);
+                ],
+                    prefix);
             case SponsorMode.PrivateArrangement:
-                return Prefixed([("SponsorshipLicensedUntil", state.SponsorUntil)]);
+                return Prefixed([("SponsorshipLicensedUntil", state.SponsorUntil)], prefix);
             case SponsorMode.Ignore:
-                return Prefixed([("SponsorshipLicenseIgnored", "true")]);
+                return Prefixed([("SponsorshipLicenseIgnored", "true")], prefix);
             default:
                 return [];
         }
     }
 
-    static IReadOnlyList<(string Name, string Value)> Prefixed(List<(string Name, string Value)> properties) =>
-        properties.Select(_ => (Prefix + _.Name, _.Value)).ToList();
+    static IReadOnlyList<(string Name, string Value)> Prefixed(List<(string Name, string Value)> properties, string prefix) =>
+        properties.Select(_ => (prefix + _.Name, _.Value)).ToList();
 
     /// <summary>What the first build does with the declaration, in the words the guide uses.</summary>
     public static string Outcome(WizardState state) =>

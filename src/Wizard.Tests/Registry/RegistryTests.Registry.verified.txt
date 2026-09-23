@@ -13,6 +13,7 @@
       VerifyAngleSharpDiffing.Initialize();
     ],
     Usings: [
+      AngleSharp.Diffing,
       AngleSharp.Diffing.Core,
       VerifyTests.AngleSharp
     ],
@@ -835,7 +836,7 @@
       HandlerContext
     ],
     Verbose: [
-      Recording,
+      RecordHandlerContext,
       MessageToHandlerMap
     ]
   },
@@ -1362,8 +1363,10 @@
     PluginType: VerifySourceGenerators,
     DiscoveredByInitializePlugins: true,
     Usings: [
+      System.Text,
       Microsoft.CodeAnalysis,
-      Microsoft.CodeAnalysis.CSharp
+      Microsoft.CodeAnalysis.CSharp,
+      Microsoft.CodeAnalysis.Text
     ],
     Minimal: [
       Driver
@@ -1547,6 +1550,9 @@
     ],
     PluginType: VerifyWolverine,
     DiscoveredByInitializePlugins: true,
+    Usings: [
+      VerifyTests.Wolverine
+    ],
     Minimal: [
       HandlerSends
     ],
@@ -1565,6 +1571,10 @@
     ],
     PluginType: VerifyXaml,
     DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Windows,
+      System.Windows.Controls
+    ],
     Minimal: [
       WindowUsage
     ],

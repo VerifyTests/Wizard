@@ -94,6 +94,20 @@ public sealed record Plan(
                 .Distinct(StringComparer.Ordinal)
         ];
 
+    /// <summary>
+    /// SponsorCheck owners other than VerifyTests whose gates the selected packages bring in, so the
+    /// generated declaration covers each of them (plan A8).
+    /// </summary>
+    public IReadOnlyList<SponsorOwner> SponsorOwners =>
+        [
+            .. Extensions
+                .SelectMany(_ => _.Packages)
+                .Select(_ => _.SponsorOwner)
+                .OfType<SponsorOwner>()
+                .DistinctBy(_ => _.Prefix)
+                .OrderBy(_ => _.Prefix, StringComparer.Ordinal)
+        ];
+
     public string Version(string packageId) => Versions[packageId];
 
     /// <summary>

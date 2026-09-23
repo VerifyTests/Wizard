@@ -208,41 +208,21 @@ public static partial class Extensions
                 new("Verify.SourceGenerators"),
                 new("Microsoft.CodeAnalysis.CSharp")
                 {
-                    ForLibrary = true,
-                    Comment = "the sample generator in the class library is written against it"
+                    Comment = "the sample generator and the driver that runs it are written against it"
                 }
             ],
             PluginType = "VerifySourceGenerators",
-            Usings = ["Microsoft.CodeAnalysis", "Microsoft.CodeAnalysis.CSharp"],
-            LibraryFiles =
+            // RS1036 and RS1041 police assemblies that ship as a real analyzer: one wants
+            // EnforceExtendedAnalyzerRules, the other a netstandard2.0 target. This generator is only
+            // ever constructed in process by CSharpGeneratorDriver, never packaged or loaded by the
+            // compiler, so neither applies, and the build treats warnings as errors.
+            ProjectProperties = [("NoWarn", "$(NoWarn);RS1036;RS1041")],
+            Usings =
             [
-                new(
-                    "HelloWorldGenerator.cs",
-                    """"
-                    using System.Text;
-                    using Microsoft.CodeAnalysis;
-                    using Microsoft.CodeAnalysis.Text;
-
-                    // Stands in for a real generator. SourceGeneratorsTests runs it and snapshots its output.
-                    [Generator(LanguageNames.CSharp)]
-                    public class HelloWorldGenerator :
-                        IIncrementalGenerator
-                    {
-                        public void Initialize(IncrementalGeneratorInitializationContext context) =>
-                            context.RegisterPostInitializationOutput(
-                                _ => _.AddSource(
-                                    "helloWorld.cs",
-                                    SourceText.From(
-                                        """
-                                        public static class HelloWorld
-                                        {
-                                            public static void SayHello() =>
-                                                System.Console.WriteLine("Hello World");
-                                        }
-                                        """,
-                                        Encoding.UTF8)));
-                    }
-                    """")
+                "System.Text",
+                "Microsoft.CodeAnalysis",
+                "Microsoft.CodeAnalysis.CSharp",
+                "Microsoft.CodeAnalysis.Text"
             ],
             MinimalSamples =
             [
@@ -273,7 +253,29 @@ public static partial class Extensions
                             var driver = CSharpGeneratorDriver.Create(generator);
                             return driver.RunGenerators(compilation);
                         }
-                        """
+                        """,
+                        """"
+                        // Stands in for a generator of your own. Nested here rather than in the class library
+                        // so that the analyzer rules for a shipped generator stay confined to this project.
+                        [Generator(LanguageNames.CSharp)]
+                        class HelloWorldGenerator :
+                            IIncrementalGenerator
+                        {
+                            public void Initialize(IncrementalGeneratorInitializationContext context) =>
+                                context.RegisterPostInitializationOutput(
+                                    _ => _.AddSource(
+                                        "helloWorld.cs",
+                                        SourceText.From(
+                                            """
+                                            public static class HelloWorld
+                                            {
+                                                public static void SayHello() =>
+                                                    System.Console.WriteLine("Hello World");
+                                            }
+                                            """,
+                                            Encoding.UTF8)));
+                        }
+                        """"
                     ]
                 }
             ],
@@ -349,7 +351,9 @@ public static partial class Extensions
                 "The package ships an MSBuild targets file that takes `*.received.cs` and `*.verified.cs` out of `Compile` and nests them, so a generated snapshot is never compiled into the test project. Do not add a `Compile Remove` for them.",
                 "The output extension comes from the generated file's path: a `.vb` hint name produces a `vb` target, anything else a `cs` one.",
                 "An exception thrown by a generator is rethrown rather than snapshotted, singly or as an `AggregateException`.",
-                "`Microsoft.CodeAnalysis.CSharp` is pinned to the version the package was built against, so the generator compiles against the same Roslyn the driver runs."
+                "`Microsoft.CodeAnalysis.CSharp` is pinned to the version the package was built against, so the generator compiles against the same Roslyn the driver runs.",
+                "Referencing `Microsoft.CodeAnalysis.CSharp` turns on the analyzer authoring rules. `RS1036` and `RS1041` both assume the assembly ships as a real analyzer, which this one never does: it is only constructed in process by `CSharpGeneratorDriver`. Both are in `NoWarn` for that reason. A generator you do ship belongs in its own `netstandard2.0` project with `EnforceExtendedAnalyzerRules`.",
+                "The sample generator is nested in the test class rather than put in the class library, so those analyzer rules never reach the code under test."
             ]
         },
         new()
@@ -1105,6 +1109,8 @@ public static partial class Extensions
             // Initialize() only sets Initialized: it registers nothing, so there is nothing to order and
             // nothing to pass. Plugin discovery calls it, and the samples work either way.
             Initialize = [],
+            // RecordingMessageContext is in VerifyTests.Wolverine, not in the Wolverine namespace.
+            Usings = ["VerifyTests.Wolverine"],
             LibraryFiles =
             [
                 new(
@@ -1219,6 +1225,9 @@ public static partial class Extensions
             Packages = [new("Verify.Xaml")],
             PluginType = "VerifyXaml",
             ProjectProperties = [("UseWPF", "true")],
+            // UseWPF only brings the assemblies in; Window and TextBlock still need their namespaces,
+            // and the WPF ones are not among the SDK's implicit usings.
+            Usings = ["System.Windows", "System.Windows.Controls"],
             Platform = Platform.WindowsOnly,
             UnsupportedTestFrameworks =
             [

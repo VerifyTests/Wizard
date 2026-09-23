@@ -8,8 +8,10 @@ public static class SponsorXml
     public const string SponsorsPage = "https://github.com/sponsors/VerifyTests";
 
     /// <summary>The comment and property group, each line prefixed with <paramref name="indent"/>, ending with a newline.</summary>
-    public static string Block(WizardState state, string indent)
+    /// <param name="owners">Other SponsorCheck owners whose gates the selected packages bring in (plan A8).</param>
+    public static string Block(WizardState state, string indent, IReadOnlyList<SponsorOwner>? owners = null)
     {
+        owners ??= [];
         var builder = new StringBuilder();
         void Line(string text = "")
         {
@@ -31,6 +33,7 @@ public static class SponsorXml
         if (properties.Count == 0)
         {
             AppendAllOptionsCommented(Line);
+            AppendUndecidedOwners(owners, Line);
             return builder.ToString();
         }
 
@@ -40,7 +43,88 @@ public static class SponsorXml
             Line(line);
         }
 
+        AppendOtherOwners(state, owners, Line);
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// Some packages the wizard can emit depend on another package with a SponsorCheck gate of its own,
+    /// under its own property prefix (plan A8). Without a declaration for each, the build fails with
+    /// SC021 naming that owner.
+    /// </summary>
+    /// <remarks>
+    /// An exemption and an opt-out are statements about the consumer, so they hold for every owner
+    /// equally and are repeated. Sponsoring is not: a GitHub account sponsors one project, so that
+    /// block is emitted commented out for the reader to fill in.
+    /// </remarks>
+    static void AppendOtherOwners(WizardState state, IReadOnlyList<SponsorOwner> owners, Action<string> line)
+    {
+        foreach (var owner in owners)
+        {
+            line("");
+            line($"<!-- {owner.Package} carries the same check under its own prefix, for {owner.DisplayName}.");
+
+            if (!Transfers(state, owner))
+            {
+                AppendOwnerUndecided(state, owner, line);
+                continue;
+            }
+
+            line("     The declaration above is about this project rather than about any one package, so it");
+            line("     is repeated here. -->");
+            foreach (var text in MsBuildXml.PropertyGroup(SponsorRules.Properties(state, $"{owner.Prefix}_")).Split('\n'))
+            {
+                line(text);
+            }
+        }
+    }
+
+    /// <summary>
+    /// Whether the declaration made for Verify says anything true about another owner. Opting out and a
+    /// private arrangement are about this project, so they carry over. A sponsorship does not: a GitHub
+    /// account sponsors one project. An exemption carries only when that owner offers the same one.
+    /// </summary>
+    public static bool Transfers(WizardState state, SponsorOwner owner) =>
+        state.SponsorMode switch
+        {
+            SponsorMode.Exempt => owner.Accepts(state.Exemption),
+            SponsorMode.PrivateArrangement => true,
+            SponsorMode.Ignore => true,
+            _ => false
+        };
+
+    static void AppendOwnerUndecided(WizardState state, SponsorOwner owner, Action<string> line)
+    {
+        if (state.SponsorMode == SponsorMode.Exempt)
+        {
+            line($"     {owner.DisplayName} does not offer the exemption claimed above, so it cannot be");
+            line("     repeated here. The build fails with SC021 until one of these is chosen.");
+        }
+        else
+        {
+            line("     A sponsorship is per project, so this one has to be decided separately. The build");
+            line("     fails with SC021 until it is.");
+        }
+
+        line("     Uncomment and complete exactly one: -->");
+        line("<!-- <PropertyGroup>");
+        line($"       <{owner.Prefix}_GitHubSponsorAccount>your-github-account</{owner.Prefix}_GitHubSponsorAccount>");
+        line("     </PropertyGroup>");
+        foreach (var exemption in owner.Exemptions)
+        {
+            line("");
+            line($"     {SponsorRules.Criteria(exemption)}:");
+            line("     <PropertyGroup>");
+            line($"       <{owner.Prefix}_SponsorshipExemption>{exemption}</{owner.Prefix}_SponsorshipExemption>");
+            line($"       <{owner.Prefix}_SponsorshipExemptionUntil>yyyy-MM</{owner.Prefix}_SponsorshipExemptionUntil>");
+            line("     </PropertyGroup>");
+        }
+
+        line("");
+        line("     Or opt out, which logs a breach-of-license warning on every build:");
+        line("     <PropertyGroup>");
+        line($"       <{owner.Prefix}_SponsorshipLicenseIgnored>true</{owner.Prefix}_SponsorshipLicenseIgnored>");
+        line("     </PropertyGroup> -->");
     }
 
     static string Explanation(WizardState state) =>
@@ -60,6 +144,16 @@ public static class SponsorXml
                 "Opting out. Every build logs an SC023 breach-of-license warning.",
             _ => throw new ArgumentOutOfRangeException(nameof(state), state.SponsorMode, null)
         };
+
+    static void AppendUndecidedOwners(IReadOnlyList<SponsorOwner> owners, Action<string> line)
+    {
+        foreach (var owner in owners)
+        {
+            line("");
+            line($"<!-- {owner.Package} carries the same check for {owner.DisplayName}, under the prefix");
+            line($"     {owner.Prefix}_ instead of Verify_. It needs a declaration of its own too. -->");
+        }
+    }
 
     static void AppendAllOptionsCommented(Action<string> line)
     {

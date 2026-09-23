@@ -73,3 +73,4 @@ DocumentFormat.OpenXml
 
 ==== interactions
 
+Warning transitive-sponsorship: Morph carries an Open Source Maintenance Fee check of its own, for Papyrine, and Papyrine does not offer the exemption claimed for Verify, and accepts only SmallRevenue and MaintainerConsulting. The generated Directory.Build.props has that owner's options commented out; until one is chosen the build fails with SC021.

@@ -71,7 +71,7 @@ public static class ProjectFiles
               </PropertyGroup>
 
             """);
-        builder.Append(SponsorXml.Block(plan.State, "  "));
+        builder.Append(SponsorXml.Block(plan.State, "  ", plan.SponsorOwners));
         builder.Append("</Project>\n");
         return builder.ToString();
     }
@@ -297,12 +297,23 @@ public static class ProjectFiles
                </PropertyGroup>
 
              """);
-        if (plan.LibraryPackages.Count > 0)
+        var items = plan.Extensions
+            .SelectMany(_ => _.Definition.LibraryProjectItems)
+            .Distinct(StringComparer.Ordinal)
+            .ToList();
+        if (plan.LibraryPackages.Count > 0 ||
+            items.Count > 0)
         {
+            builder.Append("  <!-- What the sample types the extensions brought in compile against. -->\n");
             builder.Append("  <ItemGroup>\n");
             foreach (var package in plan.LibraryPackages)
             {
                 builder.Append($"    <PackageReference Include=\"{package}\" />\n");
+            }
+
+            foreach (var item in items)
+            {
+                builder.Append($"    {item}\n");
             }
 
             builder.Append("  </ItemGroup>\n");

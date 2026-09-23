@@ -159,6 +159,9 @@ These packages each define PagesToInclude and SkipPdfNormalization as extension 
 Warning shared-log-name [MicrosoftLogging, Serilog, ZeroLog]
 Every logging extension records under the name log, so their entries interleave in one list and cannot be told apart or ignored separately.
 
+Warning transitive-sponsorship [OpenXml, Pandoc]
+Morph carries an Open Source Maintenance Fee check of its own, for Papyrine, and Papyrine does not offer the exemption claimed for Verify, and accepts only SmallRevenue and MaintainerConsulting. The generated Directory.Build.props has that owner's options commented out; until one is chosen the build fails with SC021.
+
 Info cosmos-etag [AspNetCore, Cosmos, Http]
 Verify.Cosmos ignores the member ETag on every type, not only on Cosmos types, so an ETag on an http response or an ASP.NET Core result is left out of the snapshot too.
 
@@ -437,7 +440,6 @@ src/VerifySample/UlidPerson.cs
 src/VerifySample/WordDocument.cs
 src/VerifySample/ExcelDocument.cs
 src/VerifySample/RavenPerson.cs
-src/VerifySample/HelloWorldGenerator.cs
 src/VerifySample/OrderHandlers.cs
 src/VerifySample.Tests/VerifySample.Tests.csproj
 src/VerifySample.Tests/Sample.Test.verified.txt
@@ -458,6 +460,7 @@ src/VerifySample.Tests/Extensions/CosmosTests.cs
 src/VerifySample.Tests/Extensions/CsvHelperTests.cs
 src/VerifySample.Tests/Extensions/DiagnosticsTests.cs
 src/VerifySample.Tests/Extensions/DiffPlexTests.cs
+src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt
 src/VerifySample.Tests/Extensions/DocNetTests.cs
 src/VerifySample.Tests/Extensions/EmailPreviewServicesTests.cs
 src/VerifySample.Tests/Extensions/EntityFrameworkTests.cs

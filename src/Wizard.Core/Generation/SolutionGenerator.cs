@@ -90,7 +90,7 @@ public static class SolutionGenerator
 
         foreach (var test in ExtensionTestFiles.For(plan, windows: false))
         {
-            Add($"{tests}/{test.Path}", test.Text);
+            Add($"{tests}/{test.Path}", test.Text, test.Bom);
         }
 
         if (plan.HasWindowsProject)
@@ -110,7 +110,7 @@ public static class SolutionGenerator
 
             foreach (var test in ExtensionTestFiles.For(plan, windows: true))
             {
-                Add($"{windows}/{test.Path}", test.Text);
+                Add($"{windows}/{test.Path}", test.Text, test.Bom);
             }
         }
 

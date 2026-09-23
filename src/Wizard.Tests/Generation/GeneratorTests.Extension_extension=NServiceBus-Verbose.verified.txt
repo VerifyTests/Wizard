@@ -63,7 +63,7 @@ public class NServiceBusTests
     // With a recording running, the interactions are appended to whatever is verified instead
     // of being the thing verified, which suits a test whose subject is something else.
     [Fact]
-    public async Task Recording()
+    public async Task RecordHandlerContext()
     {
         Recording.Start();
         var handler = new MyHandler();

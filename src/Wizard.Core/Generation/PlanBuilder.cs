@@ -168,6 +168,42 @@ public static class PlanBuilder
             }
         }
 
+        foreach (var owner in selected.SelectMany(_ => _.Packages).Select(_ => _.SponsorOwner).OfType<SponsorOwner>().DistinctBy(_ => _.Prefix))
+        {
+            var involved = selected
+                .Where(_ => _.Packages.Any(package => package.SponsorOwner?.Prefix == owner.Prefix))
+                .Select(_ => _.Id)
+                .ToList();
+            if (SponsorXml.Transfers(state, owner))
+            {
+                notices.Add(
+                    new(
+                        "transitive-sponsorship",
+                        Severity.Info,
+                        involved,
+                        $"{owner.Package} carries an Open Source Maintenance Fee check of its own, for " +
+                        $"{owner.DisplayName}. The declaration made for Verify is about this project rather " +
+                        "than about one package, so it is repeated under that owner's own property prefix."));
+                continue;
+            }
+
+            var reason = $"a sponsorship is made to one project, so {owner.DisplayName} needs its own";
+            if (state.SponsorMode == SponsorMode.Exempt)
+            {
+                reason = $"{owner.DisplayName} does not offer the exemption claimed for Verify, and accepts only " +
+                         $"{InteractionRules.Join([.. owner.Exemptions.Select(_ => _.ToString())])}";
+            }
+
+            notices.Add(
+                new(
+                    "transitive-sponsorship",
+                    Severity.Warning,
+                    involved,
+                    $"{owner.Package} carries an Open Source Maintenance Fee check of its own, for " +
+                    $"{owner.DisplayName}, and {reason}. The generated Directory.Build.props has that " +
+                    "owner's options commented out; until one is chosen the build fails with SC021."));
+        }
+
         var beta = selected.Where(_ => _.Beta).Select(_ => _.Id).ToList();
         if (beta.Count > 0)
         {

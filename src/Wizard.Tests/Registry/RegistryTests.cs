@@ -224,6 +224,32 @@ public class RegistryTests
         }
     }
 
+    /// <summary>
+    /// Shipping a snapshot for a test that never runs would leave a file nothing can ever confirm, and
+    /// Verify's conventions check reports a verified file with no test behind it.
+    /// </summary>
+    [Test]
+    public async Task ShippedSnapshotsBelongToSamplesThatRun()
+    {
+        var contradictions = Extensions.All
+            .SelectMany(_ => _.SamplesFor(Depth.Verbose).Select(sample => (_.Id, sample)))
+            .Where(_ => _.sample.VerifiedOutput != null && _.sample.SkipReason != null)
+            .Select(_ => $"{_.Id}.{_.sample.Name}");
+        await Assert.That(contradictions).IsEmpty();
+    }
+
+    /// <summary>A package that carries another owner's fee gate has to name it, or the build fails SC021.</summary>
+    [Test]
+    public async Task SponsorOwnersAreComplete()
+    {
+        foreach (var owner in Extensions.All.SelectMany(_ => _.Packages).Select(_ => _.SponsorOwner).OfType<SponsorOwner>())
+        {
+            await Assert.That(owner.Prefix).IsNotEmpty();
+            await Assert.That(owner.Package).IsNotEmpty();
+            await Assert.That(owner.Prefix).DoesNotContain("_");
+        }
+    }
+
     [Test]
     public async Task ChoicesHaveAtLeastTwoOptions()
     {

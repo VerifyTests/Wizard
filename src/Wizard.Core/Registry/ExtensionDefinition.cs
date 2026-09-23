@@ -77,6 +77,12 @@ public sealed record ExtensionDefinition
     /// <summary>Raw item xml the test project needs, such as a <c>FrameworkReference</c>.</summary>
     public IReadOnlyList<string> ProjectItems { get; init; } = [];
 
+    /// <summary>
+    /// The same for the class library, when <see cref="LibraryFiles"/> compile against something the
+    /// library does not otherwise reference.
+    /// </summary>
+    public IReadOnlyList<string> LibraryProjectItems { get; init; } = [];
+
     public IReadOnlyList<ExternalRequirement> ExternalRequirements { get; init; } = [];
 
     public Platform Platform { get; init; } = Platform.CrossPlatform;
@@ -211,6 +217,12 @@ public sealed record PackageRequirement(string Id)
     /// <summary>Why the package is needed, when that is not obvious from its name.</summary>
     public string? Comment { get; init; }
 
+    /// <summary>
+    /// Set when the package, or something it depends on, carries a SponsorCheck gate of its own, so
+    /// the build fails with SC021 until that owner's declaration is there too (plan A8).
+    /// </summary>
+    public SponsorOwner? SponsorOwner { get; init; }
+
     /// <summary>Referenced by the class library rather than the test project.</summary>
     public bool ForLibrary { get; init; }
 
@@ -232,6 +244,24 @@ public sealed record PackageRequirement(string Id)
         var value = WhenChoice[(separator + 1)..];
         return choices.GetValueOrDefault(id) == value;
     }
+}
+
+/// <param name="Prefix">The MSBuild property prefix, such as <c>Papyrine</c> in <c>Papyrine_SponsorshipExemption</c>.</param>
+/// <param name="Package">The package whose build carries the gate, which is not always the one referenced.</param>
+public sealed record SponsorOwner(string Prefix, string DisplayName, string Package)
+{
+    public string? SponsorsPage { get; init; }
+
+    /// <summary>
+    /// The exemptions this owner accepts, which are not the same set for every owner: Papyrine has no
+    /// open source exemption, so a project exempt from Verify's fee on that ground is not exempt from
+    /// this one. An exemption it does not list cannot be repeated for it.
+    /// </summary>
+    public IReadOnlyList<Exemption> Exemptions { get; init; } = [];
+
+    public bool Accepts(Exemption? exemption) =>
+        exemption != null &&
+        Exemptions.Contains(exemption.Value);
 }
 
 public enum PackageKind
@@ -283,6 +313,13 @@ public sealed record Sample(string Name, string Body)
 
     /// <summary>Extra members the body needs, emitted after the method.</summary>
     public IReadOnlyList<string> Members { get; init; } = [];
+
+    /// <summary>
+    /// The snapshot this sample produces, when it is known exactly and does not depend on the package
+    /// version or the machine. Shipping it means the sample passes on the first run instead of writing
+    /// a received file; most samples cannot (plan D6), and the guide explains what to do with those.
+    /// </summary>
+    public string? VerifiedOutput { get; init; }
 }
 
 /// <param name="Path">Relative to the project the file belongs to.</param>

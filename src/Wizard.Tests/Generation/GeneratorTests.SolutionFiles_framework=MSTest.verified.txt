@@ -1253,3 +1253,7 @@ public partial class DiffPlexTests
     }
 }
 
+==== src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt (UTF-8 with BOM)
+
+The text
+

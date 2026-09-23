@@ -2,6 +2,19 @@ namespace Wizard.Core;
 
 public static partial class Extensions
 {
+    /// <summary>
+    /// Verify.OpenXml depends on Morph, and Verify.Pandoc on Pandoc. Both of those ship a SponsorCheck
+    /// gate of their own under the Papyrine prefix, so the build fails with SC021 until that owner is
+    /// declared too, whichever render backend is chosen (plan A8).
+    /// </summary>
+    static readonly SponsorOwner papyrine = new("Papyrine", "Papyrine", "Morph")
+    {
+        SponsorsPage = "https://github.com/sponsors/Papyrine",
+        // Papyrine has no open source exemption, so a project exempt from Verify's fee on that ground
+        // still has to decide separately here. Read from Morph.targets' own SC034 message.
+        Exemptions = [Exemption.SmallRevenue, Exemption.MaintainerConsulting]
+    };
+
     /// <summary>Entries researched in plan-research/extension-catalogue-C.md.</summary>
     static IReadOnlyList<ExtensionDefinition> CatalogueC =>
     [
@@ -272,7 +285,12 @@ public static partial class Extensions
             Category = ExtensionCategory.Documents,
             Packages =
             [
-                new("Verify.OpenXml"),
+                new("Verify.OpenXml")
+                {
+                    // Verify.OpenXml depends on Morph whatever render backend is chosen, and Morph
+                    // carries a SponsorCheck gate of its own (plan A8).
+                    SponsorOwner = papyrine
+                },
                 new("DocumentFormat.OpenXml")
                 {
                     ForLibrary = true,
@@ -574,7 +592,14 @@ public static partial class Extensions
             RepoUrl = "https://github.com/VerifyTests/Verify.Pandoc",
             Description = "Converts docx and rtf documents to markdown through pandoc, and verifies the markdown.",
             Category = ExtensionCategory.Documents,
-            Packages = [new("Verify.Pandoc")],
+            Packages =
+            [
+                new("Verify.Pandoc")
+                {
+                    // Verify.Pandoc depends on the Pandoc package, which carries the same gate (plan A8).
+                    SponsorOwner = papyrine with {Package = "Pandoc"}
+                }
+            ],
             PluginType = "VerifyPandoc",
             ExclusiveGroups = ["docx-converter"],
             ExternalRequirements =

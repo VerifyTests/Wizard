@@ -35,12 +35,14 @@ using VerifyTests.Selenium;
 // so nothing has to be on the PATH, but its version has to match the installed Chrome.
 // Note: SocketWaiter is defined separately by each of the three headless browser packages, here in
 // VerifyTests.Selenium.
+// Note: WaitForIsReady() and GetSource() are internal to the package. The converter calls them
+// before capturing, so a test never has to wait for the page itself.
 // Note: The assembly is not strong named, and the package targets net10.0 only.
 public class SeleniumTests
 {
     // Two files are written: the page html and a png screenshot.
-    // WaitForIsReady comes with the package and blocks until the document has finished loading,
-    // which is what keeps the html from being captured half rendered.
+    // The converter waits for document.readyState itself before capturing, so nothing here has
+    // to poll for the page to finish loading.
     // Not run by default: needs Chrome and a matching chromedriver, and the site under test listening
     // on http://localhost:5000
     [Fact(Skip = "needs Chrome and a matching chromedriver, and the site under test listening on http://localhost:5000")]
@@ -54,13 +56,12 @@ public class SeleniumTests
         options.AddArgument("--disable-lcd-text");
         using var driver = new ChromeDriver(options);
         driver.Navigate().GoToUrl("http://localhost:5000");
-        driver.WaitForIsReady();
 
         await Verify(driver);
     }
 
-    // An element narrows the snapshot to one part of the page. GetSource() returns the same
-    // markup as a string, for a test that wants to assert on it instead.
+    // An element narrows the snapshot to one part of the page, so an unrelated change
+    // elsewhere on it never touches this test's snapshot.
     // Not run by default: needs Chrome and a matching chromedriver, and the site under test listening
     // on http://localhost:5000
     [Fact(Skip = "needs Chrome and a matching chromedriver, and the site under test listening on http://localhost:5000")]
@@ -72,7 +73,6 @@ public class SeleniumTests
         options.AddArgument("--headless=new");
         using var driver = new ChromeDriver(options);
         driver.Navigate().GoToUrl("http://localhost:5000");
-        driver.WaitForIsReady();
 
         await Verify(driver.FindElement(By.Id("someId")));
     }

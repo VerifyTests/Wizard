@@ -13,6 +13,16 @@ public static class ExtensionTestFiles
         foreach (var extension in plan.ExtensionsIn(windows).Where(_ => _.Samples.Count > 0))
         {
             yield return new($"Extensions/{extension.TestClass}.cs", Build(plan, extension));
+
+            // A sample whose snapshot is known ships it, so it passes on the first run. Verified text
+            // files are UTF-8 with a BOM and no trailing newline.
+            foreach (var sample in extension.Samples.Where(_ => _.VerifiedOutput != null))
+            {
+                yield return new(
+                    $"Extensions/{extension.TestClass}.{sample.Name}.verified.txt",
+                    sample.VerifiedOutput!,
+                    Bom: true);
+            }
         }
     }
 

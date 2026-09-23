@@ -349,7 +349,7 @@ public static class DocsGenerator
         builder.Heading(2, "Open Source Maintenance Fee");
         builder.Paragraph($"Verify participates in the [Open Source Maintenance Fee]({SponsorXml.FeeDocs}). Organizations using Verify's NuGet packages in revenue-generating activities, with annual gross revenue of at least US$10,000, sponsor [VerifyTests]({SponsorXml.SponsorsPage}) at the tier matching their size. Individuals, non-revenue open source projects and small organizations are exempt.");
         builder.Paragraph("Every Verify package checks at build time that the build declares its status, with a property in `Directory.Build.props`. The solution's declaration:");
-        builder.Code(SponsorXml.Block(plan.State, "").TrimEnd(), "xml");
+        builder.Code(SponsorXml.Block(plan.State, "", plan.SponsorOwners).TrimEnd(), "xml");
         builder.Paragraph($"Expected build outcome: {SponsorRules.Outcome(plan.State)}");
         builder.Paragraph($"The [SponsorCheck setup wizard for Verify]({SponsorXml.SponsorCheckWizard}) explains every option and diagnostic code.");
     }
