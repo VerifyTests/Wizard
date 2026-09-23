@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>Journeys through the published app in Chromium (plan 17.3).</summary>
 [ParallelLimiter<BrowserParallelLimit>]
 public class EndToEndTests

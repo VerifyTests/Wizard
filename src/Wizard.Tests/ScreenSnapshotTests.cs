@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>
 /// One Verify.Playwright snapshot (PNG + HTML) per wizard screen, driven through the real WASM runtime.
 /// The wizard bundles its own fonts, so layout is identical on every OS and the PNG baselines hold

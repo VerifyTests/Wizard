@@ -1,4 +1,4 @@
-namespace Wizard.Tests.Generation;
+using Extensions = Wizard.Core.Extensions;
 
 /// <summary>Snapshots of everything the generators produce (plan 17.1). The clock is frozen.</summary>
 public class GeneratorTests
@@ -201,7 +201,7 @@ public class GeneratorTests
 
     public static IEnumerable<Func<(string Id, Depth Depth)>> EachExtension()
     {
-        foreach (var definition in Core.Extensions.All)
+        foreach (var definition in Extensions.All)
         {
             foreach (var depth in new[] {Depth.Minimal, Depth.Verbose})
             {
@@ -218,7 +218,7 @@ public class GeneratorTests
         yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
         yield return () => ("Recording", ["EntityFramework", "Http", "MicrosoftLogging", "SqlServer"]);
         yield return () => ("Windows", ["DiffPlex", "WinForms", "Xaml"]);
-        yield return () => ("Everything", [.. Core.Extensions.All.Select(_ => _.Id)]);
+        yield return () => ("Everything", [.. Extensions.All.Select(_ => _.Id)]);
     }
 
     /// <summary>

@@ -1,5 +1,3 @@
-namespace Wizard.Tests.Model;
-
 /// <summary>What the browser remembers, and when it applies (plan 8.2).</summary>
 public class BrowserMemoryTests
 {

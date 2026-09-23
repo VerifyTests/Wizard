@@ -1,8 +1,6 @@
 // System.Xml.Linq, which the test project's implicit usings bring in, also has an Extensions class.
 using Extensions = Wizard.Core.Extensions;
 
-namespace Wizard.Tests.Registry;
-
 /// <summary>The tech stack table and what choosing from it does to the selection (plan 10).</summary>
 public class TechTests
 {

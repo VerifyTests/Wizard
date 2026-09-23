@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>
 /// Shared plumbing for browser-based tests: serves the published Blazor output
 /// (bin/&lt;Configuration&gt;/blazor-publish) from an in-memory Kestrel host and provides a Chromium

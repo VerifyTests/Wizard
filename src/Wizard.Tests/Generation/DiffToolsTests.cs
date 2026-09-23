@@ -1,6 +1,4 @@
-using DiffEngine;
-
-namespace Wizard.Tests.Generation;
+using DiffTools = Wizard.Core.DiffTools;
 
 /// <summary>
 /// The wizard lists diff tools from a static copy, because DiffEngine is not meant for WASM. This keeps
@@ -15,7 +13,7 @@ public class DiffToolsTests
         var expected = Definitions.Tools
             .Where(_ => !_.IsMdi && Supports(_, os))
             .Select(_ => $"{_.Tool} {_.Url}");
-        var actual = Core.DiffTools.For(os).Select(_ => $"{_.Name} {_.Url}");
+        var actual = DiffTools.For(os).Select(_ => $"{_.Name} {_.Url}");
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 

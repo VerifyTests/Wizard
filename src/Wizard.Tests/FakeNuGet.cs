@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>
 /// Answers nuget.org's flat container requests (plan 15.3) with a fixed version list, so tests that
 /// show package versions do not change whenever a real package ships. Every package's newest stable

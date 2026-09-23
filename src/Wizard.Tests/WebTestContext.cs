@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>bunit base context for component tests: loose JS interop (clipboard and downloads are
 /// no-ops), the app's DI services, and a clock frozen at <see cref="GeneratorTests.Today"/>.</summary>
 public abstract class WebTestContext : BunitContext

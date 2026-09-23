@@ -1,7 +1,3 @@
-using Wizard.Web.Pages;
-
-namespace Wizard.Tests.Pages;
-
 /// <summary>The add flows (plan 7.2, 7.3) and the browser's memory (plan 8.2), against bunit's fake NavigationManager.</summary>
 public class AddTests : WebTestContext
 {

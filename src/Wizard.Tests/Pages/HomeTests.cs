@@ -1,11 +1,9 @@
-namespace Wizard.Tests.Pages;
-
 public class HomeTests : WebTestContext
 {
     [Test]
     public async Task RendersTheThreeEntryPoints()
     {
-        var cut = Render<Wizard.Web.Pages.Home>();
+        var cut = Render<Home>();
 
         var hrefs = cut.FindAll("a.entry-card").Select(_ => _.GetAttribute("href"));
         await Assert.That(string.Join(" ", hrefs)).IsEqualTo("new add add/by-tech");
@@ -15,7 +13,7 @@ public class HomeTests : WebTestContext
     [Test]
     public async Task ForgetClearsEveryRememberedAnswer()
     {
-        var cut = Render<Wizard.Web.Pages.Home>();
+        var cut = Render<Home>();
         await cut.Find("button.link-button").ClickAsync(new());
 
         var removed = JSInterop.Invocations
@@ -31,5 +29,5 @@ public class HomeTests : WebTestContext
     /// </summary>
     [Test]
     public Task Markup() =>
-        Verify(Render<Wizard.Web.Pages.Home>().Markup, "html");
+        Verify(Render<Home>().Markup, "html");
 }

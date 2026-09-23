@@ -1,7 +1,3 @@
-using Wizard.Web.Pages;
-
-namespace Wizard.Tests.Pages;
-
 /// <summary>The new-project flow against bunit's fake NavigationManager: url in, url out (plan 8.1).</summary>
 public class NewTests : WebTestContext
 {

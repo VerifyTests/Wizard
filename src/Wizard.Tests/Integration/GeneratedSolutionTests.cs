@@ -1,4 +1,4 @@
-namespace Wizard.Tests.Integration;
+using Extensions = Wizard.Core.Extensions;
 
 /// <summary>
 /// Generates solutions, writes them to disk, and runs <c>dotnet build</c> and <c>dotnet test</c> on
@@ -54,9 +54,9 @@ public class GeneratedSolutionTests
     }
 
     public static IEnumerable<Func<string>> EveryExtension() =>
-        Core.Extensions.All
+        Extensions.All
             .Where(_ => _.Platform == Platform.CrossPlatform || OperatingSystem.IsWindows())
-            .Select<ExtensionDefinition, Func<string>>(definition => () => definition.Id);
+            .Select<ExtensionDefinition, Func<string>>(_ => () => _.Id);
 
     /// <summary>
     /// The combinations the interaction rules exist for, which is where a wrong ordering or a method

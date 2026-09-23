@@ -1,5 +1,3 @@
-namespace Wizard.Tests.Content;
-
 /// <summary>
 /// Notices when Verify's docs or samples move on from the wizard's copies of them (plan 17.5). Needs
 /// github.com, so explicit: run weekly by content-drift.yml, which never blocks a deploy, or with

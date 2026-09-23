@@ -1,12 +1,17 @@
-namespace Wizard.Tests.Model;
-
 public class WizardStateUrlTests
 {
     public static IEnumerable<Func<WizardState>> States()
     {
-        yield return () => new() {Flow = Flow.New, Step = "os"};
+        yield return () => new()
+        {
+            Flow = Flow.New,
+            Step = "os"
+        };
         yield return () => GeneratorTests.State();
-        yield return () => GeneratorTests.State(TestFramework.Expecto, BuildServer.None, Os.Linux, Ide.VsCode, CliPreference.Gui) with {SolutionName = "My.Product"};
+        yield return () => GeneratorTests.State(TestFramework.Expecto, BuildServer.None, Os.Linux, Ide.VsCode, CliPreference.Gui) with
+        {
+            SolutionName = "My.Product"
+        };
         yield return () => GeneratorTests.State() with
         {
             SponsorMode = SponsorMode.Sponsor,
@@ -14,9 +19,19 @@ public class WizardStateUrlTests
             SponsorshipStart = new Date(2026, 9, 1),
             SponsorshipPrivateUntil = "2027-01"
         };
-        yield return () => GeneratorTests.State() with {SponsorMode = SponsorMode.PrivateArrangement, SponsorUntil = "2027-06"};
-        yield return () => GeneratorTests.State() with {SponsorMode = SponsorMode.Ignore};
-        yield return () => GeneratorTests.State() with {SelectedExtensions = new HashSet<string>(StringComparer.Ordinal)};
+        yield return () => GeneratorTests.State() with
+        {
+            SponsorMode = SponsorMode.PrivateArrangement,
+            SponsorUntil = "2027-06"
+        };
+        yield return () => GeneratorTests.State() with
+        {
+            SponsorMode = SponsorMode.Ignore
+        };
+        yield return () => GeneratorTests.State() with
+        {
+            SelectedExtensions = new HashSet<string>(StringComparer.Ordinal)
+        };
         yield return () => GeneratorTests.WithExtensions(GeneratorTests.State(), "EntityFramework", "SqlServer");
         yield return () =>
         {

@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>Locates real repo files so the contract tests can compare the wizard's baked values
 /// against their sources (global.json, Directory.Build.props, the deploy workflow).</summary>
 public static class RepoPaths

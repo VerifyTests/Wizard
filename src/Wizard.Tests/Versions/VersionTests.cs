@@ -1,4 +1,4 @@
-namespace Wizard.Tests.Versions;
+using Wizard.VersionRefresh;
 
 /// <summary>Picking versions (plan D3), the weekly refresh (plan 15.2) and pinning.</summary>
 public class VersionTests
@@ -39,7 +39,7 @@ public class VersionTests
     [Test]
     public Task RefreshMovesOnlyWhatChangedAndLeavesPinnedAlone()
     {
-        var result = VersionRefresh.VersionRefresh.Refresh(file, newer, new(2026, 9, 29));
+        var result = VersionRefresh.Refresh(file, newer, new(2026, 9, 29));
         return Verify(
             $"""
              {result.Json}
@@ -53,7 +53,7 @@ public class VersionTests
     [Test]
     public async Task RefreshWithNothingNewLeavesTheFileAsItWas()
     {
-        var result = VersionRefresh.VersionRefresh.Refresh(file, new Dictionary<string, IReadOnlyList<string>>
+        var result = VersionRefresh.Refresh(file, new Dictionary<string, IReadOnlyList<string>>
         {
             ["Moq"] = ["4.0.0"],
             ["Verify"] = ["33.1.1"]
@@ -66,7 +66,7 @@ public class VersionTests
     [Test]
     public async Task RefreshKeepsWhatWasNotAnswered()
     {
-        var result = VersionRefresh.VersionRefresh.Refresh(file, new Dictionary<string, IReadOnlyList<string>>
+        var result = VersionRefresh.Refresh(file, new Dictionary<string, IReadOnlyList<string>>
         {
             ["Moq"] = ["4.1.0"]
         }, new(2026, 9, 29));
@@ -84,7 +84,7 @@ public class VersionTests
         // one version moved, so the file is rewritten, then compared with the moved line put back
         var lists = ids.ToDictionary(_ => _, _ => (IReadOnlyList<string>) [PackageVersions.Baked[_]], StringComparer.OrdinalIgnoreCase);
         lists["Verify"] = ["999.0.0"];
-        var result = VersionRefresh.VersionRefresh.Refresh(json, lists, PackageVersions.Baked.Updated);
+        var result = VersionRefresh.Refresh(json, lists, PackageVersions.Baked.Updated);
 
         var restored = result.Json.Replace("\"Verify\": \"999.0.0\"", $"\"Verify\": \"{PackageVersions.Baked["Verify"]}\"");
         await Assert.That(restored).IsEqualTo(json.ReplaceLineEndings("\n"));

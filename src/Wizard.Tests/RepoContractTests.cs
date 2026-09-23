@@ -1,5 +1,3 @@
-namespace Wizard.Tests;
-
 /// <summary>
 /// Anti-rot checks: values the wizard bakes in or links to must match their sources in this repo.
 /// These run in the Pages deploy workflow, so drift blocks deployment instead of publishing wrong output.
