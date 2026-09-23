@@ -9,9 +9,13 @@ public class GeneratedSolutionTests
 {
     [Test]
     [MatrixDataSource]
-    public async Task CoreSolutionBuildsAndPasses(TestFramework framework)
+    public async Task CoreSolutionBuildsAndPasses(TestFramework framework, bool inline)
     {
-        var directory = await Generate(State(framework), framework.ToString());
+        var state = State(framework) with
+        {
+            InlineSnapshots = inline
+        };
+        var directory = await Generate(state, $"{framework}{(inline ? "-inline" : "")}");
 
         await Run(directory, "build --configuration Release");
         // Plan.TestCommand, as the generated guide and build definitions run it
@@ -22,9 +26,10 @@ public class GeneratedSolutionTests
 
         // An undiscovered test is not a failure, so count them: the core sample, the conventions check,
         // and every plugin sample that ships its snapshot. The default selection is Verify.DiffPlex,
-        // whose sample verifies a literal string, so a first run of the download is green.
+        // whose sample verifies a literal string, so a first run of the download is green. With
+        // inline snapshots the same samples pass, carrying their snapshots as literals.
         var expected = 2 + Plan
-            .Build(State(framework), PackageVersions.Baked, Date.FromDateTime(DateTime.UtcNow))
+            .Build(state, PackageVersions.Baked, Date.FromDateTime(DateTime.UtcNow))
             .Plugins
             .SelectMany(_ => _.Samples)
             .Count(_ => _.VerifiedOutput != null);

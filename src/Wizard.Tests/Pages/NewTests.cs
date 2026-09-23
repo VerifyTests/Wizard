@@ -166,13 +166,23 @@ public class NewTests : WebTestContext
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
     }
 
-    /// <summary>With nothing selected the options step has nothing to ask, so the flow leaves it out.</summary>
+    /// <summary>With nothing selected the options step still asks about inline snapshots, and nothing else.</summary>
     [Test]
-    public async Task OptionsStepIsSkippedWhenNothingIsSelected()
+    public async Task OptionsStepAsksOnlyInlineWhenNothingIsSelected()
     {
         var page = Open("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=none");
-        await Assert.That(page.Find("section.step-body").GetAttribute("data-step")).IsEqualTo("sponsor");
-        await Assert.That(page.FindAll("li [data-step=options]").Count).IsEqualTo(0);
+        await Assert.That(page.Find("section.step-body").GetAttribute("data-step")).IsEqualTo("options");
+        await Assert.That(page.FindAll("fieldset[data-choice=inline]").Count).IsEqualTo(1);
+        await Assert.That(page.FindAll(".depth-row").Count).IsEqualTo(0);
+    }
+
+    /// <summary>Choosing inline snapshots puts the answer in the url.</summary>
+    [Test]
+    public async Task InlineSnapshotsGoInTheUrl()
+    {
+        var page = Open("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=none");
+        await page.Find("fieldset[data-choice=inline] input[value=inline]").ChangeAsync(new());
+        await Assert.That(CurrentUrl).Contains("inline=true");
     }
 
     /// <summary>The output uses nuget.org's newest versions once they arrive (plan 15.3).</summary>

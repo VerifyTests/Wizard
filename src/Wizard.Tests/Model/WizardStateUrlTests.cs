@@ -40,6 +40,10 @@ public class WizardStateUrlTests
             state.SetChoice("diffplex-output", "Full");
             return state;
         };
+        yield return () => GeneratorTests.State() with
+        {
+            InlineSnapshots = true
+        };
         yield return () => GeneratorTests.Addition(Flow.Add, ["SqlServer"], ["EntityFramework"]);
         yield return () =>
         {

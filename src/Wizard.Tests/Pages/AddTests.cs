@@ -32,7 +32,7 @@ public class AddTests : WebTestContext
         var page = OpenAdd("add");
         await Assert.That(page.Find("section.step-body").GetAttribute("data-step")).IsEqualTo("tf");
         var steps = page.FindAll(".breadcrumb li .step-title").Select(_ => _.TextContent);
-        await Assert.That(string.Join(" | ", steps)).IsEqualTo("Test framework | Already using | Plugins | Maintenance fee | Result");
+        await Assert.That(string.Join(" | ", steps)).IsEqualTo("Test framework | Already using | Plugins | Options | Maintenance fee | Result");
     }
 
     /// <summary>A plugin readme links to /add/{Id}, which starts with that one selected (plan D11).</summary>

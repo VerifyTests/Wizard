@@ -29,7 +29,6 @@ public partial class FlowPage : IDisposable
     Restored restored = new(false, false, false);
     Remembered written = Remembered.None;
 
-    // Recomputed per render: selecting no plugins drops the options step from the flow.
     IReadOnlyList<StepDefinition> Steps => FlowSteps.For(State);
 
     StepDefinition Current => Steps.Single(_ => _.Id == State.Step);

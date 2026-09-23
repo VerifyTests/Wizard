@@ -1,8 +1,8 @@
 /// <summary>
 /// Instructions for an AI coding assistant (plan 12.6): the AI tab and download, and the zip's
 /// CLAUDE.md and .github/copilot-instructions.md. Project facts come first, then Verify's context-file
-/// template from docs/ai-usage.md. The template's inline snapshot sections are dropped: inline
-/// snapshots are still beta and the wizard does not enable them.
+/// template from docs/ai-usage.md. The template's inline snapshot sections are kept only when inline
+/// snapshots are enabled (plan 12.8).
 /// </summary>
 public static class AiContentGenerator
 {
@@ -27,20 +27,51 @@ public static class AiContentGenerator
             "Packages use Central Package Management: add or change versions in `Directory.Packages.props`, and reference packages without a version.",
             $"Verify packages: {string.Join(", ", plan.TestPackages.Where(_ => _.StartsWith("Verify", StringComparison.Ordinal)).Select(_ => $"{_} {plan.Version(_)}"))}.",
             InitializationFact(plan),
+            .. InlineFacts(plan),
             $"The Open Source Maintenance Fee declaration is in `Directory.Build.props` ({SponsorRules.Summary(plan.State)}). Do not remove it: without it every build fails with SC021."
         ]);
 
         AppendPlugins(builder, plan);
-        builder.Raw(ContentFiles.Raw("context.md"));
+        builder.Raw(Context(plan));
 
         builder.Heading(2, "Environment");
         builder.Bullets(
         [
             "Set `DiffEngine_Disabled=true` when running tests, so no diff tool opens for each failed snapshot. The exception message still carries the file paths and the content.",
             "When asked to change code that has Verify tests, run the tests first: the `.received.*` files show exactly what changed.",
-            "A new test fails on its first run because it has no `.verified.*` file yet. Review the `.received.*` file, then accept it by copying it to the `Verified:` path from the exception message."
+            FirstRunFact(plan)
         ]);
         return builder.ToString();
+    }
+
+    static string Context(Plan plan)
+    {
+        if (plan.Inline)
+        {
+            return ContentFiles.Raw("context-inline.md");
+        }
+
+        return ContentFiles.Raw("context.md");
+    }
+
+    static IEnumerable<string> InlineFacts(Plan plan)
+    {
+        if (!plan.Inline)
+        {
+            yield break;
+        }
+
+        yield return "Inline snapshots are on (`VerifierSettings.Inline()` in the module initializer): a text snapshot is the `.Snapshot(...)` literal in the test source. A verification that cannot be inlined, such as an image, a document or a test whose parameters reach the verified name, uses a `.verified.` file.";
+    }
+
+    static string FirstRunFact(Plan plan)
+    {
+        if (plan.Inline)
+        {
+            return "A new test fails on its first run because it has no snapshot yet. For an inline snapshot, review the received text and add it to the test as the `.Snapshot(...)` literal at the `Source:` location. For a file snapshot, review the `.received.*` file, then copy it to the `Verified:` path from the exception message.";
+        }
+
+        return "A new test fails on its first run because it has no `.verified.*` file yet. Review the `.received.*` file, then accept it by copying it to the `Verified:` path from the exception message.";
     }
 
     /// <summary>
@@ -93,13 +124,18 @@ public static class AiContentGenerator
             tasks.Add($"Merge `{AdditionGenerator.ToolsFragment}` into `.config/dotnet-tools.json`, then run `dotnet tool restore`.");
         }
 
+        if (plan.Inline)
+        {
+            tasks.Add("`VerifierSettings.Inline()` moves every existing text snapshot inline. On the next run each of those tests fails as `InlineNew` and its `.verified.` file is listed under `Delete:`. Tell the user before running the tests; once they agree, write each received text into the `.Snapshot(...)` literal at its `Source:` location and delete the listed files.");
+        }
+
         tasks.Add("Build, then run the tests with `DiffEngine_Disabled=true`. The new tests fail on their first run because they have no `.verified.` files yet. Show the user each `.received.` file; accept one only once the user agrees it is right.");
 
         builder.Heading(2, "Steps");
         builder.Numbered(tasks);
 
         AppendPlugins(builder, plan);
-        builder.Raw(ContentFiles.Raw("context.md"));
+        builder.Raw(Context(plan));
         return builder.ToString();
     }
 

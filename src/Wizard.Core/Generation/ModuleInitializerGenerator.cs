@@ -71,7 +71,7 @@ public static class ModuleInitializerGenerator
         var blocks = Blocks(plan, windows);
 
         // Alternatives are only worth showing where that plugin's samples are verbose too.
-        var verbose = blocks.Any(_ => plan.State.DepthOf(_.Key) == Depth.Verbose);
+        var verbose = blocks.Any(_ => _ != InlineSnapshots.Block && plan.State.DepthOf(_.Key) == Depth.Verbose);
 
         var discovery = new InitializeBlock(
             "",
@@ -131,6 +131,10 @@ public static class ModuleInitializerGenerator
     {
         var state = plan.State;
         var blocks = new List<InitializeBlock>();
+        if (plan.Inline)
+        {
+            blocks.Add(InlineSnapshots.Block);
+        }
 
         foreach (var plugin in plan.PluginsIn(windows))
         {

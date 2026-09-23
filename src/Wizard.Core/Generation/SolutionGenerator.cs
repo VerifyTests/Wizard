@@ -71,7 +71,12 @@ public static class SolutionGenerator
 
         var tests = $"src/{plan.TestProject}";
         Add($"{tests}/{plan.TestProject}.{plan.Framework.ProjectExtension}", ProjectFiles.TestProject(plan));
-        Add($"{tests}/{plan.Framework.SampleVerifiedFile}", CodeFiles.SampleVerified, bom: true);
+        // With inline snapshots the sample carries its snapshot, and a verified file would be stale.
+        if (!plan.Inline)
+        {
+            Add($"{tests}/{plan.Framework.SampleVerifiedFile}", CodeFiles.SampleVerified, bom: true);
+        }
+
         if (plan.Framework.IsFSharp)
         {
             Add($"{tests}/Tests.fs", CodeFiles.ExpectoTests(plan));

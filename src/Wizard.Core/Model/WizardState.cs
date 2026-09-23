@@ -16,6 +16,9 @@ public sealed record WizardState
 
     public string SolutionName { get; set; } = DefaultSolutionName;
 
+    /// <summary>Opt in to inline snapshots: text snapshots live in the test source (plan 12.8).</summary>
+    public bool InlineSnapshots { get; set; }
+
     /// <summary>
     /// Plugin ids to include, as a set so membership is cheap; emitted in registry order everywhere,
     /// so the url and the generated output do not depend on insertion order. Collections are replaced
@@ -201,6 +204,7 @@ public sealed record WizardState
                TestFramework == other.TestFramework &&
                BuildServer == other.BuildServer &&
                SolutionName == other.SolutionName &&
+               InlineSnapshots == other.InlineSnapshots &&
                SponsorMode == other.SponsorMode &&
                SponsorAccount == other.SponsorAccount &&
                SponsorshipStart == other.SponsorshipStart &&
@@ -235,6 +239,7 @@ public sealed record WizardState
         hash.Add(TestFramework);
         hash.Add(BuildServer);
         hash.Add(SolutionName);
+        hash.Add(InlineSnapshots);
         hash.Add(SponsorMode);
         hash.Add(SponsorAccount);
         hash.Add(SponsorshipStart);

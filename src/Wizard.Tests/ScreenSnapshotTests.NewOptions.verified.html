@@ -72,7 +72,7 @@
                 </button>
               </li>
               <li class="current" aria-current="step">
-                <span class="step-title">Plugin options</span>
+                <span class="step-title">Options</span>
               </li>
               <li class="done">
                 <button type="button" class="step-link" data-step="sponsor">
@@ -88,9 +88,31 @@
             </ol>
           </nav>
           <section class="step-body" data-step="options">
-            <h2>Plugin options</h2>
+            <h2>Options</h2>
+            <fieldset class="choice" data-choice="inline">
+              <legend>Snapshot storage</legend>
+              <p class="hint">
+                Where approved snapshots are kept. See
+                <a href="https://github.com/VerifyTests/Verify/blob/main/docs/inline-snapshots.md" target="_blank" rel="noopener">inline snapshots</a>.
+              </p>
+              <label class="choice-option selected">
+                <input type="radio" name="inline" value="files">
+                <span>
+                  <strong>Files</strong>
+                  <span class="choice-hint">Each snapshot is a .verified. file next to the test.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="inline" value="inline">
+                <span>
+                  <strong>Inline</strong>
+                  <span class="choice-hint">Text snapshots are a .Snapshot(...) literal in the test source. Images, documents and parameterised tests still use files.</span>
+                </span>
+              </label>
+            </fieldset>
+            <h3>Plugin samples</h3>
             <p class="hint">
-              Verbose generates a commented test for every documented API, so the unwanted ones can be deleted.     Minimal generates the enable call and the most common usage only.
+              Verbose generates a commented test for every documented API, so the unwanted ones can be deleted.         Minimal generates the enable call and the most common usage only.
             </p>
             <div class="depth-rows">
               <div class="depth-row" data-id="DiffPlex">

@@ -67,6 +67,11 @@ public static class DocsGenerator
 
         builder.Heading(2, "3. Update the module initializer");
         AppendAdditionInitializer(builder, plan);
+        AppendInline(builder, plan);
+        if (plan.Inline)
+        {
+            builder.Paragraph("The switch applies to the snapshots the project already has. On the next run each existing text snapshot fails as a new inline snapshot, and its `.verified.` file is reported as stale. Accepting both moves the snapshot into the test source; commit the source edits and the deleted files together.");
+        }
 
         builder.Heading(2, "4. Add the tests");
         if (plan.Plugins.Any(_ => _.Samples.Count > 0))
@@ -91,7 +96,7 @@ public static class DocsGenerator
 
         builder.Heading(2, "Running the tests");
         AppendBeforeRunning(builder, plan);
-        AppendFirstRun(builder);
+        AppendFirstRun(builder, plan);
         AppendReferences(builder);
         return builder.ToString();
     }
@@ -262,6 +267,20 @@ public static class DocsGenerator
             builder.Paragraph("The solution installs it as a local tool in `.config/dotnet-tools.json`, so `dotnet tool restore` makes it available. To install it globally instead:");
             builder.Code("dotnet tool install -g verify.tool");
         }
+
+        AppendInline(builder, plan);
+    }
+
+    static void AppendInline(MarkdownBuilder builder, Plan plan)
+    {
+        if (!plan.Inline)
+        {
+            return;
+        }
+
+        builder.Heading(3, "Inline snapshots");
+        builder.Paragraph($"[Inline snapshots]({InlineSnapshots.DocsUrl}) are on: `VerifierSettings.Inline()` in the module initializer keeps each text snapshot in the test source, as the literal passed to `.Snapshot(...)`, instead of in a `.verified.` file. A verification that cannot be inlined, such as an image, a document, or a parameterised test whose parameters reach the verified name, still uses a file. `.NotInline()` keeps a single test on files.");
+        builder.Paragraph("A pending inline snapshot is reviewed in DiffEngineViewer, which ships with Verify and opens on a failed run, in DiffEngineTray 20.1.2 or later, or with Verify.Terminal 0.9.1 or later (`dotnet verify review`). Accepting one rewrites the literal in the test file. The Rider and ReSharper plugins do not handle inline snapshots yet.");
     }
 
     /// <summary>One subsection per selected plugin (plan 12.3 §9).</summary>
@@ -383,9 +402,16 @@ public static class DocsGenerator
     static void AppendSample(MarkdownBuilder builder, Plan plan)
     {
         builder.Heading(2, "Sample Test");
-        builder.Code(plan.Framework.SampleTest, plan.Framework.CodeLanguage);
-        builder.Paragraph($"`ClassBeingTested.FindPerson()` lives in the `{plan.LibraryProject}` project. The solution includes the approved snapshot, `{plan.Framework.SampleVerifiedFile}`, so this test passes on the first run:");
-        builder.Code(CodeFiles.SampleVerified, "txt");
+        builder.Code(plan.SampleTest, plan.Framework.CodeLanguage);
+        if (plan.Inline)
+        {
+            builder.Paragraph($"`ClassBeingTested.FindPerson()` lives in the `{plan.LibraryProject}` project. The approved snapshot is the literal passed to `Snapshot`, so this test passes on the first run.");
+        }
+        else
+        {
+            builder.Paragraph($"`ClassBeingTested.FindPerson()` lives in the `{plan.LibraryProject}` project. The solution includes the approved snapshot, `{plan.Framework.SampleVerifiedFile}`, so this test passes on the first run:");
+            builder.Code(CodeFiles.SampleVerified, "txt");
+        }
 
         if (plan.Framework.Framework == TestFramework.MSTest)
         {
@@ -401,7 +427,8 @@ public static class DocsGenerator
             builder.Paragraph("The solution includes this as `TestProject.cs`, along with the `[TestCase]` attribute it uses for parameterised tests. `DefaultDiscovery` only runs classes whose names end with `Tests`, which is why the sample class is `SampleTests`.");
         }
 
-        if (plan.Framework.Framework == TestFramework.Expecto)
+        if (plan.Framework.Framework == TestFramework.Expecto &&
+            !plan.Inline)
         {
             builder.Paragraph("Expecto tests pass their name to `Verifier.Verify`, which becomes the snapshot's file name.");
         }
@@ -459,7 +486,7 @@ public static class DocsGenerator
         }
 
         AppendBeforeRunning(builder, plan);
-        AppendFirstRun(builder);
+        AppendFirstRun(builder, plan);
     }
 
     static void AppendBeforeRunning(MarkdownBuilder builder, Plan plan)
@@ -491,9 +518,17 @@ public static class DocsGenerator
         }
     }
 
-    static void AppendFirstRun(MarkdownBuilder builder)
+    static void AppendFirstRun(MarkdownBuilder builder, Plan plan)
     {
-        builder.Paragraph("A new test has no `.verified.` file, so its first run fails and writes a `.received.` file. Review it, then accept it by renaming it to `.verified.`, accepting it in the diff tool, DiffEngineTray or IDE plugin, or running `dotnet verify accept`.");
+        if (plan.Inline)
+        {
+            builder.Paragraph("A new test has no snapshot yet, so its first run fails. For an inline snapshot, review the received text in DiffEngineViewer or DiffEngineTray, or with `dotnet verify review`, and accept it there: accepting writes the `.Snapshot(...)` literal into the test. A verification that cannot be inlined writes a `.received.` file instead; accept it by renaming it to `.verified.`, accepting it in the diff tool, DiffEngineTray or IDE plugin, or running `dotnet verify accept`.");
+        }
+        else
+        {
+            builder.Paragraph("A new test has no `.verified.` file, so its first run fails and writes a `.received.` file. Review it, then accept it by renaming it to `.verified.`, accepting it in the diff tool, DiffEngineTray or IDE plugin, or running `dotnet verify accept`.");
+        }
+
         builder.Paragraph("Set the environment variable `DiffEngine_Disabled=true` when running tests where a diff tool should not open, such as a build server or an AI assistant's terminal. Verify detects the common build servers itself.");
     }
 

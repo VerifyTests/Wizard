@@ -322,7 +322,7 @@ Every flow is a linear list of steps; each step is a Razor component bound to `W
 5. **Build server** (GitHub Actions, Azure DevOps, AppVeyor, none).
 6. **Tech stack** (optional, multi-select chips grouped by category; persisted). Skippable with "I just want the basics". Selecting tech pre-checks plugins on the next step.
 7. **Plugins** (multi-select cards grouped by category; suggested ones pre-checked and shown first under "Suggested for your stack", the rest under "Everything else"). Verify.DiffPlex is pre-checked always. Cards show badges: Windows only, licence required, external tool required, needs running service, beta, net10 only. Interaction notices appear inline as soon as two interacting plugins are both checked (section 11).
-8. **Plugin options**: per selected plugin, a Minimal/Verbose toggle (default Verbose), plus any rule choices (EF/SqlServer recording owner, DiffPlex output type, SystemJson strict JSON, Bunit exclude component, image comparer tolerance, PDFium dpi, HeadlessBrowsers driver, EF Core vs EF6, Serilog custom configuration stub). One compact form.
+8. **Options**: always shown. Snapshot storage, Files (default) or Inline (12.8), then per selected plugin, a Minimal/Verbose toggle (default Verbose), plus any rule choices (EF/SqlServer recording owner, DiffPlex output type, SystemJson strict JSON, Bunit exclude component, image comparer tolerance, PDFium dpi, HeadlessBrowsers driver, EF Core vs EF6, Serilog custom configuration stub). One compact form.
 9. **Sponsor** (section 14).
 10. **Output** (section 12): rendered docs, three download/copy actions, file list.
 
@@ -331,7 +331,7 @@ Every flow is a linear list of steps; each step is a Razor component bound to `W
 1. **Test framework** (needed to generate tests and the correct LocalDb package).
 2. **Already using** (optional): multi-select of plugins already in the project. Pre-filled from `localStorage`. Everything checked here is excluded from step 3's pick list (shown greyed as "already in your project") and participates in interaction rules with a "Existing" role so the side effects of adding a new plugin next to an existing one are listed.
 3. **Plugins to add** (same card grid as A7, without tech pre-selection; deep-link id pre-checked). Nothing is selected by default: Verify.DiffPlex, pre-checked for a new project, is not assumed for an existing one. An existing plugin's card is shown ticked and locked. When a rule the new selection triggers changes how an existing plugin has to be initialized (EntityFramework added next to an existing SqlServer turns SqlServer's recording off), the generated `ModuleInitializer.cs` carries that existing call too, with a comment saying to replace the project's own; an existing plugin that plugin discovery cannot find (A1) raises an `existing-not-discovered` warning, because a project relying on `InitializePlugins()` alone never enabled it.
-4. **Plugin options** (as A8).
+4. **Options** (as A8).
 5. **Sponsor**: always shown, with **No change** as the first and default option, because an existing project already declares its status; a remembered declaration pre-fills it. The output has a `Directory.Build.props` fragment only when a mode is chosen, or when an added package brings another owner's fee check (A8), whose block is emitted even when Verify's is left alone.
 6. **Output**: docs with "Change to make" sections (PackageVersion/PackageReference lines, ModuleInitializer merge instructions, new test files), a zip of just the new/changed files, and AI markdown that instructs an assistant to perform the merge.
 
@@ -778,13 +778,21 @@ verify-additions/
 
 1. Purpose line ("Instructions for an AI coding assistant working in this repository / applying these changes"), generated-by link.
 2. **Project facts**: test framework, runner command per project (`dotnet test`, `dotnet run --project`, Fixie), TFM/SDK, CPM, the list of Verify packages and versions, the plugins and their depth, the interaction decisions taken (from `InteractionResult`s, as imperative statements: "Do not enable recording in Verify.SqlServer; Verify.EntityFramework owns it").
-3. **Verify context** – the Verify `ai-usage` context-file template (Appendix A) with the framework-specific test command substituted and the inline-snapshot section dropped when not enabled (inline is still marked beta in the docs; it is not enabled by the wizard).
+3. **Verify context** – the Verify `ai-usage` context-file template (Appendix A) with the framework-specific test command substituted. `context.md` drops the inline-snapshot sections; `context-inline.md` keeps them, without the beta notes, and is used when inline snapshots are on (12.8).
 4. **Handling snapshot failures** – covered by the context template. The zip ships no `.claude` directory (no skill file): the context file in `CLAUDE.md` and `copilot-instructions.md` is enough, and a tool-specific directory in a starter solution is clutter.
 5. **For the Add flow only**: an ordered task list for the merge (add PackageVersion lines; add PackageReference lines; merge ModuleInitializer respecting order; copy tests; run; accept first snapshots after review), each pointing at the fragment file.
 6. **Plugin cheat sheet** – for each selected plugin: the enable call, the 3–5 most important APIs (minimal samples' method signatures), the snapshot key names it uses (`ef`, `sql`, `httpCall`, `log`, `activity`), and its gotchas.
 7. **Environment**: `DiffEngine_Disabled=true`; licence environment variables required; tools required.
 
 No skill file is emitted (see item 4).
+
+### 12.8 Inline snapshots (opt-in)
+
+Asked on the Options step as "Snapshot storage", default Files; `inline=true` in the url. Inline snapshots shipped in Verify 33, and the upstream `ai-usage` "beta" notes are stale.
+
+- `VerifierSettings.Inline();` is the first block of every module initializer (the F# lazy initializer too), with `Inline(maxLines: 30)` as a commented alternative at verbose depth.
+- The global switch would treat a shipped `.verified.` file as stale and the test as `InlineNew`. So no verified file is shipped. The core sample, and any plugin sample with `VerifiedOutput`, gets `.Snapshot("""…""")` chained on instead (`InlineSnapshots.AddSnapshot`), so the first run is still green. `GeneratedSolutionTests.CoreSolutionBuildsAndPasses` runs every framework both ways.
+- The guide gets an "Inline snapshots" subsection (review tools, the Rider plugin's lack of support) and inline-aware first-run text. The AI file uses `context-inline.md` and a project fact. The add flows also warn that the switch moves the project's existing text snapshots inline on the next run.
 
 ---
 

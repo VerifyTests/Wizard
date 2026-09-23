@@ -8,6 +8,7 @@
   https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&ext=none&sponsor=Exempt&exempt=OpenSource&until=2027-09,
   https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&ext=EntityFramework,SqlServer&sponsor=Exempt&exempt=OpenSource&until=2027-09,
   https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&ext=AngleSharp,DiffPlex&min=AngleSharp&opt=diffplex-output:Full&sponsor=Exempt&exempt=OpenSource&until=2027-09,
+  https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&inline=true&sponsor=Exempt&exempt=OpenSource&until=2027-09,
   https://verifytests.github.io/Wizard/add?step=output&tf=XunitV3&have=SqlServer&ext=EntityFramework,
   https://verifytests.github.io/Wizard/add/by-tech?step=output&tf=XunitV3&tech=aspnetcore,http&have=DiffPlex&ext=Http
 ]

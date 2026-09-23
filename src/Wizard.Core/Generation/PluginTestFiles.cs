@@ -12,6 +12,12 @@ public static class PluginTestFiles
         {
             yield return new($"Plugins/{plugin.TestClass}.cs", Build(plan, plugin));
 
+            // With inline snapshots a known snapshot is a literal in the sample instead.
+            if (plan.Inline)
+            {
+                continue;
+            }
+
             // A sample whose snapshot is known ships it, so it passes on the first run. Verified text
             // files are UTF-8 with a BOM and no trailing newline.
             foreach (var sample in plugin.Samples.Where(_ => _.VerifiedOutput != null))
@@ -67,7 +73,7 @@ public static class PluginTestFiles
             }
 
             first = false;
-            AppendSample(builder, framework, sample);
+            AppendSample(builder, framework, sample, plan.Inline);
         }
 
         foreach (var member in plugin.Samples.SelectMany(_ => _.Members))
@@ -80,7 +86,7 @@ public static class PluginTestFiles
         return builder.ToString();
     }
 
-    static void AppendSample(StringBuilder builder, TestFrameworkInfo framework, Sample sample)
+    static void AppendSample(StringBuilder builder, TestFrameworkInfo framework, Sample sample, bool inline)
     {
         foreach (var line in sample.Comment)
         {
@@ -118,7 +124,14 @@ public static class PluginTestFiles
 
         var signature = sample.Async ? "async Task" : "Task";
         builder.Append($"    {visibility} {signature} {sample.Name}()\n    {{\n");
-        builder.Append(ModuleInitializerGenerator.Indent(sample.Body, "        "));
+        var body = sample.Body;
+        if (inline &&
+            sample.VerifiedOutput is { } verified)
+        {
+            body = InlineSnapshots.AddSnapshot(body, verified);
+        }
+
+        builder.Append(ModuleInitializerGenerator.Indent(body, "        "));
         builder.Append("    }\n");
     }
 

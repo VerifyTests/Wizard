@@ -97,6 +97,18 @@ public static class CodeFiles
 
     public static string SampleTest(Plan plan)
     {
+        if (plan.Inline)
+        {
+            return Banner(plan) +
+                   """
+                   // Verify serializes what FindPerson returns and compares it with the literal passed to
+                   // Snapshot. On a mismatch the test fails and a viewer opens with the difference.
+                   // Accepting the change rewrites the literal in this file.
+
+                   """ +
+                   plan.SampleTest + "\n";
+        }
+
         var verified = plan.Framework.SampleVerifiedFile;
         var received = verified.Replace(".verified.", ".received.");
         return Banner(plan) +
@@ -106,7 +118,7 @@ public static class CodeFiles
                 // opens. Accepting the change means the received file replaces the verified one.
 
                 """ +
-               plan.Framework.SampleTest + "\n";
+               plan.SampleTest + "\n";
     }
 
     public static string VerifyChecksTest(Plan plan) =>
@@ -167,13 +179,23 @@ public static class CodeFiles
             lazy (
         {ExpectoInitialize(plan)})
 
-        // Verify serializes what FindPerson returns and compares it with Tests.findPerson.verified.txt.
-        {plan.Framework.SampleTest}
+        // Verify serializes what FindPerson returns and compares it with {ExpectoSnapshot(plan)}.
+        {plan.SampleTest}
 
         // Checks the solution follows Verify's conventions (.gitignore, .gitattributes, .editorconfig).
         {plan.Framework.VerifyChecksTest}
 
         """;
+
+    static string ExpectoSnapshot(Plan plan)
+    {
+        if (plan.Inline)
+        {
+            return "the literal passed to Snapshot";
+        }
+
+        return plan.Framework.SampleVerifiedFile;
+    }
 
     internal static IEnumerable<string> ExpectoOpens(Plan plan) =>
         ModuleInitializerGenerator.Blocks(plan, windows: false)

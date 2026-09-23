@@ -25,6 +25,23 @@ public sealed record Plan(
     /// <summary>Every rule and group that fires, plus the notices derived from the plugins themselves.</summary>
     public required IReadOnlyList<InteractionResult> Interactions { get; init; }
 
+    /// <summary>Snapshots of text live in the test source rather than in <c>.verified.</c> files (plan 12.8).</summary>
+    public bool Inline => State.InlineSnapshots;
+
+    /// <summary>The core sample test, carrying its snapshot as a literal when <see cref="Inline"/>.</summary>
+    public string SampleTest
+    {
+        get
+        {
+            if (Inline)
+            {
+                return InlineSnapshots.AddSnapshot(Framework.SampleTest, CodeFiles.SampleVerified);
+            }
+
+            return Framework.SampleTest;
+        }
+    }
+
     public string SolutionName => State.SolutionName;
     public string LibraryProject => SolutionName;
     public string TestProject => $"{SolutionName}.Tests";

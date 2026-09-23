@@ -90,6 +90,33 @@ public class GeneratorTests
         Verify(AiContentGenerator.Build(PlanFor(State(framework))), "md")
             .UseParameters(framework);
 
+    /// <summary>
+    /// Inline snapshots (plan 12.8): the initializer switch, the core and DiffPlex samples carrying
+    /// their snapshots as literals, no verified files, and the guide and AI text that go with them.
+    /// </summary>
+    [Test]
+    [Arguments(TestFramework.XunitV3)]
+    [Arguments(TestFramework.Expecto)]
+    public Task Inline(TestFramework framework)
+    {
+        var plan = PlanFor(State(framework) with {InlineSnapshots = true});
+        return Verify(
+                $"""
+                 ==== readme.md
+
+                 {DocsGenerator.Build(plan)}
+                 ==== CLAUDE.md
+
+                 {AiContentGenerator.Build(plan)}
+                 {Render(SolutionGenerator.Build(plan).Where(_ => _.Path.EndsWith(".cs") || _.Path.EndsWith(".fs") || _.Path.Contains(".verified.")))}
+                 """)
+            .UseParameters(framework);
+    }
+
+    [Test]
+    public Task InlineAddition() =>
+        Verify(Render(SolutionGenerator.Build(PlanFor(Addition(Flow.Add, [], ["DiffPlex"]) with {InlineSnapshots = true}))));
+
     /// <summary>Visual Studio without ReSharper, and no build server, drop the JetBrains settings and the build definition.</summary>
     [Test]
     public Task SolutionFileListMinimal() =>

@@ -17,6 +17,7 @@ public static class WizardStateUrl
     public const string ChoicesKey = "opt";
     public const string TechKey = "tech";
     public const string ExistingKey = "have";
+    public const string InlineKey = "inline";
 
     /// <summary>The <see cref="PluginsKey"/> value meaning "nothing at all", as opposed to "unset".</summary>
     public const string NoPlugins = "none";
@@ -92,6 +93,10 @@ public static class WizardStateUrl
 
         Add(MinimalKey, string.Join(',', selected.Where(_ => state.DepthOf(_) == Depth.Minimal)));
         Add(ChoicesKey, string.Join(',', state.Choices.OrderBy(_ => _.Key, StringComparer.Ordinal).Select(_ => $"{_.Key}:{_.Value}")));
+        if (state.InlineSnapshots)
+        {
+            Add(InlineKey, "true");
+        }
 
         pairs.AddRange(SponsorPairs(state));
 
@@ -155,6 +160,7 @@ public static class WizardStateUrl
             TestFramework = ParseEnum<TestFramework>(Get(TestFrameworkKey)),
             BuildServer = ParseEnum<BuildServer>(Get(BuildServerKey)),
             SolutionName = Get(NameKey) ?? WizardState.DefaultSolutionName,
+            InlineSnapshots = Get(InlineKey) == "true",
             SelectedPlugins = ParsePlugins(flow, Get(PluginsKey)),
             ExistingPlugins = new HashSet<string>(SplitList(Get(ExistingKey)), StringComparer.Ordinal),
             Techs = new HashSet<string>(SplitList(Get(TechKey)), StringComparer.Ordinal),
