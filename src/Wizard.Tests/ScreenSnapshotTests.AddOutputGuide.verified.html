@@ -67,6 +67,7 @@
           <section class="step-body" data-step="output">
             <h2>Result</h2>
             <p class="hint">The download holds the changes to merge into the project, each file named for where it goes. The guide walks through them in order, and the AI instructions ask an assistant to do the same.</p>
+            <p class="hint versions" data-versions="live">Package versions are the newest stable releases on nuget.org.</p>
             <div class="output-actions">
               <button type="button" class="primary download-zip">Download changes (.zip)</button>
               <button type="button" class="copy-guide">Copy guide as markdown</button>
@@ -91,6 +92,7 @@
                   <li>Adding: EntityFramework (verbose)</li>
                   <li>Already in the project: SqlServer</li>
                   <li>Maintenance fee: No change</li>
+                  <li>Package versions: the newest stable release of each on nuget.org when this was generated</li>
                 </ul>
                 <p>The download holds the changes below as files to merge, each named for where it goes.
                   <code>CLAUDE.md</code>
@@ -108,13 +110,13 @@
      Without Central Package Management, put each Version on the PackageReference in
      TestProject.csproj.fragment.xml instead, and skip this file. --&gt;
 &lt;ItemGroup&gt;
-  &lt;PackageVersion Include="Verify.EntityFramework" Version="15.5.0" /&gt;
-  &lt;PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" /&gt;
+  &lt;PackageVersion Include="Verify.EntityFramework" Version="1.1.0" /&gt;
+  &lt;PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" /&gt;
 &lt;/ItemGroup&gt;
 </code></pre>
                 <p>Without it, reference each package with its version instead:</p>
-                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="15.5.0" /&gt;
-&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" /&gt;
+                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="1.1.0" /&gt;
+&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" /&gt;
 </code></pre>
                 <p>Or from the command line, in the test project's directory:</p>
                 <pre><code>dotnet add package Verify.EntityFramework
@@ -191,9 +193,9 @@ public static class ModuleInitializer
                 <p>Records the SQL EF Core runs, snapshots ChangeTracker state, and turns an IQueryable into readable SQL. (<a href="https://github.com/VerifyTests/Verify.EntityFramework">repository</a>)</p>
                 <p>Packages:
                   <code>Verify.EntityFramework</code>
-                  15.5.0,
+                  1.1.0,
                   <code>Microsoft.EntityFrameworkCore.SqlServer</code>
-                  10.0.12 (the provider the sample DbContext uses).</p>
+                  1.1.0 (the provider the sample DbContext uses).</p>
                 <p>Enabled by:</p>
                 <pre><code class="language-cs">VerifyEntityFramework.Initialize(GetDbModel());
 </code></pre>
@@ -246,20 +248,20 @@ return Verify(employee)
                 <p>
                   <strong>StopRecording</strong>
                   — Recording.Stop() returns the entries instead of adding them, so they can be filtered or combined with other values before being verified.</p>
-                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="15.5.0" /&gt;
-&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" /&gt;
+                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="1.1.0" /&gt;
+&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" /&gt;
 </code>0</pre>
                 <p>
                   <strong>DescriptiveSql</strong>
                   — EF names tables c and e, and parameters @p0 and @p1. These two replace them with the table and column names, so a change in the query is visible in the diff.</p>
-                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="15.5.0" /&gt;
-&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" /&gt;
+                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="1.1.0" /&gt;
+&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" /&gt;
 </code>1</pre>
                 <p>
                   <strong>ScrubDateTimes</strong>
                   — Some queries, such as those against temporal tables, have EF inline a DateTime into the SQL. This replaces each one with a stable token.</p>
-                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="15.5.0" /&gt;
-&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="10.0.12" /&gt;
+                <pre><code class="language-xml">&lt;PackageReference Include="Verify.EntityFramework" Version="1.1.0" /&gt;
+&lt;PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="1.1.0" /&gt;
 </code>2</pre>
                 <p>Notes:</p>
                 <ul>

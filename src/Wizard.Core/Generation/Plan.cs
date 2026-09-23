@@ -150,6 +150,39 @@ public sealed record Plan(
                 .OrderBy(_ => _.Prefix, StringComparer.Ordinal)
         ];
 
+    /// <summary>
+    /// Every package id the output names a version for: what the live lookup checks (plan 15.3), and
+    /// nothing else, so a plan with two extensions makes a handful of requests rather than a hundred.
+    /// </summary>
+    public IReadOnlyList<string> EmittedPackages
+    {
+        get
+        {
+            if (IsAddition)
+            {
+                return [.. AddedPackages.Concat(DotnetTools).Distinct(StringComparer.Ordinal)];
+            }
+
+            // the new solution's .config/dotnet-tools.json always installs Verify.Terminal
+            return [.. AllPackages.Append("verify.tool").Distinct(StringComparer.Ordinal)];
+        }
+    }
+
+    /// <summary>Where the versions came from, for the guide.</summary>
+    public string VersionsNote
+    {
+        get
+        {
+            if (Versions.Live)
+            {
+                return "the newest stable release of each on nuget.org when this was generated";
+            }
+
+            var updated = Versions.Updated.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture);
+            return $"the newest stable releases as of {updated}; nuget.org was not checked when this was generated";
+        }
+    }
+
     public string Version(string packageId) => Versions[packageId];
 
     /// <summary>

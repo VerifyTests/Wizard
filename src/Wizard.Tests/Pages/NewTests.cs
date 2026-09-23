@@ -133,6 +133,29 @@ public class NewTests : WebTestContext
         await Assert.That(page.FindAll("li [data-step=options]").Count).IsEqualTo(0);
     }
 
+    /// <summary>The output uses nuget.org's newest versions once they arrive (plan 15.3).</summary>
+    [Test]
+    public async Task OutputUsesTheNewestVersionsOnNuGet()
+    {
+        var page = Open("new?step=output&os=Windows&ide=Rider&cli=Gui&tf=XunitV3&ci=None&ext=Http");
+        page.WaitForState(() => page.Find("[data-versions]").GetAttribute("data-versions") == "live");
+
+        await Assert.That(page.Find(".versions").TextContent).IsEqualTo("Package versions are the newest stable releases on nuget.org.");
+        await page.Find("#tab-Files").ClickAsync(new());
+        await page.FindAll(".file-link").Single(_ => _.TextContent == "Directory.Packages.props").ClickAsync(new());
+        await Assert.That(page.Find(".code-box-content").TextContent).Contains($"<PackageVersion Include=\"Verify.Http\" Version=\"{FakeNuGet.Newest}\" />");
+    }
+
+    /// <summary>Offline, the output stands with the baked versions, and says how old they are.</summary>
+    [Test]
+    public async Task OfflineKeepsTheBakedVersions()
+    {
+        NuGet.Offline = true;
+        var page = Open("new?step=output&os=Windows&ide=Rider&cli=Gui&tf=XunitV3&ci=None");
+        page.WaitForState(() => page.Find("[data-versions]").GetAttribute("data-versions") == "baked");
+        await Assert.That(page.Find(".versions").TextContent).StartsWith("nuget.org could not be reached");
+    }
+
     [Test]
     public Task OutputMarkup()
     {

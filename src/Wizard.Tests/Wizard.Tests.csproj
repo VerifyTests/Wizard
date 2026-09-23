@@ -17,6 +17,7 @@
     <FrameworkReference Include="Microsoft.AspNetCore.App" />
     <ProjectReference Include="..\Wizard.Web\Wizard.Web.csproj" />
     <ProjectReference Include="..\Wizard.Core\Wizard.Core.csproj" />
+    <ProjectReference Include="..\Wizard.VersionRefresh\Wizard.VersionRefresh.csproj" />
   </ItemGroup>
 
   <ItemGroup>

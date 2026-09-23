@@ -95,6 +95,7 @@
               <p class="hint">Used for the solution file, the class library, and the test project (<code>VerifySample.Tests</code>).</p>
               <input type="text" id="solutionName">
             </div>
+            <p class="hint versions" data-versions="live">Package versions are the newest stable releases on nuget.org.</p>
             <div class="output-actions">
               <button type="button" class="primary download-zip">Download solution (.zip)</button>
               <button type="button" class="copy-guide">Copy guide as markdown</button>
@@ -123,6 +124,7 @@
                   <li>Extensions: DiffPlex (verbose)</li>
                   <li>Maintenance fee: Exempt: OpenSource</li>
                   <li>.NET: net10.0 (SDK 10.0.401)</li>
+                  <li>Package versions: the newest stable release of each on nuget.org when this was generated</li>
                 </ul>
                 <p>The downloadable solution already contains everything described below: a class library, a test project with a passing sample test, and the settings files. This guide explains each part, so the same setup can be applied to an existing solution.</p>
                 <h2 id="add-nuget-packages">Add NuGet packages</h2>
@@ -411,7 +413,7 @@ indent_style = space
                 <p>Shows an inline diff in the failure message of a text snapshot, instead of both files in full. (<a href="https://github.com/VerifyTests/Verify.DiffPlex">repository</a>)</p>
                 <p>Package:
                   <code>Verify.DiffPlex</code>
-                  3.3.1.</p>
+                  1.1.0.</p>
                 <p>Enabled by:</p>
                 <pre><code class="language-json">{
   "test": {

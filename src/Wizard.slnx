@@ -12,9 +12,11 @@
     <File Path="nuget.config" />
     <File Path="../.github/workflows/deploy.yml" />
     <File Path="../.github/workflows/integration.yml" />
+    <File Path="../.github/workflows/refresh-versions.yml" />
     <File Path="../.github/dependabot.yml" />
   </Folder>
   <Project Path="Wizard.Core/Wizard.Core.csproj" />
   <Project Path="Wizard.Web/Wizard.Web.csproj" />
   <Project Path="Wizard.Tests/Wizard.Tests.csproj" />
+  <Project Path="Wizard.VersionRefresh/Wizard.VersionRefresh.csproj" />
 </Solution>

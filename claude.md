@@ -49,7 +49,11 @@ storage would let parallel tests leak into each other. A test about remembering 
     enforces most of it.
   - Every package id an entry names needs a version in `Versions/package-versions.json`, and it must be
     one that exists on nuget.org. The catalogue records each repo's own `<Version>`, which is often the
-    next unreleased one.
+    next unreleased one. `src/Wizard.VersionRefresh` rewrites that file with the newest stable versions
+    (`refresh-versions.yml` runs it weekly); run it locally rather than editing versions by hand:
+    `dotnet run --project src/Wizard.VersionRefresh -- src/Wizard.Core/Versions/package-versions.json summary.md`.
+  - Generator snapshots use `GeneratorTests.Versions`, with every package at 1.0.0, so a refresh never
+    changes them; the browser tests answer for nuget.org through `FakeNuGet`.
 - `src/Wizard.Web`: the Blazor UI.
 - `src/Wizard.Tests`: TUnit tests. There are bunit component tests, Playwright screen snapshots (PNG and
   HTML), and `RepoContractTests` anti-rot checks.

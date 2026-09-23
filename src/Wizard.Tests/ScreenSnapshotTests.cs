@@ -30,6 +30,8 @@ public class ScreenSnapshotTests
     static async Task VerifyScreen(IPage page, bool fullPage = true)
     {
         await page.EvaluateAsync("async () => { await document.fonts.ready; }");
+        // The output step regenerates once the version check answers; capture after that, not before.
+        await page.WaitForFunctionAsync("() => !document.querySelector('[data-versions=pending]')");
         await Verify(page)
             .PageScreenshotOptions(
                 new()

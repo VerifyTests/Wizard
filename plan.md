@@ -835,13 +835,24 @@ One step, both flows. Inputs and generated `Directory.Build.props` block (owner 
 
 `Wizard.Core/Versions/package-versions.json`: `{ "updated": "2026-09-22", "packages": { "Verify.XunitV3": "33.1.0", … } }` covering every package id the registry can emit (Verify adapters, test frameworks, every extension package, `EfLocalDb.*`, `LocalDb`, helper packages such as `Microsoft.EntityFrameworkCore.SqlServer`, `Avalonia.*`, `Selenium.WebDriver.ChromeDriver`, `Microsoft.AspNetCore.Mvc.Testing`, `Morph.Skia`, `Fixie.TestAdapter`, `Microsoft.NET.Test.Sdk`, `FSharp.Core`). Seed values: from the extension repos' `Directory.Build.props` `<Version>` (catalogue) and the Verify/SponsorCheck `Directory.Packages.props`. `verify.tool` (Verify.Terminal) has no version in its repo (MinVer); seed from nuget.org. The file also has a `pinned` map of package id to reason, for packages where the newest stable is wrong (`YoloDev.Expecto.TestSdk`, section 13); the refresh (15.2) and the runtime lookup (15.3) leave pinned packages alone.
 
+As built (phase 4): the generator snapshot tests do not use the baked file. They use a fixed set with every package at 1.0.0, because a weekly refresh would otherwise change a couple of hundred snapshots each time, and the refresh's own diff of this file is where a version change is reviewed. The integration tests use the baked file, which is what they have to restore.
+
 ### 15.2 Weekly refresh workflow
 
 `refresh-versions.yml` (schedule + `workflow_dispatch`): runs `dotnet run --project src/Wizard.Tests -- --treenode-filter "/*/*/PackageVersionsRefresh/*"` or a tiny console project `src/Wizard.VersionRefresh` that, for each package id, GETs `https://api.nuget.org/v3-flatcontainer/{id}/index.json`, picks the newest version without a `-` label (NuGet semver compare; use `NuGet.Versioning` in the refresh tool only), rewrites the JSON, and opens a PR with `peter-evans/create-pull-request`. Tests then re-run against the new versions (including the integration compile, 17.4), so a breaking bump is caught before deploy.
 
+As built (phase 4):
+
+- The tool is `src/Wizard.VersionRefresh`. Its rewrite is a pure function of the file and the version lists, tested without a network. It keeps the file's own format, so a refresh diff shows only the versions that moved, and it moves `updated` only when a version does, so a quiet week opens no pull request. A package nuget.org does not answer for keeps its version and is named in the pull request.
+- "Newest stable" is `StableVersion` in Core rather than `NuGet.Versioning`, so the refresh and the browser's lookup share one rule and the browser downloads nothing extra.
+- A pull request opened with `GITHUB_TOKEN` does not trigger other workflows, so `integration.yml` would never run on it. The refresh workflow builds every generated solution itself, on Windows, before opening the pull request, and puts the result in its body and title. A failing bump is still opened, marked, rather than lost.
+- The flat container index lists unlisted versions too. Registration would exclude them at the cost of a much larger response; accepted, since unlisting a newest release is rare.
+
 ### 15.3 Runtime refresh
 
 `PackageVersionLookup` (Web) mirrors `PackageLookup.LatestVersion` from SponsorCheck but filters prereleases. On the output step, for the packages in the plan only, fire the lookups in parallel with a 5 s budget; success replaces the baked version in the plan and re-renders; failure keeps the baked value and the guide says "versions as of {updated}". Never block output on the network. Playwright tests route `https://api.nuget.org/**` through `FakeNuGetFeed` (extended to serve `index.json` per package id) and bunit tests use a stub `HttpClient`, exactly as SponsorCheck does.
+
+As built (phase 4): the output appears straight away with the baked versions and is regenerated when the answers arrive. Only the packages the output names are asked about (`Plan.EmittedPackages`), and answers are kept for the session, so changing a choice asks only about what is new. The guide says the versions are live only when every package answered; otherwise it gives the baked date. The step shows which it is, and marks it with `data-versions` (`pending`, `live`, `baked`), which the screenshot tests wait on. The fake feed answers every package with the same list, so screenshots never show a real version.
 
 ---
 
@@ -904,7 +915,7 @@ Section 15.2. Runs Monday 06:00 UTC.
 
 ### 18.4 Repository settings to apply manually
 
-Enable GitHub Pages with source "GitHub Actions"; grant `pages: write`, `id-token: write`; allow Actions to create pull requests (for the refresh workflow).
+Enable GitHub Pages with source "GitHub Actions"; grant `pages: write`, `id-token: write`; allow Actions to create pull requests (for the refresh workflow). The last is Settings → Actions → General → Workflow permissions → "Allow GitHub Actions to create and approve pull requests"; without it the refresh runs, but opening its pull request fails.
 
 ---
 
@@ -924,7 +935,7 @@ Do these after the site is live:
 
 Each phase ends with green tests and a deployable site. Estimated effort is relative.
 
-Status: Phase 0 done and deployed. Phase 1 done: flow A without the tech and extension steps. Phase 2 done: the registry, the interaction rules, the ordering solver, the extension and options steps. Phase 3 done: the tech stack step and its suggestions, flows B and C, `/add/{Id}` deep links, the browser's memory, and the add-flow download.
+Status: Phase 0 done and deployed. Phase 1 done: flow A without the tech and extension steps. Phase 2 done: the registry, the interaction rules, the ordering solver, the extension and options steps. Phase 3 done: the tech stack step and its suggestions, flows B and C, `/add/{Id}` deep links, the browser's memory, and the add-flow download. Phase 4 done: the weekly refresh workflow and tool, and the live nuget.org lookup.
 
 **Phase 0 – Scaffold (small).** Repo layout (4), props, `global.json`, `nuget.config`, empty `Wizard.Core`/`Web`/`Tests`, copied SponsorCheck plumbing (index.html, css, fonts, interop.js, `PublishedWizard`, `WebTestContext`, `ModuleInitializer`), Home page with three cards, `deploy.yml` deploying the placeholder to Pages. Verify the base href and 404 fallback work at `https://verifytests.github.io/Wizard/`.
 

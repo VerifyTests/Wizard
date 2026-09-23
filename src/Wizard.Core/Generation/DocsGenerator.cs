@@ -48,7 +48,8 @@ public static class DocsGenerator
             $"Test framework: {plan.Framework.Framework.Name()}",
             $"Adding: {ExtensionSummary(plan)}",
             $"Already in the project: {ExistingSummary(plan)}",
-            $"Maintenance fee: {SponsorRules.Summary(plan.State)}"
+            $"Maintenance fee: {SponsorRules.Summary(plan.State)}",
+            $"Package versions: {plan.VersionsNote}"
         ]);
         builder.Paragraph("The download holds the changes below as files to merge, each named for where it goes. `CLAUDE.md` has the same steps written for an AI assistant to carry out.");
 
@@ -138,7 +139,8 @@ public static class DocsGenerator
             $"Build server: {plan.BuildServer.Name()}",
             $"Extensions: {ExtensionSummary(plan)}",
             $"Maintenance fee: {SponsorRules.Summary(plan.State)}",
-            $".NET: {WizardDefaults.TargetFramework} (SDK {WizardDefaults.SdkVersion})"
+            $".NET: {WizardDefaults.TargetFramework} (SDK {WizardDefaults.SdkVersion})",
+            $"Package versions: {plan.VersionsNote}"
         ]);
         builder.Paragraph("The downloadable solution already contains everything described below: a class library, a test project with a passing sample test, and the settings files. This guide explains each part, so the same setup can be applied to an existing solution.");
     }

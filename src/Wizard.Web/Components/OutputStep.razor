@@ -1,6 +1,7 @@
 @inject ClipboardService Clipboard
 @inject DownloadService Download
 @inject NavigationManager Navigation
+@inject PackageVersionLookup Lookup
 
 @* The terminating step (plan 12.1): the guide, the files of the downloadable solution, and the AI
    instructions, with copy and download actions for each. *@
@@ -19,6 +20,9 @@ else
                @onchange="NameChanged" />
     </div>
 }
+
+@* data-versions says where the versions came from: the tests wait for it to settle before a screenshot. *@
+<p class="hint versions" data-versions="@versionsState">@VersionsText</p>
 
 <div class="output-actions">
     <button type="button" class="primary download-zip" @onclick="DownloadZip">@DownloadLabel</button>
@@ -83,6 +87,7 @@ else
     string? copied;
     Output output = null!;
     WizardState? generatedFor;
+    string versionsState = "pending";
 
     sealed record Output(Plan Plan, string Guide, string Ai, IReadOnlyList<GeneratedFile> Files);
 
@@ -95,10 +100,51 @@ else
         }
 
         generatedFor = State with { };
-        var plan = Plan.Build(State, PackageVersions.Baked, Today);
-        output = new(plan, DocsGenerator.Build(plan), AiContentGenerator.Build(plan), SolutionGenerator.Build(plan));
+        Generate(PackageVersions.Baked);
         copied = null;
+        _ = CheckVersions(generatedFor);
     }
+
+    void Generate(PackageVersions versions)
+    {
+        var plan = Plan.Build(generatedFor!, versions, Today);
+        output = new(plan, DocsGenerator.Build(plan), AiContentGenerator.Build(plan), SolutionGenerator.Build(plan));
+    }
+
+    /// <summary>
+    /// The output is on screen straight away with the baked versions, then regenerated with nuget.org's
+    /// newest once they arrive (plan 15.3). Nothing waits on the network.
+    /// </summary>
+    async Task CheckVersions(WizardState forState)
+    {
+        versionsState = "pending";
+        var baked = PackageVersions.Baked;
+        var wanted = output.Plan.EmittedPackages.Where(_ => !baked.IsPinned(_)).ToList();
+        var found = await Lookup.NewestAsync(wanted);
+
+        // a later change has already started its own check
+        if (!ReferenceEquals(forState, generatedFor))
+        {
+            return;
+        }
+
+        var live = found.Count == wanted.Count;
+        if (found.Count > 0)
+        {
+            Generate(baked.With(found, live));
+        }
+
+        versionsState = live ? "live" : "baked";
+        await InvokeAsync(StateHasChanged);
+    }
+
+    string VersionsText =>
+        versionsState switch
+        {
+            "pending" => "Checking nuget.org for the newest versions.",
+            "live" => "Package versions are the newest stable releases on nuget.org.",
+            _ => $"nuget.org could not be reached, so some package versions are as of {PackageVersions.Baked.Updated.ToString("yyyy-MM-dd", CultureInfo.InvariantCulture)}."
+        };
 
     GeneratedFile SelectedFile =>
         output.Files.FirstOrDefault(_ => _.Path == selectedPath) ??

@@ -1,0 +1,19 @@
+﻿{
+  "updated": "2026-09-29",
+  "packages": {
+    "Moq": "4.1.0",
+    "Verify": "33.1.1",
+    "YoloDev.Expecto.TestSdk": "0.16.1"
+  },
+  "pinned": {
+    "YoloDev.Expecto.TestSdk": "1.0.0 requires Expecto < 10"
+  }
+}
+
+==== summary
+
+Newest stable versions on nuget.org (plan 15.2).
+
+| Package | From | To |
+|---|---|---|
+| Moq | 4.0.0 | 4.1.0 |

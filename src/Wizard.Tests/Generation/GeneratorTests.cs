@@ -55,8 +55,15 @@ public class GeneratorTests
         return state;
     }
 
+    /// <summary>
+    /// Every package at 1.0.0. The baked file is refreshed weekly (plan 15.2), and snapshots taken with
+    /// it would all change each time; that file's own diff is where a version change is reviewed.
+    /// </summary>
+    public static readonly PackageVersions Versions =
+        PackageVersions.Create(Today, PackageVersions.Baked.Ids.ToDictionary(_ => _, _ => "1.0.0"));
+
     static Plan PlanFor(WizardState state) =>
-        Plan.Build(state, PackageVersions.Baked, Today);
+        Plan.Build(state, Versions, Today);
 
     [Test]
     [MatrixDataSource]
@@ -253,38 +260,42 @@ public class GeneratorTests
         await Assert.That(SolutionGenerator.Build(plan)).IsNotEmpty();
     }
 
-    public static IEnumerable<Func<(string Name, WizardState State)>> Additions()
+    // Keyed by name, so the test's display name is the name rather than the whole state.
+    static readonly Dictionary<string, Func<WizardState>> additions = new()
     {
         // The case the interaction rules were written for: EF Core added next to an existing SqlServer,
         // whose recording the project's own initializer now has to turn off.
-        yield return () => ("EfNextToExistingSql", Addition(Flow.Add, ["DiffPlex", "SqlServer"], ["EntityFramework"]));
+        ["EfNextToExistingSql"] = () => Addition(Flow.Add, ["DiffPlex", "SqlServer"], ["EntityFramework"]),
         // An existing extension plugin discovery never found, which the project may never have enabled.
-        yield return () => ("ExistingUndiscovered", Addition(Flow.Add, ["AngleSharp"], ["Bunit"]));
+        ["ExistingUndiscovered"] = () => Addition(Flow.Add, ["AngleSharp"], ["Bunit"]),
         // A package with a maintenance fee check of its own, into a project whose Verify declaration
         // is left alone.
-        yield return () => ("TransitiveSponsorship", Addition(Flow.Add, [], ["OpenXml"]));
-        yield return () => ("ChangedDeclaration", Addition(Flow.Add, [], ["Http"]) with
+        ["TransitiveSponsorship"] = () => Addition(Flow.Add, [], ["OpenXml"]),
+        ["ChangedDeclaration"] = () => Addition(Flow.Add, [], ["Http"]) with
         {
             SponsorMode = SponsorMode.Exempt,
             Exemption = Exemption.SmallRevenue,
             SponsorUntil = "2027-09"
-        });
-        yield return () => ("Windows", Addition(Flow.Add, [], ["WinForms", "Terminal"], TestFramework.NUnit));
-        yield return () => ("Expecto", Addition(Flow.Add, [], ["Http", "EntityFramework"], TestFramework.Expecto));
-        yield return () =>
+        },
+        ["Windows"] = () => Addition(Flow.Add, [], ["WinForms", "Terminal"], TestFramework.NUnit),
+        ["Expecto"] = () => Addition(Flow.Add, [], ["Http", "EntityFramework"], TestFramework.Expecto),
+        ["ByTech"] = () =>
         {
             var state = Addition(Flow.AddByTech, ["DiffPlex"], []);
             TechSuggestions.Choose(state, "aspnetcore", true);
-            return ("ByTech", state);
-        };
-    }
+            return state;
+        }
+    };
+
+    public static IEnumerable<string> Additions() =>
+        additions.Keys;
 
     /// <summary>Every file the add flows download, and the guide and AI instructions with them (plan 12.5).</summary>
     [Test]
     [MethodDataSource(nameof(Additions))]
-    public Task Addition((string Name, WizardState State) addition)
+    public Task Addition(string name)
     {
-        var plan = PlanFor(addition.State);
+        var plan = PlanFor(additions[name]());
         return Verify(
                 $"""
                  ==== interactions
@@ -293,7 +304,7 @@ public class GeneratorTests
 
                  {Render(SolutionGenerator.Build(plan))}
                  """)
-            .UseParameters(addition.Name);
+            .UseParameters(name);
     }
 
     [Test]

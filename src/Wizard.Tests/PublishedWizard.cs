@@ -93,6 +93,7 @@ public sealed class PublishedWizard : IAsyncDisposable
     {
         var isolated = await Browser.NewContextAsync(ContextOptions);
         await isolated.Clock.SetFixedTimeAsync(FixedTime);
+        await RouteNuGet(isolated);
         var page = await isolated.NewPageAsync();
         page.SetDefaultTimeout(120_000);
         return page;
@@ -110,6 +111,25 @@ public sealed class PublishedWizard : IAsyncDisposable
                 Height = 900
             }
         };
+
+    /// <summary>
+    /// The output step asks nuget.org for the newest versions (plan 15.3). The tests answer for it, so a
+    /// package shipping does not change a screenshot, and nothing depends on the network.
+    /// </summary>
+    static Task RouteNuGet(IBrowserContext context) =>
+        context.RouteAsync(
+            "https://api.nuget.org/**",
+            _ => _.FulfillAsync(
+                new()
+                {
+                    Status = 200,
+                    ContentType = "application/json",
+                    Body = FakeNuGet.Json,
+                    Headers = new Dictionary<string, string>
+                    {
+                        ["Access-Control-Allow-Origin"] = "*"
+                    }
+                }));
 
     /// <summary>What every page believes "now" is, so dates the wizard derives are the same every run.</summary>
     public static readonly DateTime FixedTime = new(2026, 9, 22, 10, 0, 0, DateTimeKind.Utc);
@@ -173,6 +193,7 @@ public sealed class PublishedWizard : IAsyncDisposable
         // the clock on a page that has not navigated yet fails, because the script it calls into is
         // injected on navigation.
         await context.Clock.SetFixedTimeAsync(FixedTime);
+        await RouteNuGet(context);
 
         var wizard = new PublishedWizard(app, playwright, browser, context, port);
         await wizard.WarmUp();

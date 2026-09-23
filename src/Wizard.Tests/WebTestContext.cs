@@ -12,8 +12,13 @@ public abstract class WebTestContext : BunitContext
         Services.AddScoped<ClipboardService>();
         Services.AddScoped<DownloadService>();
         Services.AddScoped<BrowserStorage>();
+        Services.AddScoped<PackageVersionLookup>();
+        Services.AddScoped(_ => new HttpClient(NuGet));
         Services.AddSingleton<TimeProvider>(new FixedTimeProvider());
     }
+
+    /// <summary>Stands in for nuget.org, so the live version lookup (plan 15.3) is deterministic.</summary>
+    protected FakeNuGet NuGet { get; } = new();
 
     sealed class FixedTimeProvider : TimeProvider
     {
