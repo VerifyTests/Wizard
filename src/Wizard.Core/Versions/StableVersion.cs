@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Picks the newest stable version from a nuget.org version list (plan D3). One rule, shared by the
 /// weekly refresh and the browser's live lookup, so the two cannot pick differently. Stable means no

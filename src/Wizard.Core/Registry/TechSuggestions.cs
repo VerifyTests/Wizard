@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <param name="Recommended">Pre-checked when its tech is chosen; otherwise it is listed as related.</param>
 /// <param name="Because">The techs that suggest it, for the "related" tag and the card's hint.</param>
 public sealed record Suggestion(string PluginId, bool Recommended, IReadOnlyList<string> Because);

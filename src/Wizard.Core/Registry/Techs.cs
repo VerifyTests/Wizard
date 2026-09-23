@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <param name="Id">Stable, because it is a url value and is kept in browser storage.</param>
 /// <param name="Recommended">Plugins pre-checked when the tech is chosen.</param>
 /// <param name="Related">Plugins listed under the suggestions but left unchecked.</param>

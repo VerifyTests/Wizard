@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>MSBuild-flavoured XML emitters (from SponsorCheck.Web).</summary>
 public static class MsBuildXml
 {

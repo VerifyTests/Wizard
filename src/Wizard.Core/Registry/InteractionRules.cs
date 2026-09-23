@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 public enum Severity
 {
     /// <summary>Worth knowing: a companion suggestion, or an explanation of combined behaviour.</summary>

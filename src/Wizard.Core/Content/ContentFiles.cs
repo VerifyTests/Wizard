@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Text copied from Verify's docs (plan D15, Appendix A). The files are kept verbatim so they can be
 /// diffed against the originals; the differences that matter outside the Verify repo are applied at

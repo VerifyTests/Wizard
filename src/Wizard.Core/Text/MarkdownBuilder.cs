@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>Appends markdown blocks separated by exactly one blank line, with lf line endings.</summary>
 public sealed class MarkdownBuilder
 {

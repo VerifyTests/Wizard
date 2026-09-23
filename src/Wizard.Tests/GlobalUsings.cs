@@ -19,7 +19,6 @@ global using Microsoft.Playwright;
 global using TUnit.Core;
 global using VerifyTests;
 global using VerifyTests.AngleSharp;
-global using Wizard.Core;
 global using Wizard.Tests;
 global using Wizard.Web;
 global using Wizard.Web.Components;

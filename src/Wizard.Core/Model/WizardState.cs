@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Everything the wizard knows. The UI mutates it; <see cref="WizardStateUrl"/> round-trips it through
 /// the query string so every point in a flow is a bookmark (plan 8.1); the generators read it.
@@ -317,7 +315,7 @@ public sealed record WizardState
             StringComparer.Ordinal);
 
         Techs = new HashSet<string>(
-            Techs.Where(Core.Techs.Contains),
+            Techs.Where(Techs.Contains),
             StringComparer.Ordinal);
 
         Depths = new Dictionary<string, Depth>(

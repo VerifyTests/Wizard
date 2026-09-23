@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Canonical urls into the deployed wizard. One place so the generators, the docs and the tests
 /// can't drift. It lives in Core because generated files link back to the wizard state they came from.

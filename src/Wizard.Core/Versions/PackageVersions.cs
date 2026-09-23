@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The package versions emitted into generated output (plan D3). Baked from package-versions.json,
 /// which a weekly workflow refreshes (plan 15.2); the web app overlays live nuget.org lookups with
