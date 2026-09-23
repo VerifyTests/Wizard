@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The Open Source Maintenance Fee declaration (plan 14, Verify's docs/maintenance-fee.md). Verify
 /// uses SponsorCheck owner mode with owner id <c>Verify</c>, so the declaration is MSBuild properties

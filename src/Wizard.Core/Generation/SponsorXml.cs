@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>The maintenance fee declaration as it appears in the generated Directory.Build.props (plan 14).</summary>
 public static class SponsorXml
 {

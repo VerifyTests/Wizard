@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Everything that differs per test framework (plan 13). Package lists and project properties match
 /// Verify's usages/*NugetUsage projects; sample and VerifyChecks code match the snippets in the Verify

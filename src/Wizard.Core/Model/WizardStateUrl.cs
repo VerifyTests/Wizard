@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The query string encoding of <see cref="WizardState"/> (plan 8.1). Values stay readable, because
 /// shared links are meant to be read. Defaults are omitted. Parsing is total: an unknown or malformed

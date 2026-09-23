@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>What the browser remembers between visits (plan 8.2), each as it appears in a url.</summary>
 /// <param name="Tech">A comma list of tech ids.</param>
 /// <param name="Existing">A comma list of the plugin ids a project already has.</param>

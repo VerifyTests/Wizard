@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <param name="Id">The url value of <c>step</c>.</param>
 /// <param name="Summary">The chosen value shown next to a completed step in the breadcrumb, or null when nothing is chosen.</param>
 /// <param name="IsComplete">Whether the step's input is valid, which gates moving past it.</param>

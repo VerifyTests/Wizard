@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The month-window arithmetic the SponsorCheck verifier applies to every <c>...Until</c> value
 /// (copied from SponsorCheck.Web's MonthBound): a claim is valid through the end of the month it names,

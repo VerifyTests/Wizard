@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Zips the generated files under a folder named after the solution. Runs in the browser (plan D19).
 /// Entries get a fixed timestamp so the same input always produces the same bytes.

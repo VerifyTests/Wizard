@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>Display names. The Os, Ide, Cli and BuildServer names match the old docs/wiz pages (plan Appendix C).</summary>
 public static class DisplayNames
 {
