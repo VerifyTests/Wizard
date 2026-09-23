@@ -1,5 +1,3 @@
-using Wizard.Core;
-
 public sealed record DiffToolLink(string Name, string Url);
 
 /// <summary>

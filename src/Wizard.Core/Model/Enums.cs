@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 // Member names are URL values (plan 8.1) and match the WizardGen enums in the Verify repo where they
 // overlap, so the old docs/wiz file names map onto wizard urls (plan 19). Do not rename members.
 

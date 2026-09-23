@@ -46,21 +46,21 @@ public sealed record WizardState
     /// part in the interaction rules, because adding an extension next to one of them can change how
     /// the existing one has to be initialized.
     /// </summary>
-    public IReadOnlySet<string> ExistingExtensions { get; set; } = EmptySet;
+    public IReadOnlySet<string> ExistingExtensions { get; set; } = emptySet;
 
     /// <summary>Tech ids (plan 10). They only seed the extension selection; nothing is generated from them.</summary>
-    public IReadOnlySet<string> Techs { get; set; } = EmptySet;
+    public IReadOnlySet<string> Techs { get; set; } = emptySet;
 
-    static readonly IReadOnlySet<string> EmptySet = new HashSet<string>(StringComparer.Ordinal);
+    static IReadOnlySet<string> emptySet = new HashSet<string>(StringComparer.Ordinal);
 
     /// <summary>Extension id to depth. Missing means <see cref="Depth.Verbose"/> (plan D7).</summary>
-    public IReadOnlyDictionary<string, Depth> Depths { get; set; } = EmptyDepths;
+    public IReadOnlyDictionary<string, Depth> Depths { get; set; } = emptyDepths;
 
     /// <summary>Choice id to value, for the per-extension and per-rule options (plan 7.1 step 8).</summary>
-    public IReadOnlyDictionary<string, string> Choices { get; set; } = EmptyChoices;
+    public IReadOnlyDictionary<string, string> Choices { get; set; } = emptyChoices;
 
-    static readonly IReadOnlyDictionary<string, Depth> EmptyDepths = new Dictionary<string, Depth>(StringComparer.Ordinal);
-    static readonly IReadOnlyDictionary<string, string> EmptyChoices = new Dictionary<string, string>(StringComparer.Ordinal);
+    static IReadOnlyDictionary<string, Depth> emptyDepths = new Dictionary<string, Depth>(StringComparer.Ordinal);
+    static IReadOnlyDictionary<string, string> emptyChoices = new Dictionary<string, string>(StringComparer.Ordinal);
 
     public bool Has(string extensionId) =>
         SelectedExtensions.Contains(extensionId);
@@ -268,12 +268,12 @@ public sealed record WizardState
         }
         else
         {
-            ExistingExtensions = EmptySet;
+            ExistingExtensions = emptySet;
         }
 
         if (Flow == Flow.Add)
         {
-            Techs = EmptySet;
+            Techs = emptySet;
         }
     }
 
@@ -288,7 +288,7 @@ public sealed record WizardState
     public string? Unavailable(string extensionId)
     {
         var definition = Extensions.ById[extensionId];
-        if (Os is Core.Os.MacOS or Core.Os.Linux &&
+        if (Os is global::Os.MacOS or global::Os.Linux &&
             definition.Platform == Platform.WindowsOnly)
         {
             return $"Only runs on Windows, and the operating system chosen is {Os.Value.Name()}.";
