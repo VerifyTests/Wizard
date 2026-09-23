@@ -7,7 +7,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 The Verify getting-started wizard: a Blazor WebAssembly app deployed to https://verifytests.github.io/Wizard/
 by `.github/workflows/deploy.yml`. `plan.md` is the implementation plan and the record of every design
 decision; read the relevant section before changing behaviour, and update it when a decision changes.
-`plan-research/extension-catalogue-*.md` holds the per-extension research the registry is built from.
+`plan-research/plugin-catalogue-*.md` holds the per-plugin research the registry is built from.
 
 ## Build & test
 
@@ -48,9 +48,9 @@ storage would let parallel tests leak into each other. A test about remembering 
   generator tests stay fast. `GenerateWizardDefaults` in its csproj bakes the SDK version (from `global.json`)
   and the target framework (`GeneratedTargetFramework` in `src/Directory.Build.props`) into
   `WizardDefaults`. Generated solutions use those values.
-  - `Registry/Extensions.<A-D>.cs` hold one `ExtensionDefinition` per extension, split by the catalogue
+  - `Registry/Plugins.<A-D>.cs` hold one `PluginDefinition` per plugin, split by the catalogue
     file each was researched from. `Registry/InteractionRules.Data.cs` holds the combinations. Read
-    `ExtensionDefinition.cs` before adding an entry: its xml docs are the contract, and `RegistryTests`
+    `PluginDefinition.cs` before adding an entry: its xml docs are the contract, and `RegistryTests`
     enforces most of it.
   - Every package id an entry names needs a version in `Versions/package-versions.json`, and it must be
     one that exists on nuget.org. The catalogue records each repo's own `<Version>`, which is often the
@@ -70,7 +70,7 @@ storage would let parallel tests leak into each other. A test about remembering 
   them. Split source with `ModuleInitializerGenerator.Lines`, which drops the carriage return.
 - A registry sample has to compile for xUnit v3, NUnit, TUnit, MSTest and Fixie, so it is a method body
   only; the generator supplies the signature and the framework's attribute. `GeneratedSolutionTests`
-  proves it by building a solution per extension.
+  proves it by building a solution per plugin.
 - The bundled fonts in `wwwroot/fonts` keep screenshots identical across OSes.
   `RepoContractTests.ShippedFontsCoverRenderedText` fails if rendered text uses a character the fonts
   don't cover.

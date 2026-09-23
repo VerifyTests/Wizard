@@ -19,6 +19,6 @@
   src/VerifySample.Tests/ModuleInitializer.cs,
   src/VerifySample.Tests/Sample.cs,
   src/VerifySample.Tests/VerifyChecksTests.cs,
-  src/VerifySample.Tests/Extensions/DiffPlexTests.cs,
-  src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt
+  src/VerifySample.Tests/Plugins/DiffPlexTests.cs,
+  src/VerifySample.Tests/Plugins/DiffPlexTests.PerTestOutput.verified.txt
 ]

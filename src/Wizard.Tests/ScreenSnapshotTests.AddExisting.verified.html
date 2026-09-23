@@ -10,7 +10,7 @@
     <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
     <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
     <link rel="stylesheet" href="css/app.css">
-    <title>Add extensions · Verify Wizard</title>
+    <title>Add plugins · Verify Wizard</title>
   </head>
   <body>
     <div id="app">
@@ -27,7 +27,7 @@
       <main>
         <div class="wizard-layout">
           <nav class="breadcrumb" aria-label="Wizard progress">
-            <a class="breadcrumb-flow" href="">Add extensions</a>
+            <a class="breadcrumb-flow" href="">Add plugins</a>
             <ol>
               <li class="done">
                 <button type="button" class="step-link" data-step="tf">
@@ -39,8 +39,8 @@
                 <span class="step-title">Already using</span>
               </li>
               <li class="done">
-                <button type="button" class="step-link" data-step="extensions">
-                  <span class="step-title">Extensions</span>
+                <button type="button" class="step-link" data-step="plugins">
+                  <span class="step-title">Plugins</span>
                   <span class="step-value">None</span>
                 </button>
               </li>
@@ -60,14 +60,14 @@
           <section class="step-body" data-step="have">
             <h2>Already using</h2>
             <p class="hint">
-              Tick the Verify extensions the project already references. They are left out of what is generated,     and any side effect of adding something next to them is spelled out. The list is remembered in this browser.
+              Tick the Verify plugins the project already references. They are left out of what is generated,     and any side effect of adding something next to them is spelled out. The list is remembered in this browser.
             </p>
-            <div class="extension-search">
+            <div class="plugin-search">
               <label for="existingFilter">Filter</label>
               <input type="text" id="existingFilter" placeholder="Name">
               <span class="selected-count">2 ticked</span>
             </div>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Developer experience</h3>
               <div class="existing-list">
                 <label class="existing-item selected" data-id="DiffPlex">
@@ -76,7 +76,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Data</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Cosmos">
@@ -113,7 +113,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Web</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="AngleSharp">
@@ -154,7 +154,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Desktop UI</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Avalonia">
@@ -175,7 +175,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Documents</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Aspose">
@@ -220,7 +220,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Images</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="ImageHash">
@@ -245,7 +245,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Messaging</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Brighter">
@@ -266,7 +266,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Logging</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="MicrosoftLogging">
@@ -283,7 +283,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Observability</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Diagnostics">
@@ -296,7 +296,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Serialization</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="NewtonsoftJson">
@@ -321,7 +321,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Email</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="EmailPreviewServices">
@@ -338,7 +338,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Mocking</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="FakeItEasy">
@@ -359,7 +359,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Compiler and code generation</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="ICSharpCodeDecompiler">
@@ -376,7 +376,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Scrubbing</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="NUlid">
@@ -389,7 +389,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Testing</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Assertions">
@@ -402,7 +402,7 @@
                 </label>
               </div>
             </section>
-            <section class="extension-category">
+            <section class="plugin-category">
               <h3>Tooling</h3>
               <div class="existing-list">
                 <label class="existing-item " data-id="Terminal">
@@ -413,7 +413,7 @@
             </section>
             <div class="wizard-nav">
               <button type="button" class="back">Back</button>
-              <button type="button" class="primary">Next: Extensions</button>
+              <button type="button" class="primary">Next: Plugins</button>
             </div>
           </section>
         </div>

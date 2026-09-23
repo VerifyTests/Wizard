@@ -19,11 +19,11 @@ public sealed record WizardState
     public string SolutionName { get; set; } = DefaultSolutionName;
 
     /// <summary>
-    /// Extension ids to include, as a set so membership is cheap; emitted in registry order everywhere,
+    /// Plugin ids to include, as a set so membership is cheap; emitted in registry order everywhere,
     /// so the url and the generated output do not depend on insertion order. Collections are replaced
     /// rather than mutated, so <c>with { }</c> copies do not share them.
     /// </summary>
-    public IReadOnlySet<string> SelectedExtensions { get; set; } = new HashSet<string>(DefaultExtensions(Flow.New), StringComparer.Ordinal);
+    public IReadOnlySet<string> SelectedPlugins { get; set; } = new HashSet<string>(DefaultPlugins(Flow.New), StringComparer.Ordinal);
 
     /// <summary>
     /// In a new project Verify.DiffPlex is selected until it is deselected: an inline diff on a failed
@@ -31,88 +31,88 @@ public sealed record WizardState
     /// old pages. Adding to an existing project starts from nothing, because the project already has
     /// whatever it had.
     /// </summary>
-    public static IReadOnlyList<string> DefaultExtensions(Flow flow)
+    public static IReadOnlyList<string> DefaultPlugins(Flow flow)
     {
         if (flow == Flow.New)
         {
-            return [Extensions.DiffPlexId];
+            return [Plugins.DiffPlexId];
         }
 
         return [];
     }
 
     /// <summary>
-    /// Extensions the project already has (plan 7.2 step 2). They are never generated, but they take
-    /// part in the interaction rules, because adding an extension next to one of them can change how
+    /// Plugins the project already has (plan 7.2 step 2). They are never generated, but they take
+    /// part in the interaction rules, because adding a plugin next to one of them can change how
     /// the existing one has to be initialized.
     /// </summary>
-    public IReadOnlySet<string> ExistingExtensions { get; set; } = emptySet;
+    public IReadOnlySet<string> ExistingPlugins { get; set; } = emptySet;
 
-    /// <summary>Tech ids (plan 10). They only seed the extension selection; nothing is generated from them.</summary>
+    /// <summary>Tech ids (plan 10). They only seed the plugin selection; nothing is generated from them.</summary>
     public IReadOnlySet<string> Techs { get; set; } = emptySet;
 
     static IReadOnlySet<string> emptySet = new HashSet<string>(StringComparer.Ordinal);
 
-    /// <summary>Extension id to depth. Missing means <see cref="Depth.Verbose"/> (plan D7).</summary>
+    /// <summary>Plugin id to depth. Missing means <see cref="Depth.Verbose"/> (plan D7).</summary>
     public IReadOnlyDictionary<string, Depth> Depths { get; set; } = emptyDepths;
 
-    /// <summary>Choice id to value, for the per-extension and per-rule options (plan 7.1 step 8).</summary>
+    /// <summary>Choice id to value, for the per-plugin and per-rule options (plan 7.1 step 8).</summary>
     public IReadOnlyDictionary<string, string> Choices { get; set; } = emptyChoices;
 
     static IReadOnlyDictionary<string, Depth> emptyDepths = new Dictionary<string, Depth>(StringComparer.Ordinal);
     static IReadOnlyDictionary<string, string> emptyChoices = new Dictionary<string, string>(StringComparer.Ordinal);
 
-    public bool Has(string extensionId) =>
-        SelectedExtensions.Contains(extensionId);
+    public bool Has(string pluginId) =>
+        SelectedPlugins.Contains(pluginId);
 
-    public bool IsExisting(string extensionId) =>
-        ExistingExtensions.Contains(extensionId);
+    public bool IsExisting(string pluginId) =>
+        ExistingPlugins.Contains(pluginId);
 
     /// <summary>Selected or already in the project: what the interaction rules are evaluated against.</summary>
-    public bool Uses(string extensionId) =>
-        Has(extensionId) || IsExisting(extensionId);
+    public bool Uses(string pluginId) =>
+        Has(pluginId) || IsExisting(pluginId);
 
     /// <summary>Everything the project will have, existing and selected.</summary>
-    public IReadOnlySet<string> AllExtensions =>
-        new HashSet<string>(SelectedExtensions.Concat(ExistingExtensions), StringComparer.Ordinal);
+    public IReadOnlySet<string> AllPlugins =>
+        new HashSet<string>(SelectedPlugins.Concat(ExistingPlugins), StringComparer.Ordinal);
 
-    public void SetExisting(string extensionId, bool existing)
+    public void SetExisting(string pluginId, bool existing)
     {
-        var set = new HashSet<string>(ExistingExtensions, StringComparer.Ordinal);
+        var set = new HashSet<string>(ExistingPlugins, StringComparer.Ordinal);
         if (existing)
         {
-            set.Add(extensionId);
+            set.Add(pluginId);
         }
         else
         {
-            set.Remove(extensionId);
+            set.Remove(pluginId);
         }
 
-        ExistingExtensions = set;
+        ExistingPlugins = set;
     }
 
-    public Depth DepthOf(string extensionId) =>
-        Depths.GetValueOrDefault(extensionId, Depth.Verbose);
+    public Depth DepthOf(string pluginId) =>
+        Depths.GetValueOrDefault(pluginId, Depth.Verbose);
 
-    public void Select(string extensionId, bool selected)
+    public void Select(string pluginId, bool selected)
     {
-        var selection = new HashSet<string>(SelectedExtensions, StringComparer.Ordinal);
+        var selection = new HashSet<string>(SelectedPlugins, StringComparer.Ordinal);
         if (selected)
         {
-            selection.Add(extensionId);
+            selection.Add(pluginId);
         }
         else
         {
-            selection.Remove(extensionId);
+            selection.Remove(pluginId);
         }
 
-        SelectedExtensions = selection;
+        SelectedPlugins = selection;
     }
 
-    public void SetDepth(string extensionId, Depth depth) =>
+    public void SetDepth(string pluginId, Depth depth) =>
         Depths = new Dictionary<string, Depth>(Depths, StringComparer.Ordinal)
         {
-            [extensionId] = depth
+            [pluginId] = depth
         };
 
     public void SetChoice(string choiceId, string value) =>
@@ -156,7 +156,7 @@ public sealed record WizardState
         SolutionName = SolutionNames.Clean(SolutionName);
 
         NormalizeFlow();
-        NormalizeExtensions();
+        NormalizePlugins();
 
         // Values for other sponsor modes are dropped, so the url holds everything the state does.
         if (SponsorMode != SponsorMode.Sponsor)
@@ -210,8 +210,8 @@ public sealed record WizardState
                Exemption == other.Exemption &&
                SponsorUntil == other.SponsorUntil &&
                Step == other.Step &&
-               SelectedExtensions.SetEquals(other.SelectedExtensions) &&
-               ExistingExtensions.SetEquals(other.ExistingExtensions) &&
+               SelectedPlugins.SetEquals(other.SelectedPlugins) &&
+               ExistingPlugins.SetEquals(other.ExistingPlugins) &&
                Techs.SetEquals(other.Techs) &&
                SameEntries(Depths, other.Depths) &&
                SameEntries(Choices, other.Choices);
@@ -244,8 +244,8 @@ public sealed record WizardState
         hash.Add(Exemption);
         hash.Add(SponsorUntil);
         hash.Add(Step);
-        hash.Add(SelectedExtensions.Count);
-        hash.Add(ExistingExtensions.Count);
+        hash.Add(SelectedPlugins.Count);
+        hash.Add(ExistingPlugins.Count);
         hash.Add(Techs.Count);
         hash.Add(Depths.Count);
         hash.Add(Choices.Count);
@@ -268,7 +268,7 @@ public sealed record WizardState
         }
         else
         {
-            ExistingExtensions = emptySet;
+            ExistingPlugins = emptySet;
         }
 
         if (Flow == Flow.Add)
@@ -282,12 +282,12 @@ public sealed record WizardState
     /// url holds exactly what the state holds and a stale link cannot carry hidden values.
     /// </summary>
     /// <summary>
-    /// Why an extension cannot be selected with the chosen operating system and test framework, or null
+    /// Why a plugin cannot be selected with the chosen operating system and test framework, or null
     /// when it can. An answer not given yet rules nothing out; the add flows never ask for the OS.
     /// </summary>
-    public string? Unavailable(string extensionId)
+    public string? Unavailable(string pluginId)
     {
-        var definition = Extensions.ById[extensionId];
+        var definition = Plugins.ById[pluginId];
         if (Os is global::Os.MacOS or global::Os.Linux &&
             definition.Platform == Platform.WindowsOnly)
         {
@@ -304,16 +304,16 @@ public sealed record WizardState
         return null;
     }
 
-    void NormalizeExtensions()
+    void NormalizePlugins()
     {
-        ExistingExtensions = new HashSet<string>(
-            ExistingExtensions.Where(Extensions.Contains),
+        ExistingPlugins = new HashSet<string>(
+            ExistingPlugins.Where(Plugins.Contains),
             StringComparer.Ordinal);
 
         // Something the project already has cannot be added again, and nothing that cannot run on the
         // chosen operating system can be added at all.
-        SelectedExtensions = new HashSet<string>(
-            SelectedExtensions.Where(_ => Extensions.Contains(_) && !IsExisting(_) && Unavailable(_) == null),
+        SelectedPlugins = new HashSet<string>(
+            SelectedPlugins.Where(_ => Plugins.Contains(_) && !IsExisting(_) && Unavailable(_) == null),
             StringComparer.Ordinal);
 
         Techs = new HashSet<string>(
@@ -324,9 +324,9 @@ public sealed record WizardState
             Depths.Where(_ => _.Value != Depth.Verbose && Has(_.Key)),
             StringComparer.Ordinal);
 
-        var available = SelectedExtensions
-            .SelectMany(_ => Extensions.ById[_].Choices)
-            .Concat(InteractionRules.ChoicesFor(AllExtensions))
+        var available = SelectedPlugins
+            .SelectMany(_ => Plugins.ById[_].Choices)
+            .Concat(InteractionRules.ChoicesFor(AllPlugins))
             .ToDictionary(_ => _.Id, StringComparer.Ordinal);
 
         Choices = new Dictionary<string, string>(

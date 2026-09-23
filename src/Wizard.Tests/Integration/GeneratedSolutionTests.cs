@@ -1,4 +1,4 @@
-using Extensions = Wizard.Core.Extensions;
+using Plugins = Wizard.Core.Plugins;
 
 /// <summary>
 /// Generates solutions, writes them to disk, and runs <c>dotnet build</c> and <c>dotnet test</c> on
@@ -23,40 +23,40 @@ public class GeneratedSolutionTests
         await Assert.That(received).IsEmpty();
 
         // An undiscovered test is not a failure, so count them: the core sample, the conventions check,
-        // and every extension sample that ships its snapshot. The default selection is Verify.DiffPlex,
+        // and every plugin sample that ships its snapshot. The default selection is Verify.DiffPlex,
         // whose sample verifies a literal string, so a first run of the download is green.
         var expected = 2 + Plan
             .Build(State(framework), PackageVersions.Baked, Date.FromDateTime(DateTime.UtcNow))
-            .Extensions
+            .Plugins
             .SelectMany(_ => _.Samples)
             .Count(_ => _.VerifiedOutput != null);
         await Assert.That(PassedCount(output)).IsEqualTo(expected).Because(output);
     }
 
     /// <summary>
-    /// Every extension on its own, at verbose depth, has to compile. This is the guarantee behind the
+    /// Every plugin on its own, at verbose depth, has to compile. This is the guarantee behind the
     /// samples: they are copied from readmes, which drift, and only the compiler notices (plan 17.4).
-    /// The tests are not run, because most extensions need a database, a browser or a licence; the core
+    /// The tests are not run, because most plugins need a database, a browser or a licence; the core
     /// solution above covers running.
     /// </summary>
     [Test]
-    [MethodDataSource(nameof(EveryExtension))]
-    public async Task ExtensionSolutionBuilds(string id)
+    [MethodDataSource(nameof(EveryPlugin))]
+    public async Task PluginSolutionBuilds(string id)
     {
         var state = State(TestFramework.XunitV3) with
         {
-            SelectedExtensions = new HashSet<string>([id], StringComparer.Ordinal)
+            SelectedPlugins = new HashSet<string>([id], StringComparer.Ordinal)
         };
         state.Normalize();
 
-        var directory = await Generate(state, $"extension-{id}");
+        var directory = await Generate(state, $"plugin-{id}");
         await Run(directory, "build --configuration Release");
     }
 
-    public static IEnumerable<Func<string>> EveryExtension() =>
-        Extensions.All
+    public static IEnumerable<Func<string>> EveryPlugin() =>
+        Plugins.All
             .Where(_ => _.Platform == Platform.CrossPlatform || OperatingSystem.IsWindows())
-            .Select<ExtensionDefinition, Func<string>>(_ => () => _.Id);
+            .Select<PluginDefinition, Func<string>>(_ => () => _.Id);
 
     /// <summary>
     /// The combinations the interaction rules exist for, which is where a wrong ordering or a method
@@ -68,7 +68,7 @@ public class GeneratedSolutionTests
     {
         var state = State(TestFramework.XunitV3) with
         {
-            SelectedExtensions = new HashSet<string>(combination.Ids, StringComparer.Ordinal)
+            SelectedPlugins = new HashSet<string>(combination.Ids, StringComparer.Ordinal)
         };
         state.Normalize();
 
@@ -103,7 +103,7 @@ public class GeneratedSolutionTests
             BuildServer = BuildServer.GitHubActions,
             SolutionName = "VerifySample",
             SponsorMode = SponsorMode.Exempt,
-            // SmallRevenue rather than OpenSource: a few extensions depend on a package with a
+            // SmallRevenue rather than OpenSource: a few plugins depend on a package with a
             // maintenance fee check of its own, and not every owner offers an open source exemption,
             // so the declaration would not carry over and the build would stop for a decision.
             Exemption = Exemption.SmallRevenue

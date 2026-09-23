@@ -11,7 +11,7 @@ public static class ModuleInitializerGenerator
     public static string Build(Plan plan) =>
         CodeFiles.Banner(plan) + Body(plan, windows: false);
 
-    /// <summary>The second test project's copy, holding only the Windows-only extensions (plan D5).</summary>
+    /// <summary>The second test project's copy, holding only the Windows-only plugins (plan D5).</summary>
     public static string BuildWindows(Plan plan) =>
         CodeFiles.Banner(plan) + Body(plan, windows: true);
 
@@ -66,13 +66,13 @@ public static class ModuleInitializerGenerator
     /// indentation. Shared with the F# initializer, which needs the same calls in the same order.
     /// </summary>
     /// <param name="skipBlocksNeedingMembers">
-    /// Set for F#, where the C# helper methods a few extensions need are not generated (plan D9).
+    /// Set for F#, where the C# helper methods a few plugins need are not generated (plan D9).
     /// </param>
     public static IEnumerable<string> Statements(Plan plan, bool windows, bool skipBlocksNeedingMembers = false)
     {
         var blocks = Blocks(plan, windows);
 
-        // Alternatives are only worth showing where that extension's samples are verbose too.
+        // Alternatives are only worth showing where that plugin's samples are verbose too.
         var verbose = blocks.Any(_ => plan.State.DepthOf(_.Key) == Depth.Verbose);
 
         var discovery = new InitializeBlock(
@@ -126,26 +126,26 @@ public static class ModuleInitializerGenerator
     }
 
     /// <summary>
-    /// One block per extension, plus the blocks the rules add, sorted into the order the calls have to
-    /// run in. The Windows project holds the Windows-only extensions and the main one holds the rest.
+    /// One block per plugin, plus the blocks the rules add, sorted into the order the calls have to
+    /// run in. The Windows project holds the Windows-only plugins and the main one holds the rest.
     /// </summary>
     public static IReadOnlyList<InitializeBlock> Blocks(Plan plan, bool windows)
     {
         var state = plan.State;
         var blocks = new List<InitializeBlock>();
 
-        foreach (var extension in plan.ExtensionsIn(windows))
+        foreach (var plugin in plan.PluginsIn(windows))
         {
-            if (extension.Statements.Count == 0)
+            if (plugin.Statements.Count == 0)
             {
                 continue;
             }
 
             blocks.Add(
-                new(extension.Id, extension.Definition.Phase, extension.Statements)
+                new(plugin.Id, plugin.Definition.Phase, plugin.Statements)
                 {
-                    Usings = extension.Definition.InitializeUsings,
-                    Members = extension.Definition.InitializeMembers
+                    Usings = plugin.Definition.InitializeUsings,
+                    Members = plugin.Definition.InitializeMembers
                 });
         }
 
@@ -168,7 +168,7 @@ public static class ModuleInitializerGenerator
                 {
                     Comment =
                     [
-                        $"{existing.Definition.DisplayName} is already in the project, and the extensions being added",
+                        $"{existing.Definition.DisplayName} is already in the project, and the plugins being added",
                         "change how it has to be initialized. Replace its existing call with this one, or, where the",
                         "project relies on InitializePlugins() to enable it, add this call above that.",
                         .. statements[0].Comment

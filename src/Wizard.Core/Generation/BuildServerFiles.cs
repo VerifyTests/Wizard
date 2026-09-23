@@ -40,7 +40,7 @@ public static class BuildServerFiles
     }
 
     /// <summary>
-    /// The Windows-only extensions build only on Windows, so when any is selected the portable job
+    /// The Windows-only plugins build only on Windows, so when any is selected the portable job
     /// names the projects it can build and a second job on windows-latest builds the whole solution.
     /// </summary>
     static void AppendGitHubJob(StringBuilder builder, Plan plan, bool windows)
@@ -101,10 +101,10 @@ public static class BuildServerFiles
              """);
     }
 
-    /// <summary>Install steps for the external tools the selected extensions need, where one exists.</summary>
+    /// <summary>Install steps for the external tools the selected plugins need, where one exists.</summary>
     static IEnumerable<string> ToolSteps(Plan plan, bool windows)
     {
-        foreach (var requirement in plan.ExtensionsIn(windows).SelectMany(_ => _.Definition.ExternalRequirements))
+        foreach (var requirement in plan.PluginsIn(windows).SelectMany(_ => _.Definition.ExternalRequirements))
         {
             var install = windows ? requirement.WindowsInstall : requirement.LinuxInstall;
             if (install == null)
@@ -127,7 +127,7 @@ public static class BuildServerFiles
     /// </summary>
     static string Secrets(Plan plan)
     {
-        var variables = plan.Extensions
+        var variables = plan.Plugins
             .SelectMany(_ => _.Definition.ExternalRequirements)
             .Select(_ => _.EnvironmentVariable)
             .OfType<string>()

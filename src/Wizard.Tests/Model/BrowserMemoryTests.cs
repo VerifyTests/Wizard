@@ -6,14 +6,14 @@ public class BrowserMemoryTests
     [Test]
     public async Task RememberedAnswersFillInWhatTheUrlLeavesOut()
     {
-        const string query = "step=extensions&tf=XunitV3";
+        const string query = "step=plugins&tf=XunitV3";
         var state = WizardStateUrl.Parse(Flow.AddByTech, query);
 
         var restored = BrowserMemory.Seed(state, query, everything);
 
         await Assert.That(restored).IsEqualTo(new(Tech: true, Existing: true, Sponsor: true));
         await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
-        await Assert.That(state.ExistingExtensions).IsEquivalentTo(["SqlServer"]);
+        await Assert.That(state.ExistingPlugins).IsEquivalentTo(["SqlServer"]);
         await Assert.That(state.Exemption).IsEqualTo(Exemption.SmallRevenue);
         // the remembered stack's recommendations are applied, as if each tech had just been chosen
         await Assert.That(state.Has("EntityFramework")).IsTrue();
@@ -30,11 +30,11 @@ public class BrowserMemoryTests
 
         await Assert.That(restored.Any).IsFalse();
         await Assert.That(state.Techs).IsEquivalentTo(["stj"]);
-        await Assert.That(state.ExistingExtensions).IsEquivalentTo(["DiffPlex"]);
+        await Assert.That(state.ExistingPlugins).IsEquivalentTo(["DiffPlex"]);
         await Assert.That(state.SponsorMode).IsEqualTo(SponsorMode.Ignore);
     }
 
-    /// <summary>A url that names extensions keeps exactly those, even when it leaves the stack out.</summary>
+    /// <summary>A url that names plugins keeps exactly those, even when it leaves the stack out.</summary>
     [Test]
     public async Task ARememberedStackDoesNotAddToAnExplicitSelection()
     {
@@ -44,7 +44,7 @@ public class BrowserMemoryTests
         BrowserMemory.Seed(state, query, everything);
 
         await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
-        await Assert.That(state.SelectedExtensions).IsEquivalentTo(["Http"]);
+        await Assert.That(state.SelectedPlugins).IsEquivalentTo(["Http"]);
     }
 
     /// <summary>Only answers to questions the flow asks are read, or written.</summary>
@@ -54,11 +54,11 @@ public class BrowserMemoryTests
         var added = WizardStateUrl.Parse(Flow.Add, "");
         BrowserMemory.Seed(added, "", everything);
         await Assert.That(added.Techs).IsEmpty();
-        await Assert.That(added.ExistingExtensions).IsEquivalentTo(["SqlServer"]);
+        await Assert.That(added.ExistingPlugins).IsEquivalentTo(["SqlServer"]);
 
         var created = WizardStateUrl.Parse(Flow.New, "");
         BrowserMemory.Seed(created, "", everything);
-        await Assert.That(created.ExistingExtensions).IsEmpty();
+        await Assert.That(created.ExistingPlugins).IsEmpty();
         await Assert.That(created.Techs).IsEquivalentTo(["efcore"]);
 
         // what the new-project flow writes leaves the existing list alone
@@ -74,7 +74,7 @@ public class BrowserMemoryTests
         BrowserMemory.Seed(state, "", new("nope,efcore", "Gone,SqlServer", "sponsor=Nonsense"));
 
         await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
-        await Assert.That(state.ExistingExtensions).IsEquivalentTo(["SqlServer"]);
+        await Assert.That(state.ExistingPlugins).IsEquivalentTo(["SqlServer"]);
         await Assert.That(state.SponsorMode).IsEqualTo(SponsorMode.NotChosen);
     }
 }

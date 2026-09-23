@@ -5,14 +5,14 @@ public enum Severity
     /// <summary>Worth knowing: a companion suggestion, or an explanation of combined behaviour.</summary>
     Info,
 
-    /// <summary>A side effect the combination has that neither extension has alone.</summary>
+    /// <summary>A side effect the combination has that neither plugin has alone.</summary>
     Warning,
 
-    /// <summary>Mutually exclusive. The extension step blocks moving on until one is deselected.</summary>
+    /// <summary>Mutually exclusive. The plugin step blocks moving on until one is deselected.</summary>
     Conflict
 }
 
-/// <param name="Members">Extension ids. Two or more selected is a <see cref="Severity.Conflict"/>.</param>
+/// <param name="Members">Plugin ids. Two or more selected is a <see cref="Severity.Conflict"/>.</param>
 /// <param name="Reason">Why they cannot co-exist, rendered in the notice and in the guide.</param>
 public sealed record ExclusiveGroup(
     string Id,
@@ -42,7 +42,7 @@ public sealed record GroupCondition(
     IReadOnlyList<string> Values);
 
 /// <summary>One rule firing for one selection (plan 11).</summary>
-/// <param name="Involved">Extension ids, in registry order, that made the rule fire.</param>
+/// <param name="Involved">Plugin ids, in registry order, that made the rule fire.</param>
 public sealed record InteractionResult(
     string RuleId,
     Severity Severity,
@@ -50,7 +50,7 @@ public sealed record InteractionResult(
     string Message)
 {
     /// <summary>The option that resolves it, rendered on the options step.</summary>
-    public ExtensionChoice? Choice { get; init; }
+    public PluginChoice? Choice { get; init; }
 
     /// <summary>The value in force, whether chosen or defaulted.</summary>
     public string? ChosenValue { get; init; }
@@ -71,19 +71,19 @@ public sealed record InteractionRule
     public IReadOnlyList<string> Any { get; init; } = [];
     public int AnyCount { get; init; } = 1;
     public IReadOnlyList<string> Without { get; init; } = [];
-    public ExtensionChoice? Choice { get; init; }
+    public PluginChoice? Choice { get; init; }
     public IReadOnlyList<string> Notes { get; init; } = [];
 
     /// <summary>Ordering edges the rule imposes on the module initializer (plan 11.3).</summary>
     public IReadOnlyList<OrderEdge> Order { get; init; } = [];
 
     /// <summary>
-    /// Statements that stand in for an extension's own while this rule fires and its choice holds
+    /// Statements that stand in for a plugin's own while this rule fires and its choice holds
     /// <see cref="RuleStatements.WhenValue"/>. A rule without a choice uses an empty value.
     /// </summary>
     public IReadOnlyList<RuleStatements> Replace { get; init; } = [];
 
-    /// <summary>Statements the rule adds that belong to no single extension.</summary>
+    /// <summary>Statements the rule adds that belong to no single plugin.</summary>
     public IReadOnlyList<RuleStatements> Add { get; init; } = [];
 
     /// <summary>The §23 upstream change that would make this rule unnecessary.</summary>
@@ -107,7 +107,7 @@ public sealed record InteractionRule
 
     public IReadOnlyList<string> InvolvedIn(IReadOnlySet<string> selected) =>
     [
-        .. Extensions.All
+        .. Plugins.All
             .Select(_ => _.Id)
             .Where(_ => selected.Contains(_) && (All.Contains(_) || Any.Contains(_)))
     ];
@@ -117,8 +117,8 @@ public sealed record InteractionRule
 public sealed record OrderEdge(string Before, string After, string WhenValue = "");
 
 /// <param name="WhenValue">The choice value this applies to; empty for a rule with no choice.</param>
-/// <param name="Target">The extension whose statements are replaced, or, for an added statement, the
-/// extension it is ordered with.</param>
+/// <param name="Target">The plugin whose statements are replaced, or, for an added statement, the
+/// plugin it is ordered with.</param>
 public sealed record RuleStatements(
     string WhenValue,
     string Target,
@@ -131,25 +131,25 @@ public sealed record RuleStatements(
 }
 
 /// <summary>
-/// The hard-coded interactions between extensions (plan 11). Notices that follow from a single
-/// extension's own data, such as needing Windows or a licence key, are derived in
+/// The hard-coded interactions between plugins (plan 11). Notices that follow from a single
+/// plugin's own data, such as needing Windows or a licence key, are derived in
 /// <see cref="PlanBuilder"/> instead, so this list holds only genuine combinations.
 /// </summary>
 public static partial class InteractionRules
 {
     /// <summary>
-    /// Every rule and group that fires for a selection, ordered most severe first. Existing extensions
+    /// Every rule and group that fires for a selection, ordered most severe first. Existing plugins
     /// count: adding one next to something the project already has can change how that one has to be
     /// initialized (plan 7.2).
     /// </summary>
     public static IReadOnlyList<InteractionResult> For(WizardState state)
     {
-        var selected = state.AllExtensions;
+        var selected = state.AllPlugins;
         var results = new List<InteractionResult>();
 
         foreach (var group in Groups)
         {
-            var members = Extensions.All
+            var members = Plugins.All
                 .Select(_ => _.Id)
                 .Where(_ => selected.Contains(_) && group.Members.Contains(_) && group.Holds(_, state.Choices))
                 .ToList();
@@ -184,12 +184,12 @@ public static partial class InteractionRules
     }
 
     /// <summary>The choices the options step shows for rules that are currently firing.</summary>
-    public static IEnumerable<ExtensionChoice> ChoicesFor(IReadOnlySet<string> selected) =>
+    public static IEnumerable<PluginChoice> ChoicesFor(IReadOnlySet<string> selected) =>
         Rules
             .Where(_ => _.Choice != null && _.Fires(selected))
             .Select(_ => _.Choice!);
 
-    /// <summary>Ordering edges every rule in force imposes, as extension id pairs (plan 11.3).</summary>
+    /// <summary>Ordering edges every rule in force imposes, as plugin id pairs (plan 11.3).</summary>
     public static IEnumerable<OrderEdge> Edges(WizardState state) =>
         Active(state)
             .SelectMany(_ => _.Rule.Order.Where(edge => edge.WhenValue is "" || edge.WhenValue == _.Value))
@@ -198,18 +198,18 @@ public static partial class InteractionRules
     /// <summary>The rules in force for a state, paired with the choice value that applies.</summary>
     public static IEnumerable<(InteractionRule Rule, string Value)> Active(WizardState state)
     {
-        foreach (var rule in Rules.Where(_ => _.Fires(state.AllExtensions)))
+        foreach (var rule in Rules.Where(_ => _.Fires(state.AllPlugins)))
         {
             yield return (rule, Value(rule.Choice, state) ?? "");
         }
     }
 
-    /// <summary>The statements standing in for an extension's own, when a rule replaces them.</summary>
-    public static IReadOnlyList<InitializeStatement>? Replacement(WizardState state, string extensionId)
+    /// <summary>The statements standing in for a plugin's own, when a rule replaces them.</summary>
+    public static IReadOnlyList<InitializeStatement>? Replacement(WizardState state, string pluginId)
     {
         foreach (var (rule, value) in Active(state))
         {
-            var replacement = rule.Replace.FirstOrDefault(_ => _.Target == extensionId && _.WhenValue == value);
+            var replacement = rule.Replace.FirstOrDefault(_ => _.Target == pluginId && _.WhenValue == value);
             if (replacement != null)
             {
                 return replacement.Statements;
@@ -219,11 +219,11 @@ public static partial class InteractionRules
         return null;
     }
 
-    /// <summary>Statements the active rules add that belong to no single extension.</summary>
+    /// <summary>Statements the active rules add that belong to no single plugin.</summary>
     public static IEnumerable<RuleStatements> Additions(WizardState state) =>
         Active(state).SelectMany(_ => _.Rule.Add.Where(addition => addition.WhenValue == _.Value));
 
-    static string? Value(ExtensionChoice? choice, WizardState state)
+    static string? Value(PluginChoice? choice, WizardState state)
     {
         if (choice == null)
         {

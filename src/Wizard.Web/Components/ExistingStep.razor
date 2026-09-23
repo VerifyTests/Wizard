@@ -1,8 +1,8 @@
-@* The extensions the project already has (plan 7.2 step 2). Optional. They are never generated, but
-   they take part in the interaction rules: adding an extension next to one of them can change how the
+@* The plugins the project already has (plan 7.2 step 2). Optional. They are never generated, but
+   they take part in the interaction rules: adding a plugin next to one of them can change how the
    existing one has to be initialized, and the output says exactly what to edit. *@
 <p class="hint">
-    Tick the Verify extensions the project already references. They are left out of what is generated,
+    Tick the Verify plugins the project already references. They are left out of what is generated,
     and any side effect of adding something next to them is spelled out. The list is remembered in this browser.
 </p>
 
@@ -11,19 +11,19 @@
     <p class="restored">Restored from this browser.</p>
 }
 
-<div class="extension-search">
+<div class="plugin-search">
     <label for="existingFilter">Filter</label>
     <input type="text"
            id="existingFilter"
            placeholder="Name"
            value="@filter"
            @oninput="FilterChanged" />
-    <span class="selected-count">@State.ExistingExtensions.Count ticked</span>
+    <span class="selected-count">@State.ExistingPlugins.Count ticked</span>
 </div>
 
 @foreach (var category in Categories)
 {
-    <section class="extension-category">
+    <section class="plugin-category">
         <h3>@category.Key.Label()</h3>
         <div class="existing-list">
             @foreach (var definition in category)
@@ -47,13 +47,13 @@
 
     string filter = "";
 
-    IEnumerable<IGrouping<ExtensionCategory, ExtensionDefinition>> Categories =>
-        Extensions.All
+    IEnumerable<IGrouping<PluginCategory, PluginDefinition>> Categories =>
+        Plugins.All
             .Where(Matches)
             .GroupBy(_ => _.Category)
             .OrderBy(_ => _.Key);
 
-    bool Matches(ExtensionDefinition definition) =>
+    bool Matches(PluginDefinition definition) =>
         filter.Length == 0 ||
         State.IsExisting(definition.Id) ||
         definition.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase);

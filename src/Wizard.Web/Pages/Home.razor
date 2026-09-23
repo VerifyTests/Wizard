@@ -8,20 +8,20 @@
 <div class="entry-cards">
     <a class="entry-card" href="new">
         <h2>New to Verify</h2>
-        <p>Start from scratch: operating system, IDE, test framework and build server, plus any extensions for the stack.</p>
+        <p>Start from scratch: operating system, IDE, test framework and build server, plus any plugins for the stack.</p>
     </a>
     <a class="entry-card" href="add">
-        <h2>Add extensions to an existing project</h2>
-        <p>Pick extensions to add. Known interactions with the extensions already in the project are explained, with the configuration they need.</p>
+        <h2>Add plugins to an existing project</h2>
+        <p>Pick plugins to add. Known interactions with the plugins already in the project are explained, with the configuration they need.</p>
     </a>
     <a class="entry-card" href="add/by-tech">
-        <h2>Suggest extensions for my tech stack</h2>
-        <p>Describe the libraries in use (EF Core, ASP.NET Core, Serilog, ...) and get a suggested set of extensions to add.</p>
+        <h2>Suggest plugins for my tech stack</h2>
+        <p>Describe the libraries in use (EF Core, ASP.NET Core, Serilog, ...) and get a suggested set of plugins to add.</p>
     </a>
 </div>
 
 <p class="hint">Every page's url holds the choices made so far, so any point can be bookmarked or shared.</p>
-<p class="hint forget">This browser remembers the tech stack, the extensions a project already has, and the maintenance fee declaration, to fill them in next time. <button type="button" class="link-button" @onclick="Forget">@forgetLabel</button></p>
+<p class="hint forget">This browser remembers the tech stack, the plugins a project already has, and the maintenance fee declaration, to fill them in next time. <button type="button" class="link-button" @onclick="Forget">@forgetLabel</button></p>
 
 @code {
     string forgetLabel = "Forget them";

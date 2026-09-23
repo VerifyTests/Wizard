@@ -56,29 +56,29 @@ public static class FlowSteps
         TechSummary,
         (_, _) => true);
 
-    /// <summary>Optional: the extensions the project already has (plan 7.2 step 2).</summary>
+    /// <summary>Optional: the plugins the project already has (plan 7.2 step 2).</summary>
     public static readonly StepDefinition Existing = new(
         "have",
         "Already using",
         ExistingSummary,
         (_, _) => true);
 
-    public static readonly StepDefinition ExtensionsStep = new(
-        "extensions",
-        "Extensions",
-        ExtensionSummary,
-        // Two extensions that register the same thing for the same file extension have to be resolved
+    public static readonly StepDefinition PluginsStep = new(
+        "plugins",
+        "Plugins",
+        PluginSummary,
+        // Two plugins that register the same thing for the same file extension have to be resolved
         // here: whichever the generated code initialized last would silently win.
         (state, _) => !InteractionRules.For(state).Any(_ => _.Severity == Severity.Conflict));
 
     public static readonly StepDefinition Options = new(
         "options",
-        "Extension options",
+        "Plugin options",
         OptionsSummary,
         // Every option has a default, so there is nothing to gate on.
         (_, _) => true)
     {
-        Applies = state => state.SelectedExtensions.Count > 0
+        Applies = state => state.SelectedPlugins.Count > 0
     };
 
     public static readonly StepDefinition Sponsor = new(
@@ -93,9 +93,9 @@ public static class FlowSteps
         _ => null,
         (_, _) => false);
 
-    static string? ExtensionSummary(WizardState state)
+    static string? PluginSummary(WizardState state)
     {
-        var selected = Extensions.Selected(state);
+        var selected = Plugins.Selected(state);
         if (selected.Count == 0)
         {
             return "None";
@@ -103,7 +103,7 @@ public static class FlowSteps
 
         if (selected.Count > 3)
         {
-            return $"{selected.Count} extensions";
+            return $"{selected.Count} plugins";
         }
 
         return string.Join(", ", selected.Select(_ => _.Id));
@@ -127,7 +127,7 @@ public static class FlowSteps
 
     static string? ExistingSummary(WizardState state)
     {
-        var existing = Extensions.All.Where(_ => state.IsExisting(_.Id)).ToList();
+        var existing = Plugins.All.Where(_ => state.IsExisting(_.Id)).ToList();
         if (existing.Count == 0)
         {
             return "None";
@@ -135,7 +135,7 @@ public static class FlowSteps
 
         if (existing.Count > 3)
         {
-            return $"{existing.Count} extensions";
+            return $"{existing.Count} plugins";
         }
 
         return string.Join(", ", existing.Select(_ => _.Id));
@@ -143,7 +143,7 @@ public static class FlowSteps
 
     static string? OptionsSummary(WizardState state)
     {
-        var minimal = state.SelectedExtensions.Count(_ => state.DepthOf(_) == Depth.Minimal);
+        var minimal = state.SelectedPlugins.Count(_ => state.DepthOf(_) == Depth.Minimal);
         var changed = state.Choices.Count;
         var parts = new List<string>();
         if (minimal > 0)
@@ -172,7 +172,7 @@ public static class FlowSteps
         TestFramework,
         BuildServer,
         Tech,
-        ExtensionsStep,
+        PluginsStep,
         Options,
         Sponsor,
         Output
@@ -184,7 +184,7 @@ public static class FlowSteps
     [
         TestFramework,
         Existing,
-        ExtensionsStep,
+        PluginsStep,
         Options,
         Sponsor,
         Output
@@ -195,7 +195,7 @@ public static class FlowSteps
         TestFramework,
         Existing,
         Tech,
-        ExtensionsStep,
+        PluginsStep,
         Options,
         Sponsor,
         Output
@@ -217,7 +217,7 @@ public static class FlowSteps
 
     /// <summary>
     /// The nearest step that still applies: the one asked for, or, when it has been dropped from the
-    /// flow, the next one that is left. Deselecting every extension while on the options step moves
+    /// flow, the next one that is left. Deselecting every plugin while on the options step moves
     /// forward to the sponsor step rather than back to the first question.
     /// </summary>
     public static string Nearest(WizardState state, string stepId)

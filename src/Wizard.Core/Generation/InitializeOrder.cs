@@ -1,7 +1,7 @@
 namespace Wizard.Core;
 
-/// <summary>One block of the module initializer: an extension's statements, or a rule's addition.</summary>
-/// <param name="Key">The extension id the block belongs to, which is what ordering edges name.</param>
+/// <summary>One block of the module initializer: a plugin's statements, or a rule's addition.</summary>
+/// <param name="Key">The plugin id the block belongs to, which is what ordering edges name.</param>
 public sealed record InitializeBlock(
     string Key,
     InitializePhase Phase,
@@ -10,7 +10,7 @@ public sealed record InitializeBlock(
     public IReadOnlyList<string> Usings { get; init; } = [];
     public IReadOnlyList<string> Members { get; init; } = [];
 
-    /// <summary>Blocks added by a rule sort after the extension they are keyed to.</summary>
+    /// <summary>Blocks added by a rule sort after the plugin they are keyed to.</summary>
     public bool FromRule { get; init; }
 }
 
@@ -64,7 +64,7 @@ public static class InitializeOrder
             if (next == null)
             {
                 var cycle = string.Join(", ", remaining.Select(_ => _.Key).Distinct(StringComparer.Ordinal));
-                throw new($"The interaction rules order these extensions in a cycle: {cycle}.");
+                throw new($"The interaction rules order these plugins in a cycle: {cycle}.");
             }
 
             result.Add(next);

@@ -5,10 +5,10 @@ public class AddTests : WebTestContext
 
     string CurrentUrl => Navigation.ToBaseRelativePath(Navigation.Uri);
 
-    IRenderedComponent<Add> OpenAdd(string url, string? extensionId = null)
+    IRenderedComponent<Add> OpenAdd(string url, string? pluginId = null)
     {
         Navigation.NavigateTo(url);
-        return Render<Add>(_ => _.Add(page => page.ExtensionId, extensionId));
+        return Render<Add>(_ => _.Add(page => page.PluginId, pluginId));
     }
 
     IRenderedComponent<AddByTech> OpenAddByTech(string url)
@@ -25,37 +25,37 @@ public class AddTests : WebTestContext
             .Where(_ => _.Identifier == "verifyWizard.storageSet")
             .Select(_ => ((string) _.Arguments[0]!, (string) _.Arguments[1]!));
 
-    /// <summary>Adding to a project asks only the test framework before the extensions (plan 7.2).</summary>
+    /// <summary>Adding to a project asks only the test framework before the plugins (plan 7.2).</summary>
     [Test]
     public async Task StartsAtTheTestFramework()
     {
         var page = OpenAdd("add");
         await Assert.That(page.Find("section.step-body").GetAttribute("data-step")).IsEqualTo("tf");
         var steps = page.FindAll(".breadcrumb li .step-title").Select(_ => _.TextContent);
-        await Assert.That(string.Join(" | ", steps)).IsEqualTo("Test framework | Already using | Extensions | Maintenance fee | Result");
+        await Assert.That(string.Join(" | ", steps)).IsEqualTo("Test framework | Already using | Plugins | Maintenance fee | Result");
     }
 
-    /// <summary>An extension readme links to /add/{Id}, which starts with that one selected (plan D11).</summary>
+    /// <summary>A plugin readme links to /add/{Id}, which starts with that one selected (plan D11).</summary>
     [Test]
-    public async Task DeepLinkSelectsTheExtension()
+    public async Task DeepLinkSelectsThePlugin()
     {
         OpenAdd("add/EntityFramework", "EntityFramework");
         await Assert.That(CurrentUrl).IsEqualTo("add?step=tf&ext=EntityFramework");
     }
 
     [Test]
-    public async Task DeepLinkToAnUnknownExtensionIsIgnored()
+    public async Task DeepLinkToAnUnknownPluginIsIgnored()
     {
-        OpenAdd("add/NotAnExtension", "NotAnExtension");
+        OpenAdd("add/NotAPlugin", "NotAPlugin");
         await Assert.That(CurrentUrl).IsEqualTo("add?step=tf");
     }
 
     /// <summary>Something the project already has is shown ticked and locked, never selectable.</summary>
     [Test]
-    public async Task ExistingExtensionsAreLocked()
+    public async Task ExistingPluginsAreLocked()
     {
-        var page = OpenAdd("add?step=extensions&tf=XunitV3&have=SqlServer");
-        var card = page.Find(".extension-card[data-id=SqlServer]");
+        var page = OpenAdd("add?step=plugins&tf=XunitV3&have=SqlServer");
+        var card = page.Find(".plugin-card[data-id=SqlServer]");
         await Assert.That(card.ClassList.Contains("existing")).IsTrue();
         await Assert.That(card.QuerySelector("input")!.HasAttribute("disabled")).IsTrue();
     }
@@ -65,14 +65,14 @@ public class AddTests : WebTestContext
     /// raises the recording notice, although only one of the two is being added (plan 17.3).
     /// </summary>
     [Test]
-    public async Task AddingNextToAnExistingExtensionRaisesItsInteraction()
+    public async Task AddingNextToAnExistingPluginRaisesItsInteraction()
     {
-        var page = OpenAdd("add?step=extensions&tf=XunitV3&have=SqlServer&ext=EntityFramework");
+        var page = OpenAdd("add?step=plugins&tf=XunitV3&have=SqlServer&ext=EntityFramework");
         await Assert.That(page.FindAll(".interaction-notice[data-rule=ef-sql-recording]").Count).IsEqualTo(1);
     }
 
     [Test]
-    public async Task TickingAnExistingExtensionUpdatesTheUrlAndIsRemembered()
+    public async Task TickingAnExistingPluginUpdatesTheUrlAndIsRemembered()
     {
         var page = OpenAdd("add?step=have&tf=XunitV3");
         await page.Find(".existing-item[data-id=SqlServer] input")

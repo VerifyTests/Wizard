@@ -115,7 +115,7 @@ public static class CodeFiles
         Banner(plan) +
         """
         // Checks the solution follows Verify's conventions: .gitignore excludes received files, and
-        // .gitattributes and .editorconfig have settings for every verified text extension in use.
+        // .gitattributes and .editorconfig have settings for every verified text plugin in use.
 
         """ +
         plan.Framework.VerifyChecksTest + "\n";
@@ -164,7 +164,7 @@ public static class CodeFiles
         open VerifyExpecto
 
         // F# has no module initializers, so each test forces this before verifying. It runs once.
-        // Extension samples are C# only (plan D9), but every selected plugin is still enabled here.
+        // Plugin samples are C# only (plan D9), but every selected plugin is still enabled here.
         let initialize =
             lazy (
         {ExpectoInitialize(plan)})
@@ -187,7 +187,7 @@ public static class CodeFiles
     /// <summary>
     /// The same calls, in the same order, as the C# module initializer, translated to F#: no
     /// semicolons, and helper members become local functions, which the registry does not carry, so an
-    /// extension needing one is not offered for Expecto.
+    /// plugin needing one is not offered for Expecto.
     /// </summary>
     internal static string ExpectoInitialize(Plan plan)
     {

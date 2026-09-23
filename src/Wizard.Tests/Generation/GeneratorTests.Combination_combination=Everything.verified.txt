@@ -79,22 +79,22 @@ Conflict csv-scrubber [CsvHelper, Sep]
 CsvHelper and Sep cannot be used together: both register csv converters and scrubbers, and both define the same settings methods, which then fail to compile. Keep one of them.
 
 Conflict docx-converter [Aspose, OpenXml, Pandoc, Syncfusion]
-Aspose, OpenXml, Pandoc and Syncfusion cannot be used together: each registers a converter for the docx extension, and the last one registered wins. Keep one of them.
+Aspose, OpenXml, Pandoc and Syncfusion cannot be used together: each registers a converter for the docx plugin, and the last one registered wins. Keep one of them.
 
 Conflict image-comparer [ImageHash, ImageMagick, ImageSharpCompare, Phash]
-ImageHash, ImageMagick, ImageSharpCompare and Phash cannot be used together: each registers a comparer for png and the other image extensions, and the last one registered wins. Keep one of them.
+ImageHash, ImageMagick, ImageSharpCompare and Phash cannot be used together: each registers a comparer for png and the other image plugins, and the last one registered wins. Keep one of them.
 
 Conflict pdf-converter [Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF, Syncfusion]
-Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF and Syncfusion cannot be used together: each registers a converter for the pdf extension, and the last one registered wins. Keep one of them.
+Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF and Syncfusion cannot be used together: each registers a converter for the pdf plugin, and the last one registered wins. Keep one of them.
 
 Conflict pptx-converter [Aspose, OpenXml, Syncfusion]
-Aspose, OpenXml and Syncfusion cannot be used together: each registers a converter for the pptx extension, and the last one registered wins. Keep one of them.
+Aspose, OpenXml and Syncfusion cannot be used together: each registers a converter for the pptx plugin, and the last one registered wins. Keep one of them.
 
 Conflict ulid-scrubber [NUlid, Ulid]
 NUlid and Ulid cannot be used together: both scrub 26 character ULIDs and both define DontScrubUlids, which then fails to compile. Keep one of them.
 
 Conflict xlsx-converter [Aspose, ClosedXml, OpenXml, Sylvan, Syncfusion]
-Aspose, ClosedXml, OpenXml, Sylvan and Syncfusion cannot be used together: each registers a converter for the xlsx extension, and the last one registered wins. Keep one of them.
+Aspose, ClosedXml, OpenXml, Sylvan and Syncfusion cannot be used together: each registers a converter for the xlsx plugin, and the last one registered wins. Keep one of them.
 
 Warning bunit-anglesharp-comparer [AngleSharp, Bunit]
 Both register a string comparer for html. Verify.Bunit is initialized first, so Verify.AngleSharp's semantic comparison wins.
@@ -139,7 +139,7 @@ Warning imagemagick-svg-comparer [AngleSharp, ImageMagick]
 Both register a comparer for svg: Verify.AngleSharp compares it as markup, Verify.ImageMagick as an image. Whichever is initialized last is the one in effect.
 
 Warning imagesharp-reencode [Aspose, DocNet, ImageMagick, ImageSharp, OpenXml, PDFium, Syncfusion]
-The selected extensions render pages to png, and Verify.ImageSharp then re-encodes that png: core ignores PerformConversion for a target a converter produced, so the image is written by ImageSharp rather than by the extension that rendered it.
+The selected plugins render pages to png, and Verify.ImageSharp then re-encodes that png: core ignores PerformConversion for a target a converter produced, so the image is written by ImageSharp rather than by the plugin that rendered it.
 
 Warning licence-required [Aspose]
 Aspose needs An Aspose licence: Aspose is commercial. Without a licence its renderers watermark the output and cap the page count, so no snapshot matches.
@@ -157,7 +157,7 @@ Warning settings-method-ambiguity [Aspose, DocNet, PDFium, PdfPig, QuestPDF, Syn
 These packages each define PagesToInclude and SkipPdfNormalization as extension methods in the VerifyTests namespace. With two of them referenced, calling one fails to compile with CS0121, ambiguous call, even though nothing conflicts at run time.
 
 Warning shared-log-name [MicrosoftLogging, Serilog, ZeroLog]
-Every logging extension records under the name log, so their entries interleave in one list and cannot be told apart or ignored separately.
+Every logging plugin records under the name log, so their entries interleave in one list and cannot be told apart or ignored separately.
 
 Warning transitive-sponsorship [OpenXml, Pandoc]
 Morph carries an Open Source Maintenance Fee check of its own, for Papyrine, and Papyrine does not offer the exemption claimed for Verify, and accepts only SmallRevenue and MaintainerConsulting. The generated Directory.Build.props has that owner's options commented out; until one is chosen the build fails with SC021.
@@ -166,7 +166,7 @@ Info cosmos-etag [AspNetCore, Cosmos, Http]
 Verify.Cosmos ignores the member ETag on every type, not only on Cosmos types, so an ETag on an http response or an ASP.NET Core result is left out of the snapshot too.
 
 Info diffplex-default-comparer [AngleSharp, Bunit, DiffPlex, ImageMagick, Quibble]
-Verify.DiffPlex is the default comparer for text snapshots. The extensions selected here register comparers for specific extensions (html, json, svg), which take precedence over it.
+Verify.DiffPlex is the default comparer for text snapshots. The plugins selected here register comparers for specific plugins (html, json, svg), which take precedence over it.
 
 Info ef-localdb [EntityFramework, LocalDb]
 LocalDb runs the tests against a real SQL Server LocalDB instance, one database per test, so EF snapshots cover what the database actually returns. The EfLocalDb package for the chosen test framework already depends on Verify.EntityFramework.
@@ -187,7 +187,7 @@ Info readable-expressions-priority [EntityFramework, ReadableExpressions]
 Verify.ReadableExpressions inserts its converter at the front of the list, so expression trees inside EF snapshots render as readable C# instead of as node graphs.
 
 Info recording-bus [Diagnostics, EntityFramework, Http, MicrosoftLogging, NServiceBus, OpenTelemetry, Serilog, SqlServer, ZeroLog]
-These extensions all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.
+These plugins all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.
 
 Info sql-localdb [LocalDb, SqlServer]
 LocalDb gives Verify.SqlServer a real database to read a schema from, without needing a SQL Server installation.
@@ -243,7 +243,7 @@ public static class ModuleInitializer
         // Verify.ImageSharp.Compare: png, jpg and bmp snapshots are compared pixel by pixel, and
         // pass while the absolute error stays under the threshold.
         // This runs before Initialize(): registration keeps the first comparer registered for each
-        // extension, and Initialize() would otherwise get in first with the default threshold of 5.
+        // plugin, and Initialize() would otherwise get in first with the default threshold of 5.
         VerifyImageSharpCompare.RegisterComparers(threshold: 5);
         // Marks the plugin initialized, so the trailing InitializePlugins() leaves the registration
         // above alone.
@@ -445,71 +445,71 @@ src/VerifySample.Tests/Sample.Test.verified.txt
 src/VerifySample.Tests/ModuleInitializer.cs
 src/VerifySample.Tests/Sample.cs
 src/VerifySample.Tests/VerifyChecksTests.cs
-src/VerifySample.Tests/Extensions/AngleSharpTests.cs
-src/VerifySample.Tests/Extensions/AspNetCoreTests.cs
-src/VerifySample.Tests/Extensions/AsposeTests.cs
-src/VerifySample.Tests/Extensions/AssertionsTests.cs
-src/VerifySample.Tests/Extensions/AvaloniaTests.cs
-src/VerifySample.Tests/Extensions/BlazorTests.cs
-src/VerifySample.Tests/Extensions/BrighterTests.cs
-src/VerifySample.Tests/Extensions/BunitTests.cs
-src/VerifySample.Tests/Extensions/ClosedXmlTests.cs
-src/VerifySample.Tests/Extensions/CommunityToolkitMvvmTests.cs
-src/VerifySample.Tests/Extensions/CosmosTests.cs
-src/VerifySample.Tests/Extensions/CsvHelperTests.cs
-src/VerifySample.Tests/Extensions/DiagnosticsTests.cs
-src/VerifySample.Tests/Extensions/DiffPlexTests.cs
-src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt
-src/VerifySample.Tests/Extensions/DocNetTests.cs
-src/VerifySample.Tests/Extensions/EmailPreviewServicesTests.cs
-src/VerifySample.Tests/Extensions/EntityFrameworkTests.cs
-src/VerifySample.Tests/Extensions/EntityFrameworkClassicTests.cs
-src/VerifySample.Tests/Extensions/FakeItEasyTests.cs
-src/VerifySample.Tests/Extensions/FlurlTests.cs
-src/VerifySample.Tests/Extensions/HttpTests.cs
-src/VerifySample.Tests/Extensions/ICSharpCodeDecompilerTests.cs
-src/VerifySample.Tests/Extensions/ImageHashTests.cs
-src/VerifySample.Tests/Extensions/ImageMagickTests.cs
-src/VerifySample.Tests/Extensions/ImageSharpTests.cs
-src/VerifySample.Tests/Extensions/ImageSharpCompareTests.cs
-src/VerifySample.Tests/Extensions/MailMessageTests.cs
-src/VerifySample.Tests/Extensions/MassTransitTests.cs
-src/VerifySample.Tests/Extensions/MicrosoftLoggingTests.cs
-src/VerifySample.Tests/Extensions/MocklyTests.cs
-src/VerifySample.Tests/Extensions/MoqTests.cs
-src/VerifySample.Tests/Extensions/NServiceBusTests.cs
-src/VerifySample.Tests/Extensions/NSubstituteTests.cs
-src/VerifySample.Tests/Extensions/NUlidTests.cs
-src/VerifySample.Tests/Extensions/NewtonsoftJsonTests.cs
-src/VerifySample.Tests/Extensions/NodaTimeTests.cs
-src/VerifySample.Tests/Extensions/OpenTelemetryTests.cs
-src/VerifySample.Tests/Extensions/OpenXmlTests.cs
-src/VerifySample.Tests/Extensions/PDFiumTests.cs
-src/VerifySample.Tests/Extensions/PandocTests.cs
-src/VerifySample.Tests/Extensions/ParametersHashingTests.cs
-src/VerifySample.Tests/Extensions/PdfPigTests.cs
-src/VerifySample.Tests/Extensions/PlaywrightTests.cs
-src/VerifySample.Tests/Extensions/PuppeteerTests.cs
-src/VerifySample.Tests/Extensions/QuestPDFTests.cs
-src/VerifySample.Tests/Extensions/QuibbleTests.cs
-src/VerifySample.Tests/Extensions/RavenDBTests.cs
-src/VerifySample.Tests/Extensions/ReadableExpressionsTests.cs
-src/VerifySample.Tests/Extensions/SeleniumTests.cs
-src/VerifySample.Tests/Extensions/SendGridTests.cs
-src/VerifySample.Tests/Extensions/SepTests.cs
-src/VerifySample.Tests/Extensions/SerilogTests.cs
-src/VerifySample.Tests/Extensions/SourceGeneratorsTests.cs
-src/VerifySample.Tests/Extensions/SqlServerTests.cs
-src/VerifySample.Tests/Extensions/SylvanTests.cs
-src/VerifySample.Tests/Extensions/SyncfusionTests.cs
-src/VerifySample.Tests/Extensions/SystemJsonTests.cs
-src/VerifySample.Tests/Extensions/UlidTests.cs
-src/VerifySample.Tests/Extensions/WolverineTests.cs
-src/VerifySample.Tests/Extensions/YamlTests.cs
-src/VerifySample.Tests/Extensions/ZeroLogTests.cs
+src/VerifySample.Tests/Plugins/AngleSharpTests.cs
+src/VerifySample.Tests/Plugins/AspNetCoreTests.cs
+src/VerifySample.Tests/Plugins/AsposeTests.cs
+src/VerifySample.Tests/Plugins/AssertionsTests.cs
+src/VerifySample.Tests/Plugins/AvaloniaTests.cs
+src/VerifySample.Tests/Plugins/BlazorTests.cs
+src/VerifySample.Tests/Plugins/BrighterTests.cs
+src/VerifySample.Tests/Plugins/BunitTests.cs
+src/VerifySample.Tests/Plugins/ClosedXmlTests.cs
+src/VerifySample.Tests/Plugins/CommunityToolkitMvvmTests.cs
+src/VerifySample.Tests/Plugins/CosmosTests.cs
+src/VerifySample.Tests/Plugins/CsvHelperTests.cs
+src/VerifySample.Tests/Plugins/DiagnosticsTests.cs
+src/VerifySample.Tests/Plugins/DiffPlexTests.cs
+src/VerifySample.Tests/Plugins/DiffPlexTests.PerTestOutput.verified.txt
+src/VerifySample.Tests/Plugins/DocNetTests.cs
+src/VerifySample.Tests/Plugins/EmailPreviewServicesTests.cs
+src/VerifySample.Tests/Plugins/EntityFrameworkTests.cs
+src/VerifySample.Tests/Plugins/EntityFrameworkClassicTests.cs
+src/VerifySample.Tests/Plugins/FakeItEasyTests.cs
+src/VerifySample.Tests/Plugins/FlurlTests.cs
+src/VerifySample.Tests/Plugins/HttpTests.cs
+src/VerifySample.Tests/Plugins/ICSharpCodeDecompilerTests.cs
+src/VerifySample.Tests/Plugins/ImageHashTests.cs
+src/VerifySample.Tests/Plugins/ImageMagickTests.cs
+src/VerifySample.Tests/Plugins/ImageSharpTests.cs
+src/VerifySample.Tests/Plugins/ImageSharpCompareTests.cs
+src/VerifySample.Tests/Plugins/MailMessageTests.cs
+src/VerifySample.Tests/Plugins/MassTransitTests.cs
+src/VerifySample.Tests/Plugins/MicrosoftLoggingTests.cs
+src/VerifySample.Tests/Plugins/MocklyTests.cs
+src/VerifySample.Tests/Plugins/MoqTests.cs
+src/VerifySample.Tests/Plugins/NServiceBusTests.cs
+src/VerifySample.Tests/Plugins/NSubstituteTests.cs
+src/VerifySample.Tests/Plugins/NUlidTests.cs
+src/VerifySample.Tests/Plugins/NewtonsoftJsonTests.cs
+src/VerifySample.Tests/Plugins/NodaTimeTests.cs
+src/VerifySample.Tests/Plugins/OpenTelemetryTests.cs
+src/VerifySample.Tests/Plugins/OpenXmlTests.cs
+src/VerifySample.Tests/Plugins/PDFiumTests.cs
+src/VerifySample.Tests/Plugins/PandocTests.cs
+src/VerifySample.Tests/Plugins/ParametersHashingTests.cs
+src/VerifySample.Tests/Plugins/PdfPigTests.cs
+src/VerifySample.Tests/Plugins/PlaywrightTests.cs
+src/VerifySample.Tests/Plugins/PuppeteerTests.cs
+src/VerifySample.Tests/Plugins/QuestPDFTests.cs
+src/VerifySample.Tests/Plugins/QuibbleTests.cs
+src/VerifySample.Tests/Plugins/RavenDBTests.cs
+src/VerifySample.Tests/Plugins/ReadableExpressionsTests.cs
+src/VerifySample.Tests/Plugins/SeleniumTests.cs
+src/VerifySample.Tests/Plugins/SendGridTests.cs
+src/VerifySample.Tests/Plugins/SepTests.cs
+src/VerifySample.Tests/Plugins/SerilogTests.cs
+src/VerifySample.Tests/Plugins/SourceGeneratorsTests.cs
+src/VerifySample.Tests/Plugins/SqlServerTests.cs
+src/VerifySample.Tests/Plugins/SylvanTests.cs
+src/VerifySample.Tests/Plugins/SyncfusionTests.cs
+src/VerifySample.Tests/Plugins/SystemJsonTests.cs
+src/VerifySample.Tests/Plugins/UlidTests.cs
+src/VerifySample.Tests/Plugins/WolverineTests.cs
+src/VerifySample.Tests/Plugins/YamlTests.cs
+src/VerifySample.Tests/Plugins/ZeroLogTests.cs
 src/VerifySample.Tests.Windows/VerifySample.Tests.Windows.csproj
 src/VerifySample.Tests.Windows/ModuleInitializer.cs
-src/VerifySample.Tests.Windows/Extensions/LocalDbTests.cs
-src/VerifySample.Tests.Windows/Extensions/PhashTests.cs
-src/VerifySample.Tests.Windows/Extensions/WinFormsTests.cs
-src/VerifySample.Tests.Windows/Extensions/XamlTests.cs
+src/VerifySample.Tests.Windows/Plugins/LocalDbTests.cs
+src/VerifySample.Tests.Windows/Plugins/PhashTests.cs
+src/VerifySample.Tests.Windows/Plugins/WinFormsTests.cs
+src/VerifySample.Tests.Windows/Plugins/XamlTests.cs

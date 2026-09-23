@@ -1,13 +1,13 @@
-// System.Xml.Linq, which the test project's implicit usings bring in, also has an Extensions class.
-using Extensions = Wizard.Core.Extensions;
+// System.Xml.Linq, which the test project's implicit usings bring in, also has an Plugins class.
+using Plugins = Wizard.Core.Plugins;
 
-/// <summary>Invariants the extension registry has to hold (plan 9.2, 17.2).</summary>
+/// <summary>Invariants the plugin registry has to hold (plan 9.2, 17.2).</summary>
 public class RegistryTests
 {
     [Test]
     public async Task IdsAreUnique()
     {
-        var duplicates = Extensions.All
+        var duplicates = Plugins.All
             .GroupBy(_ => _.Id, StringComparer.Ordinal)
             .Where(_ => _.Count() > 1)
             .Select(_ => _.Key);
@@ -18,7 +18,7 @@ public class RegistryTests
     [Test]
     public Task Registry() =>
         Verify(
-            Extensions.All.Select(
+            Plugins.All.Select(
                 _ => new
                 {
                     _.Id,
@@ -65,7 +65,7 @@ public class RegistryTests
         {
             foreach (var member in group.Members)
             {
-                await Assert.That(Extensions.Contains(member))
+                await Assert.That(Plugins.Contains(member))
                     .IsTrue()
                     .Because($"group '{group.Id}' names '{member}', which the registry does not have");
             }
@@ -78,17 +78,17 @@ public class RegistryTests
     [Test]
     public async Task GroupMembershipAgreesBothWays()
     {
-        foreach (var extension in Extensions.All)
+        foreach (var plugin in Plugins.All)
         {
-            foreach (var id in extension.ExclusiveGroups)
+            foreach (var id in plugin.ExclusiveGroups)
             {
                 var group = InteractionRules.Groups.SingleOrDefault(_ => _.Id == id);
                 await Assert.That(group)
                     .IsNotNull()
-                    .Because($"'{extension.Id}' claims group '{id}', which does not exist");
+                    .Because($"'{plugin.Id}' claims group '{id}', which does not exist");
                 await Assert.That(group!.Members)
-                    .Contains(extension.Id)
-                    .Because($"'{extension.Id}' claims group '{id}', which does not list it");
+                    .Contains(plugin.Id)
+                    .Because($"'{plugin.Id}' claims group '{id}', which does not list it");
             }
         }
     }
@@ -101,7 +101,7 @@ public class RegistryTests
         {
             foreach (var condition in group.Conditions)
             {
-                var member = Extensions.ById[condition.Member];
+                var member = Plugins.ById[condition.Member];
                 var choice = member.Choices.SingleOrDefault(_ => _.Id == condition.ChoiceId);
                 await Assert.That(choice)
                     .IsNotNull()
@@ -116,26 +116,26 @@ public class RegistryTests
     }
 
     [Test]
-    public async Task RulesNameRealExtensions()
+    public async Task RulesNameRealPlugins()
     {
         foreach (var rule in InteractionRules.Rules)
         {
             foreach (var id in rule.All.Concat(rule.Any).Concat(rule.Without))
             {
-                await Assert.That(Extensions.Contains(id))
+                await Assert.That(Plugins.Contains(id))
                     .IsTrue()
                     .Because($"rule '{rule.Id}' names '{id}', which the registry does not have");
             }
 
             foreach (var edge in rule.Order)
             {
-                await Assert.That(Extensions.Contains(edge.Before)).IsTrue();
-                await Assert.That(Extensions.Contains(edge.After)).IsTrue();
+                await Assert.That(Plugins.Contains(edge.Before)).IsTrue();
+                await Assert.That(Plugins.Contains(edge.After)).IsTrue();
             }
 
             foreach (var statements in rule.Replace.Concat(rule.Add))
             {
-                await Assert.That(Extensions.Contains(statements.Target)).IsTrue();
+                await Assert.That(Plugins.Contains(statements.Target)).IsTrue();
                 if (rule.Choice is { } choice)
                 {
                     await Assert.That(choice.Options.Select(_ => _.Value)).Contains(statements.WhenValue);
@@ -149,7 +149,7 @@ public class RegistryTests
     public async Task EveryPackageHasAVersion()
     {
         var known = PackageVersions.Baked.Ids.ToHashSet(StringComparer.OrdinalIgnoreCase);
-        var missing = Extensions.All
+        var missing = Plugins.All
             .SelectMany(_ => _.Packages)
             .Select(_ => _.Id)
             .Distinct(StringComparer.OrdinalIgnoreCase)
@@ -159,13 +159,13 @@ public class RegistryTests
     }
 
     /// <summary>
-    /// Core finds a plugin by looking for the assembly name without dots, so an extension whose class
+    /// Core finds a plugin by looking for the assembly name without dots, so a plugin whose class
     /// is named otherwise is never enabled by discovery. Those have to carry an explicit call (plan A1).
     /// </summary>
     [Test]
-    public async Task UndiscoveredExtensionsAreInitializedExplicitly()
+    public async Task UndiscoveredPluginsAreInitializedExplicitly()
     {
-        foreach (var extension in Extensions
+        foreach (var plugin in Plugins
                      .All
                      .Where(_ => _ is
                      {
@@ -173,16 +173,16 @@ public class RegistryTests
                          DiscoveredByInitializePlugins: false
                      }))
         {
-            await Assert.That(extension.Initialize)
+            await Assert.That(plugin.Initialize)
                 .IsNotEmpty()
-                .Because($"InitializePlugins() cannot find '{extension.Id}' (its type is {extension.PluginType}, not {extension.ExpectedPluginType}), so it needs an explicit call");
+                .Because($"InitializePlugins() cannot find '{plugin.Id}' (its type is {plugin.PluginType}, not {plugin.ExpectedPluginType}), so it needs an explicit call");
         }
     }
 
     [Test]
-    public async Task ChoiceIdsAreUniqueAcrossExtensionsAndRules()
+    public async Task ChoiceIdsAreUniqueAcrossPluginsAndRules()
     {
-        var ids = Extensions.All
+        var ids = Plugins.All
             .SelectMany(_ => _.Choices)
             .Concat(InteractionRules.Rules.Where(_ => _.Choice != null).Select(_ => _.Choice!))
             .GroupBy(_ => _.Id, StringComparer.Ordinal)
@@ -192,13 +192,13 @@ public class RegistryTests
     }
 
     /// <summary>
-    /// Library files are written once per path, so two extensions sharing a path have to agree on the
+    /// Library files are written once per path, so two plugins sharing a path have to agree on the
     /// content: otherwise whichever sorts first would silently decide what the other one compiles against.
     /// </summary>
     [Test]
     public async Task LibraryFilesSharingAPathAgree()
     {
-        var clashes = Extensions.All
+        var clashes = Plugins.All
             .SelectMany(_ => _.LibraryFiles.Select(file => (_.Id, file.Path, file.Content)))
             .GroupBy(_ => _.Path, StringComparer.Ordinal)
             .Where(_ => _.Select(file => file.Content).Distinct(StringComparer.Ordinal).Count() > 1)
@@ -206,19 +206,19 @@ public class RegistryTests
         await Assert.That(clashes).IsEmpty();
     }
 
-    /// <summary>A statement gated on a choice the extension does not declare would never be emitted.</summary>
+    /// <summary>A statement gated on a choice the plugin does not declare would never be emitted.</summary>
     [Test]
     public async Task StatementConditionsNameARealChoice()
     {
-        foreach (var extension in Extensions.All)
+        foreach (var plugin in Plugins.All)
         {
-            foreach (var statement in extension.Initialize.Where(_ => _.WhenChoice != null))
+            foreach (var statement in plugin.Initialize.Where(_ => _.WhenChoice != null))
             {
                 var separator = statement.WhenChoice!.IndexOf(':');
-                var choice = extension.Choices.SingleOrDefault(_ => _.Id == statement.WhenChoice[..separator]);
+                var choice = plugin.Choices.SingleOrDefault(_ => _.Id == statement.WhenChoice[..separator]);
                 await Assert.That(choice)
                     .IsNotNull()
-                    .Because($"'{extension.Id}' gates a statement on '{statement.WhenChoice}', a choice it does not declare");
+                    .Because($"'{plugin.Id}' gates a statement on '{statement.WhenChoice}', a choice it does not declare");
                 foreach (var value in statement.WhenChoice[(separator + 1)..].Split('|'))
                 {
                     await Assert.That(choice!.Options.Select(_ => _.Value)).Contains(value);
@@ -234,7 +234,7 @@ public class RegistryTests
     [Test]
     public async Task ShippedSnapshotsBelongToSamplesThatRun()
     {
-        var contradictions = Extensions.All
+        var contradictions = Plugins.All
             .SelectMany(_ => _.SamplesFor(Depth.Verbose).Select(sample => (_.Id, sample)))
             .Where(_ => _.sample.VerifiedOutput != null && _.sample.SkipReason != null)
             .Select(_ => $"{_.Id}.{_.sample.Name}");
@@ -245,7 +245,7 @@ public class RegistryTests
     [Test]
     public async Task SponsorOwnersAreComplete()
     {
-        foreach (var owner in Extensions.All.SelectMany(_ => _.Packages).Select(_ => _.SponsorOwner).OfType<SponsorOwner>())
+        foreach (var owner in Plugins.All.SelectMany(_ => _.Packages).Select(_ => _.SponsorOwner).OfType<SponsorOwner>())
         {
             await Assert.That(owner.Prefix).IsNotEmpty();
             await Assert.That(owner.Package).IsNotEmpty();
@@ -256,7 +256,7 @@ public class RegistryTests
     [Test]
     public async Task ChoicesHaveAtLeastTwoOptions()
     {
-        foreach (var choice in Extensions.All.SelectMany(_ => _.Choices))
+        foreach (var choice in Plugins.All.SelectMany(_ => _.Choices))
         {
             await Assert.That(choice.Options.Count).IsGreaterThan(1);
         }
@@ -264,14 +264,14 @@ public class RegistryTests
 
     /// <summary>Sample names become method names in one class, so a repeat would not compile.</summary>
     [Test]
-    public async Task SampleNamesAreUniquePerExtension()
+    public async Task SampleNamesAreUniquePerPlugin()
     {
-        foreach (var extension in Extensions.All)
+        foreach (var plugin in Plugins.All)
         {
-            var duplicates = extension.SamplesFor(Depth.Verbose)
+            var duplicates = plugin.SamplesFor(Depth.Verbose)
                 .GroupBy(_ => _.Name, StringComparer.Ordinal)
                 .Where(_ => _.Count() > 1)
-                .Select(_ => $"{extension.Id}.{_.Key}");
+                .Select(_ => $"{plugin.Id}.{_.Key}");
             await Assert.That(duplicates).IsEmpty();
         }
     }
@@ -285,7 +285,7 @@ public class RegistryTests
     {
         var state = GeneratorTests.State() with
         {
-            SelectedExtensions = Extensions.All.Select(_ => _.Id).ToHashSet(StringComparer.Ordinal)
+            SelectedPlugins = Plugins.All.Select(_ => _.Id).ToHashSet(StringComparer.Ordinal)
         };
         state.Normalize();
         var plan = Plan.Build(state, PackageVersions.Baked, GeneratorTests.Today);

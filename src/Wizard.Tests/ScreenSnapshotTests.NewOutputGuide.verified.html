@@ -66,14 +66,14 @@
                 </button>
               </li>
               <li class="done">
-                <button type="button" class="step-link" data-step="extensions">
-                  <span class="step-title">Extensions</span>
+                <button type="button" class="step-link" data-step="plugins">
+                  <span class="step-title">Plugins</span>
                   <span class="step-value">DiffPlex</span>
                 </button>
               </li>
               <li class="done">
                 <button type="button" class="step-link" data-step="options">
-                  <span class="step-title">Extension options</span>
+                  <span class="step-title">Plugin options</span>
                   <span class="step-value">Defaults</span>
                 </button>
               </li>
@@ -121,7 +121,7 @@
                   <li>Package management: Prefer CLI</li>
                   <li>Test framework: xUnit v3</li>
                   <li>Build server: GitHub Actions</li>
-                  <li>Extensions: DiffPlex (verbose)</li>
+                  <li>Plugins: DiffPlex (verbose)</li>
                   <li>Maintenance fee: Exempt: OpenSource</li>
                   <li>.NET: net10.0 (SDK 10.0.401)</li>
                   <li>Package versions: the newest stable release of each on nuget.org when this was generated</li>
@@ -213,7 +213,7 @@ dotnet add package Verify.DiffPlex
                 </ul>
                 <p>This manifests in several ways:</p>
                 <h4 id="source-control-settings">Source control settings</h4>
-                <p>All text extensions of
+                <p>All text plugins of
                   <code>*.verified.*</code>
                   should have:</p>
                 <ul>
@@ -292,7 +292,7 @@ indent_size = 2
 indent_style = space
 </code></pre>
                 <p>
-                  <strong>Note that the above are suggested for subset of text extension. Add others as required based on the text file types being verified.</strong>
+                  <strong>Note that the above are suggested for subset of text plugin. Add others as required based on the text file types being verified.</strong>
                 </p>
                 <p>
                   <strong>Visual Studio Code</strong>
@@ -302,12 +302,12 @@ indent_style = space
                   <code>crlf</code>
                   on Windows, taken from the default
                   <code>files.eol</code>. Verify then rejects that file for containing a carriage return. Installing the
-                  <a href="https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig">EditorConfig for VS Code extension</a>
+                  <a href="https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig">EditorConfig for VS Code plugin</a>
                   applies
                   <code>end_of_line = lf</code>
                   on save. Setting
                   <code>"files.eol": "\n"</code>
-                  in Visual Studio Code settings has the same effect without the extension.</p>
+                  in Visual Studio Code settings has the same effect without the plugin.</p>
                 <h4 id="newline-tolerance">Newline tolerance</h4>
                 <p>The settings above are the recommended approach, since they keep the content on disk consistent for everyone working on a repository. Where per developer setup cannot be relied on, Verify can instead be made tolerant of carriage returns and of a trailing newline in verified files. Both are opt in, and both have side effects worth understanding before enabling them. See
                   <a href="https://github.com/VerifyTests/Verify/blob/main/docs/newline-tolerance.md">Newline tolerance</a>.</p>
@@ -407,8 +407,8 @@ indent_style = space
   }
 }
 </code>4</pre>
-                <h2 id="extensions">Extensions</h2>
-                <p>Each extension below teaches Verify about one kind of value: how to serialize it, how to compare two of them, or how to turn it into something readable. They are independent; removing one changes nothing else.</p>
+                <h2 id="plugins">Plugins</h2>
+                <p>Each plugin below teaches Verify about one kind of value: how to serialize it, how to compare two of them, or how to turn it into something readable. They are independent; removing one changes nothing else.</p>
                 <h3 id="verify.diffplex">Verify.DiffPlex</h3>
                 <p>Shows an inline diff in the failure message of a text snapshot, instead of both files in full. (<a href="https://github.com/VerifyTests/Verify.DiffPlex">repository</a>)</p>
                 <p>Package:
@@ -422,7 +422,7 @@ indent_style = space
 }
 </code>5</pre>
                 <p>
-                  <code>Extensions/DiffPlexTests.cs</code>
+                  <code>Plugins/DiffPlexTests.cs</code>
                   in the download shows every documented API:</p>
                 <p>
                   <strong>PerTestOutput</strong>
@@ -438,7 +438,7 @@ indent_style = space
                   <li>This changes only the failure message; what is written to a
                     <code>.verified.</code>
                     file is unaffected.</li>
-                  <li>It is the default comparer for text. An extension that registers a comparer for a specific file extension, such as html or json, takes precedence for that extension.</li>
+                  <li>It is the default comparer for text. A plugin that registers a comparer for a specific file extension, such as html or json, takes precedence for that extension.</li>
                 </ul>
                 <h2 id="initialization">Initialization</h2>
                 <p>Verify is configured once, before any test runs, in a

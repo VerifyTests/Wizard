@@ -2,13 +2,13 @@ namespace Wizard.Core;
 
 /// <param name="Recommended">Pre-checked when its tech is chosen; otherwise it is listed as related.</param>
 /// <param name="Because">The techs that suggest it, for the "related" tag and the card's hint.</param>
-public sealed record Suggestion(string ExtensionId, bool Recommended, IReadOnlyList<string> Because);
+public sealed record Suggestion(string PluginId, bool Recommended, IReadOnlyList<string> Because);
 
-/// <summary>Turns the chosen tech stack into suggested extensions (plan 10).</summary>
+/// <summary>Turns the chosen tech stack into suggested plugins (plan 10).</summary>
 public static class TechSuggestions
 {
     /// <summary>
-    /// The extensions the stack suggests, in registry order. A Windows-only extension is left out when
+    /// The plugins the stack suggests, in registry order. A Windows-only plugin is left out when
     /// the chosen OS is not Windows, since it cannot be selected there.
     /// Verify.DiffPlex is recommended in every new project, and Verify.Terminal is listed alongside it.
     /// </summary>
@@ -17,11 +17,11 @@ public static class TechSuggestions
         var recommended = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         var related = new Dictionary<string, List<string>>(StringComparer.Ordinal);
 
-        static void Note(Dictionary<string, List<string>> into, string extensionId, string because)
+        static void Note(Dictionary<string, List<string>> into, string pluginId, string because)
         {
-            if (!into.TryGetValue(extensionId, out var list))
+            if (!into.TryGetValue(pluginId, out var list))
             {
-                into[extensionId] = list = [];
+                into[pluginId] = list = [];
             }
 
             list.Add(because);
@@ -42,12 +42,12 @@ public static class TechSuggestions
 
         if (state.Flow == Flow.New)
         {
-            Note(recommended, Extensions.DiffPlexId, "every project");
+            Note(recommended, Plugins.DiffPlexId, "every project");
             Note(related, "Terminal", "every project");
         }
 
         var suggestions = new List<Suggestion>();
-        foreach (var definition in Extensions.All.Where(_ => state.Unavailable(_.Id) == null))
+        foreach (var definition in Plugins.All.Where(_ => state.Unavailable(_.Id) == null))
         {
             if (recommended.TryGetValue(definition.Id, out var because))
             {
@@ -118,11 +118,11 @@ public static class TechSuggestions
         }
     }
 
-    static bool WouldConflict(WizardState state, string extensionId) =>
+    static bool WouldConflict(WizardState state, string pluginId) =>
         InteractionRules.Groups
-            .Where(_ => _.Members.Contains(extensionId) && _.Holds(extensionId, state.Choices))
+            .Where(_ => _.Members.Contains(pluginId) && _.Holds(pluginId, state.Choices))
             .Any(group => group.Members.Any(
-                member => member != extensionId &&
+                member => member != pluginId &&
                           state.Uses(member) &&
                           group.Holds(member, state.Choices)));
 }

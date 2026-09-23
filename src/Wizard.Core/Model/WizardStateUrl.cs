@@ -14,14 +14,14 @@ public static class WizardStateUrl
     public const string TestFrameworkKey = "tf";
     public const string BuildServerKey = "ci";
     public const string NameKey = "name";
-    public const string ExtensionsKey = "ext";
+    public const string PluginsKey = "ext";
     public const string MinimalKey = "min";
     public const string ChoicesKey = "opt";
     public const string TechKey = "tech";
     public const string ExistingKey = "have";
 
-    /// <summary>The <see cref="ExtensionsKey"/> value meaning "nothing at all", as opposed to "unset".</summary>
-    public const string NoExtensions = "none";
+    /// <summary>The <see cref="PluginsKey"/> value meaning "nothing at all", as opposed to "unset".</summary>
+    public const string NoPlugins = "none";
 
     public const string SponsorKey = "sponsor";
     public const string AccountKey = "account";
@@ -79,17 +79,17 @@ public static class WizardStateUrl
         }
 
         Add(TechKey, string.Join(",", Techs.All.Where(_ => state.Techs.Contains(_.Id)).Select(_ => _.Id)));
-        Add(ExistingKey, string.Join(",", Extensions.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id)));
+        Add(ExistingKey, string.Join(",", Plugins.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id)));
 
         // Registry order, not insertion order, so the same selection is always the same link.
-        var selected = Extensions.All
+        var selected = Plugins.All
             .Where(_ => state.Has(_.Id))
             .Select(_ => _.Id)
             .ToList();
-        if (!selected.SequenceEqual(WizardState.DefaultExtensions(state.Flow), StringComparer.Ordinal))
+        if (!selected.SequenceEqual(WizardState.DefaultPlugins(state.Flow), StringComparer.Ordinal))
         {
             // A link that selects nothing still has to say so, or it would read as the default.
-            Add(ExtensionsKey, selected.Count == 0 ? NoExtensions : string.Join(",", selected));
+            Add(PluginsKey, selected.Count == 0 ? NoPlugins : string.Join(",", selected));
         }
 
         Add(MinimalKey, string.Join(",", selected.Where(_ => state.DepthOf(_) == Depth.Minimal)));
@@ -157,8 +157,8 @@ public static class WizardStateUrl
             TestFramework = ParseEnum<TestFramework>(Get(TestFrameworkKey)),
             BuildServer = ParseEnum<BuildServer>(Get(BuildServerKey)),
             SolutionName = Get(NameKey) ?? WizardState.DefaultSolutionName,
-            SelectedExtensions = ParseExtensions(flow, Get(ExtensionsKey)),
-            ExistingExtensions = new HashSet<string>(SplitList(Get(ExistingKey)), StringComparer.Ordinal),
+            SelectedPlugins = ParsePlugins(flow, Get(PluginsKey)),
+            ExistingPlugins = new HashSet<string>(SplitList(Get(ExistingKey)), StringComparer.Ordinal),
             Techs = new HashSet<string>(SplitList(Get(TechKey)), StringComparer.Ordinal),
             Choices = ParseChoices(Get(ChoicesKey)),
             Depths = SplitList(Get(MinimalKey))
@@ -223,17 +223,17 @@ public static class WizardStateUrl
             .Replace("%3A", ":");
 
     /// <summary>
-    /// An absent key means the default selection, so a link made before an extension existed still
-    /// means what it meant. <see cref="NoExtensions"/> is how "nothing selected" is written.
+    /// An absent key means the default selection, so a link made before a plugin existed still
+    /// means what it meant. <see cref="NoPlugins"/> is how "nothing selected" is written.
     /// </summary>
-    static HashSet<string> ParseExtensions(Flow flow, string? value)
+    static HashSet<string> ParsePlugins(Flow flow, string? value)
     {
         if (value == null)
         {
-            return [with(StringComparer.Ordinal), .. WizardState.DefaultExtensions(flow)];
+            return [with(StringComparer.Ordinal), .. WizardState.DefaultPlugins(flow)];
         }
 
-        if (value == NoExtensions)
+        if (value == NoPlugins)
         {
             return new(StringComparer.Ordinal);
         }

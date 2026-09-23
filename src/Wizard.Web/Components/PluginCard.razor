@@ -1,0 +1,100 @@
+@* One selectable plugin (plan 7.1 step 7). The whole card is the checkbox's label, so clicking
+   anywhere toggles it. Badges say up front what selecting it will cost: a licence, a tool, Windows. *@
+<label class="plugin-card @CardClass" data-id="@Definition.Id" title="@Unavailable">
+    <input type="checkbox"
+           checked="@(Selected || Existing)"
+           disabled="@(Existing || Unavailable != null)"
+           @onchange="_ => SelectedChanged.InvokeAsync((bool?) _.Value ?? false)" />
+    <span class="plugin-body">
+        <span class="plugin-name">@Definition.DisplayName</span>
+        @if (Existing)
+        {
+            <span class="plugin-tag">Already in the project</span>
+        }
+        else if (Tag.Length > 0)
+        {
+            <span class="plugin-tag">@Tag</span>
+        }
+        <span class="plugin-description">@Definition.Description</span>
+        @if (Badges.Count > 0)
+        {
+            <span class="badges">
+                @foreach (var badge in Badges)
+                {
+                    <span class="badge" title="@badge.Hint">@badge.Label</span>
+                }
+            </span>
+        }
+    </span>
+</label>
+
+@code {
+    [Parameter, EditorRequired] public PluginDefinition Definition { get; set; } = null!;
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public EventCallback<bool> SelectedChanged { get; set; }
+
+    /// <summary>Already in the project (plan 7.2): shown ticked and locked, never generated.</summary>
+    [Parameter] public bool Existing { get; set; }
+
+    /// <summary>Why it cannot be selected on the chosen operating system; the card is greyed out and says so on hover.</summary>
+    [Parameter] public string? Unavailable { get; set; }
+
+    /// <summary>Why the card is suggested, from the tech stack.</summary>
+    [Parameter] public string Tag { get; set; } = "";
+
+    string CardClass
+    {
+        get
+        {
+            if (Existing)
+            {
+                return "existing";
+            }
+
+            if (Unavailable != null)
+            {
+                return "unavailable";
+            }
+
+            if (Selected)
+            {
+                return "selected";
+            }
+
+            return "";
+        }
+    }
+
+    record Badge(string Label, string Hint);
+
+    IReadOnlyList<Badge> Badges
+    {
+        get
+        {
+            var badges = new List<Badge>();
+            if (Definition.Platform == Platform.WindowsOnly &&
+                Unavailable == null)
+            {
+                badges.Add(new("Windows only", "The samples go in a second test project that only builds on Windows."));
+            }
+
+            foreach (var requirement in Definition.ExternalRequirements)
+            {
+                var label = "Needs a tool";
+                if (requirement.EnvironmentVariable != null)
+                {
+                    label = "Needs a licence";
+                }
+
+                badges.Add(new(label, $"{requirement.Name}: {requirement.Description}"));
+            }
+
+            if (Definition.Beta)
+            {
+                badges.Add(new("Prerelease", "This package has no stable release yet."));
+            }
+
+            return badges;
+        }
+    }
+}

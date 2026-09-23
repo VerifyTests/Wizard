@@ -1,0 +1,138 @@
+@* The plugin picker (plan 7.1 step 7). What the tech stack suggests comes first; everything else
+   follows, grouped by category so a long list stays navigable. Every interaction the selection implies
+   appears above the cards as soon as the combination exists, rather than at the end. *@
+<p class="hint">
+    Plugins teach Verify about one kind of value each. Nothing here is required, and anything chosen
+    can be deleted from what is generated later. @Plugins.All.Count are available.
+</p>
+
+<div class="plugin-search">
+    <label for="pluginFilter">Filter</label>
+    <input type="text"
+           id="pluginFilter"
+           placeholder="Name or description"
+           value="@filter"
+           @oninput="FilterChanged" />
+    <span class="selected-count">@State.SelectedPlugins.Count selected</span>
+</div>
+
+@if (interactions.Count > 0)
+{
+    <div class="interactions">
+        @foreach (var interaction in interactions)
+        {
+            <InteractionNotice Result="interaction" />
+        }
+    </div>
+}
+
+@if (suggested.Count > 0)
+{
+    <section class="plugin-category suggested">
+        <h3>@SuggestedHeading</h3>
+        <div class="plugin-cards">
+            @foreach (var suggestion in suggested)
+            {
+                <PluginCard Definition="Plugins.ById[suggestion.PluginId]"
+                               Selected="State.Has(suggestion.PluginId)"
+                               Existing="State.IsExisting(suggestion.PluginId)"
+                               Tag="@Tag(suggestion)"
+                               SelectedChanged="_ => Toggle(suggestion.PluginId, _)" />
+            }
+        </div>
+    </section>
+}
+
+@foreach (var category in Categories)
+{
+    <section class="plugin-category">
+        <h3>@category.Key.Label()</h3>
+        <div class="plugin-cards">
+            @foreach (var definition in category)
+            {
+                <PluginCard Definition="definition"
+                               Selected="State.Has(definition.Id)"
+                               Existing="State.IsExisting(definition.Id)"
+                               Unavailable="@State.Unavailable(definition.Id)"
+                               SelectedChanged="_ => Toggle(definition.Id, _)" />
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
+    [Parameter] public EventCallback Changed { get; set; }
+
+    string filter = "";
+
+    IReadOnlyList<InteractionResult> interactions = [];
+    IReadOnlyList<Suggestion> suggested = [];
+
+
+    protected override void OnParametersSet()
+    {
+        interactions = InteractionRules.For(State);
+        suggested = [.. TechSuggestions.For(State).Where(_ => Matches(Plugins.ById[_.PluginId]))];
+    }
+
+    string SuggestedHeading
+    {
+        get
+        {
+            if (State.Techs.Count == 0)
+            {
+                return "Suggested";
+            }
+
+            return "Suggested for this stack";
+        }
+    }
+
+    static string Tag(Suggestion suggestion)
+    {
+        var because = string.Join(", ", suggestion.Because);
+        if (suggestion.Recommended)
+        {
+            return $"For {because}";
+        }
+
+        return $"Related to {because}";
+    }
+
+    // Suggested plugins are listed once, above; the categories hold the rest.
+    IEnumerable<IGrouping<PluginCategory, PluginDefinition>> Categories =>
+        Plugins.All
+            .Where(_ => Matches(_) && suggested.All(suggestion => suggestion.PluginId != _.Id))
+            .GroupBy(_ => _.Category)
+            .OrderBy(_ => _.Key);
+
+    bool Matches(PluginDefinition definition)
+    {
+        if (filter.Length == 0)
+        {
+            return true;
+        }
+
+        // A selected plugin stays visible whatever the filter says, so it cannot be lost from view.
+        if (State.Has(definition.Id))
+        {
+            return true;
+        }
+
+        return definition.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+               definition.Description.Contains(filter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    void FilterChanged(ChangeEventArgs args)
+    {
+        filter = args.Value as string ?? "";
+        suggested = [.. TechSuggestions.For(State).Where(_ => Matches(Plugins.ById[_.PluginId]))];
+    }
+
+    Task Toggle(string id, bool selected)
+    {
+        State.Select(id, selected);
+        return Changed.InvokeAsync();
+    }
+}

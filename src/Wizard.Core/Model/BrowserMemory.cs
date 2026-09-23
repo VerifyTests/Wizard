@@ -2,7 +2,7 @@ namespace Wizard.Core;
 
 /// <summary>What the browser remembers between visits (plan 8.2), each as it appears in a url.</summary>
 /// <param name="Tech">A comma list of tech ids.</param>
-/// <param name="Existing">A comma list of the extension ids a project already has.</param>
+/// <param name="Existing">A comma list of the plugin ids a project already has.</param>
 /// <param name="Sponsor">The maintenance fee declaration, as a query string.</param>
 public sealed record Remembered(string? Tech, string? Existing, string? Sponsor)
 {
@@ -19,7 +19,7 @@ public sealed record Restored(bool Tech, bool Existing, bool Sponsor)
 /// The rules for the browser's memory (plan 8.2). A url always wins: remembered values only fill in
 /// what a url leaves out, so a shared link means the same thing in every browser. Only answers to
 /// questions the flow asks are read or written, so the new-project flow neither clears nor overwrites
-/// the list of existing extensions an add flow kept.
+/// the list of existing plugins an add flow kept.
 /// </summary>
 public static class BrowserMemory
 {
@@ -47,12 +47,12 @@ public static class BrowserMemory
             !string.IsNullOrEmpty(remembered.Existing) &&
             !WizardStateUrl.HasKey(query, WizardStateUrl.ExistingKey))
         {
-            foreach (var id in Split(remembered.Existing).Where(Extensions.Contains))
+            foreach (var id in Split(remembered.Existing).Where(Plugins.Contains))
             {
                 state.SetExisting(id, true);
             }
 
-            existing = state.ExistingExtensions.Count > 0;
+            existing = state.ExistingPlugins.Count > 0;
         }
 
         if (AsksTech(state.Flow) &&
@@ -62,9 +62,9 @@ public static class BrowserMemory
             state.Techs = new HashSet<string>(Split(remembered.Tech).Where(Techs.Contains), StringComparer.Ordinal);
             tech = state.Techs.Count > 0;
 
-            // A url that says nothing about extensions gets what the remembered stack recommends, as if
-            // each tech had just been chosen. One that names extensions keeps exactly those.
-            if (!WizardStateUrl.HasKey(query, WizardStateUrl.ExtensionsKey))
+            // A url that says nothing about plugins gets what the remembered stack recommends, as if
+            // each tech had just been chosen. One that names plugins keeps exactly those.
+            if (!WizardStateUrl.HasKey(query, WizardStateUrl.PluginsKey))
             {
                 TechSuggestions.ApplyAll(state);
             }
@@ -96,7 +96,7 @@ public static class BrowserMemory
         string? existing = null;
         if (AsksExisting(state.Flow))
         {
-            existing = string.Join(",", Extensions.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id));
+            existing = string.Join(",", Plugins.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id));
         }
 
         return new(tech, existing, WizardStateUrl.SponsorQuery(state));

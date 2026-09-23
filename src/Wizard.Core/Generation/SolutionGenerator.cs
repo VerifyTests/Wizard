@@ -64,9 +64,9 @@ public static class SolutionGenerator
         Add($"{library}/{plan.LibraryProject}.csproj", ProjectFiles.LibraryProject(plan));
         Add($"{library}/ClassBeingTested.cs", CodeFiles.ClassBeingTested(plan));
         Add($"{library}/SampleModels.cs", CodeFiles.SampleModels(plan));
-        // Types the extension samples exercise: a DbContext, a controller, a component. Each one is a
+        // Types the plugin samples exercise: a DbContext, a controller, a component. Each one is a
         // placeholder for the reader's own code, which is why they live beside it rather than in the tests.
-        foreach (var file in plan.Extensions.SelectMany(_ => _.Definition.LibraryFiles).DistinctBy(_ => _.Path))
+        foreach (var file in plan.Plugins.SelectMany(_ => _.Definition.LibraryFiles).DistinctBy(_ => _.Path))
         {
             Add($"{library}/{file.Path}", CodeFiles.Banner(plan) + file.Content.TrimEnd('\n') + "\n");
         }
@@ -95,7 +95,7 @@ public static class SolutionGenerator
             Add($"{tests}/TestProject.cs", CodeFiles.FixieTestProject(plan));
         }
 
-        foreach (var test in ExtensionTestFiles.For(plan, windows: false))
+        foreach (var test in PluginTestFiles.For(plan, windows: false))
         {
             Add($"{tests}/{test.Path}", test.Text, test.Bom);
         }
@@ -115,7 +115,7 @@ public static class SolutionGenerator
                 Add($"{windows}/TestProject.cs", CodeFiles.FixieTestProject(plan));
             }
 
-            foreach (var test in ExtensionTestFiles.For(plan, windows: true))
+            foreach (var test in PluginTestFiles.For(plan, windows: true))
             {
                 Add($"{windows}/{test.Path}", test.Text, test.Bom);
             }

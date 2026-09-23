@@ -15,16 +15,16 @@ public sealed record Plan(
     PackageVersions Versions,
     Date Today)
 {
-    /// <summary>The selected extensions in registry order, each resolved against the whole state.</summary>
-    public required IReadOnlyList<ResolvedExtension> Extensions { get; init; }
+    /// <summary>The selected plugins in registry order, each resolved against the whole state.</summary>
+    public required IReadOnlyList<ResolvedPlugin> Plugins { get; init; }
 
-    /// <summary>Existing extensions whose initialization the new selection changes (plan 7.2).</summary>
-    public IReadOnlyList<ResolvedExtension> ExistingChanges { get; init; } = [];
+    /// <summary>Existing plugins whose initialization the new selection changes (plan 7.2).</summary>
+    public IReadOnlyList<ResolvedPlugin> ExistingChanges { get; init; } = [];
 
     /// <summary>Adding to an existing project rather than generating a new one (plan 12.5).</summary>
     public bool IsAddition => State.Flow != Flow.New;
 
-    /// <summary>Every rule and group that fires, plus the notices derived from the extensions themselves.</summary>
+    /// <summary>Every rule and group that fires, plus the notices derived from the plugins themselves.</summary>
     public required IReadOnlyList<InteractionResult> Interactions { get; init; }
 
     public string SolutionName => State.SolutionName;
@@ -32,16 +32,16 @@ public sealed record Plan(
     public string TestProject => $"{SolutionName}.Tests";
 
     /// <summary>
-    /// The second test project, for extensions that only run on Windows (plan D5). Nothing references
+    /// The second test project, for plugins that only run on Windows (plan D5). Nothing references
     /// it, so the rest of the solution builds and runs on any OS.
     /// </summary>
     public string WindowsTestProject => $"{SolutionName}.Tests.Windows";
 
-    public IReadOnlyList<ResolvedExtension> WindowsExtensions =>
-        [.. Extensions.Where(_ => _.IsWindowsOnly)];
+    public IReadOnlyList<ResolvedPlugin> WindowsPlugins =>
+        [.. Plugins.Where(_ => _.IsWindowsOnly)];
 
-    public IReadOnlyList<ResolvedExtension> PortableExtensions =>
-        [.. Extensions.Where(_ => !_.IsWindowsOnly)];
+    public IReadOnlyList<ResolvedPlugin> PortablePlugins =>
+        [.. Plugins.Where(_ => !_.IsWindowsOnly)];
 
     /// <summary>
     /// Not for Expecto: the samples are C# (plan D9), so a second project would hold nothing but an
@@ -49,15 +49,15 @@ public sealed record Plan(
     /// </summary>
     public bool HasWindowsProject =>
         !IsAddition &&
-        WindowsExtensions.Count > 0 &&
+        WindowsPlugins.Count > 0 &&
         !Framework.IsFSharp;
 
     /// <summary>
-    /// The extensions a test project holds. Adding to an existing project writes everything for the one
+    /// The plugins a test project holds. Adding to an existing project writes everything for the one
     /// test project the reader already has; whether that one can target windows is theirs to decide,
-    /// and the guide says which extensions need it.
+    /// and the guide says which plugins need it.
     /// </summary>
-    public IEnumerable<ResolvedExtension> ExtensionsIn(bool windows)
+    public IEnumerable<ResolvedPlugin> PluginsIn(bool windows)
     {
         if (IsAddition)
         {
@@ -66,10 +66,10 @@ public sealed record Plan(
                 return [];
             }
 
-            return Extensions;
+            return Plugins;
         }
 
-        return Extensions.Where(_ => _.IsWindowsOnly == windows);
+        return Plugins.Where(_ => _.IsWindowsOnly == windows);
     }
 
     /// <summary>The root folder of the zip: the solution, or the changes to merge into one (plan 12.5).</summary>
@@ -93,16 +93,16 @@ public sealed record Plan(
     public string WizardUrl =>
         WizardStateUrl.ToAbsoluteUrl(State with {Step = FlowSteps.Output.Id});
 
-    /// <summary>Packages the test project references, framework first, then the extensions in registry order.</summary>
+    /// <summary>Packages the test project references, framework first, then the plugins in registry order.</summary>
     public IReadOnlyList<string> TestPackages =>
-        [.. Framework.Packages, .. ExtensionPackages(windows: false)];
+        [.. Framework.Packages, .. PluginPackages(windows: false)];
 
-    /// <summary>What an existing test project needs added: the extensions' packages, not the framework's.</summary>
+    /// <summary>What an existing test project needs added: the plugins' packages, not the framework's.</summary>
     public IReadOnlyList<string> AddedPackages =>
-        [.. ExtensionPackages(windows: false)];
+        [.. PluginPackages(windows: false)];
 
     public IReadOnlyList<string> WindowsTestPackages =>
-        [.. Framework.Packages, .. ExtensionPackages(windows: true)];
+        [.. Framework.Packages, .. PluginPackages(windows: true)];
 
     /// <summary>Every package version the solution has to pin, whichever project references it.</summary>
     public IReadOnlyList<string> AllPackages =>
@@ -110,7 +110,7 @@ public sealed record Plan(
 
     public IReadOnlyList<string> LibraryPackages =>
         [
-            .. Extensions
+            .. Plugins
                 .SelectMany(_ => _.Packages)
                 .Where(_ => _ is {ForLibrary: true, Kind: PackageKind.PackageReference})
                 .Select(_ => _.Id)
@@ -119,8 +119,8 @@ public sealed record Plan(
 
     // A package the class library needs is usually needed by the tests too, which build the same types
     // up, so ForLibrary adds a reference rather than moving one.
-    IEnumerable<string> ExtensionPackages(bool windows) =>
-        ExtensionsIn(windows)
+    IEnumerable<string> PluginPackages(bool windows) =>
+        PluginsIn(windows)
             .SelectMany(_ => _.Packages)
             .Where(_ => _.Kind == PackageKind.PackageReference)
             .Select(_ => _.Id)
@@ -129,7 +129,7 @@ public sealed record Plan(
     /// <summary>Tools installed into <c>.config/dotnet-tools.json</c>.</summary>
     public IReadOnlyList<string> DotnetTools =>
         [
-            .. Extensions
+            .. Plugins
                 .SelectMany(_ => _.Packages)
                 .Where(_ => _.Kind == PackageKind.DotnetTool)
                 .Select(_ => _.Id)
@@ -142,7 +142,7 @@ public sealed record Plan(
     /// </summary>
     public IReadOnlyList<SponsorOwner> SponsorOwners =>
         [
-            .. Extensions
+            .. Plugins
                 .SelectMany(_ => _.Packages)
                 .Select(_ => _.SponsorOwner)
                 .OfType<SponsorOwner>()
@@ -152,7 +152,7 @@ public sealed record Plan(
 
     /// <summary>
     /// Every package id the output names a version for: what the live lookup checks (plan 15.3), and
-    /// nothing else, so a plan with two extensions makes a handful of requests rather than a hundred.
+    /// nothing else, so a plan with two plugins makes a handful of requests rather than a hundred.
     /// </summary>
     public IReadOnlyList<string> EmittedPackages
     {
@@ -203,7 +203,7 @@ public sealed record Plan(
             versions,
             today)
         {
-            Extensions = PlanBuilder.Resolve(state, framework),
+            Plugins = PlanBuilder.Resolve(state, framework),
             ExistingChanges = PlanBuilder.ResolveExistingChanges(state),
             Interactions =
             [

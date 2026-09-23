@@ -1,5 +1,5 @@
-// System.Xml.Linq, which the test project's implicit usings bring in, also has an Extensions class.
-using Extensions = Wizard.Core.Extensions;
+// System.Xml.Linq, which the test project's implicit usings bring in, also has an Plugins class.
+using Plugins = Wizard.Core.Plugins;
 
 /// <summary>The tech stack table and what choosing from it does to the selection (plan 10).</summary>
 public class TechTests
@@ -16,28 +16,28 @@ public class TechTests
     }
 
     [Test]
-    public async Task SuggestionsNameRealExtensions()
+    public async Task SuggestionsNameRealPlugins()
     {
         foreach (var tech in Techs.All)
         {
             foreach (var id in tech.Recommended.Concat(tech.Related))
             {
-                await Assert.That(Extensions.Contains(id))
+                await Assert.That(Plugins.Contains(id))
                     .IsTrue()
                     .Because($"tech '{tech.Id}' suggests '{id}', which the registry does not have");
             }
         }
     }
 
-    /// <summary>Every extension is reachable from some tech, or is deliberately listed as universal (plan 9.2).</summary>
+    /// <summary>Every plugin is reachable from some tech, or is deliberately listed as universal (plan 9.2).</summary>
     [Test]
-    public async Task EveryExtensionIsSuggestedOrUniversal()
+    public async Task EveryPluginIsSuggestedOrUniversal()
     {
         var suggested = Techs.All
             .SelectMany(_ => _.Recommended.Concat(_.Related))
             .Concat(Techs.NotSuggestedByTech)
             .ToHashSet(StringComparer.Ordinal);
-        var orphans = Extensions.All.Select(_ => _.Id).Where(_ => !suggested.Contains(_));
+        var orphans = Plugins.All.Select(_ => _.Id).Where(_ => !suggested.Contains(_));
         await Assert.That(orphans).IsEmpty();
     }
 
@@ -83,23 +83,23 @@ public class TechTests
     }
 
     [Test]
-    public async Task AnExtensionTheProjectHasIsNotSelectedAgain()
+    public async Task APluginTheProjectHasIsNotSelectedAgain()
     {
-        var state = new WizardState {Flow = Flow.AddByTech, SelectedExtensions = new HashSet<string>()};
+        var state = new WizardState {Flow = Flow.AddByTech, SelectedPlugins = new HashSet<string>()};
         state.SetExisting("SqlServer", true);
         TechSuggestions.Choose(state, "sqlserver", true);
         await Assert.That(state.Has("SqlServer")).IsFalse();
     }
 
-    /// <summary>Windows-only extensions cannot be selected on another OS, so they are not suggested there (plan 10).</summary>
+    /// <summary>Windows-only plugins cannot be selected on another OS, so they are not suggested there (plan 10).</summary>
     [Test]
-    public async Task WindowsOnlyExtensionsAreNotSuggestedElsewhere()
+    public async Task WindowsOnlyPluginsAreNotSuggestedElsewhere()
     {
         var state = GeneratorTests.State(os: Os.Linux, ide: Ide.Rider);
         TechSuggestions.Choose(state, "wpf", true);
 
         await Assert.That(state.Has("Xaml")).IsFalse();
-        await Assert.That(TechSuggestions.For(state).Select(_ => _.ExtensionId)).DoesNotContain("Xaml");
+        await Assert.That(TechSuggestions.For(state).Select(_ => _.PluginId)).DoesNotContain("Xaml");
     }
 
     [Test]
@@ -108,6 +108,6 @@ public class TechTests
         var state = GeneratorTests.State();
         TechSuggestions.Choose(state, "efcore", true);
         TechSuggestions.Choose(state, "aspnetcore", true);
-        return Verify(TechSuggestions.For(state).Select(_ => $"{_.ExtensionId}: {(_.Recommended ? "recommended" : "related")} by {string.Join(", ", _.Because)}"));
+        return Verify(TechSuggestions.For(state).Select(_ => $"{_.PluginId}: {(_.Recommended ? "recommended" : "related")} by {string.Join(", ", _.Because)}"));
     }
 }

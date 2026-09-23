@@ -94,10 +94,10 @@ public class NewTests : WebTestContext
 
     /// <summary>Toggling a card writes the selection into the url, in registry order (plan 8.1).</summary>
     [Test]
-    public async Task SelectingAnExtensionUpdatesTheUrl()
+    public async Task SelectingAPluginUpdatesTheUrl()
     {
-        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
-        await page.Find(".extension-card[data-id=AngleSharp] input")
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
+        await page.Find(".plugin-card[data-id=AngleSharp] input")
             .ChangeAsync(
             new()
             {
@@ -105,7 +105,7 @@ public class NewTests : WebTestContext
             });
         await Assert.That(CurrentUrl).Contains("&ext=AngleSharp,DiffPlex");
 
-        await page.Find(".extension-card[data-id=DiffPlex] input")
+        await page.Find(".plugin-card[data-id=DiffPlex] input")
             .ChangeAsync(
             new()
             {Value = false});
@@ -116,48 +116,48 @@ public class NewTests : WebTestContext
     [Test]
     public async Task DeselectingEverythingIsCarriedInTheUrl()
     {
-        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
-        await page.Find(".extension-card[data-id=DiffPlex] input")
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
+        await page.Find(".plugin-card[data-id=DiffPlex] input")
             .ChangeAsync(
                 new()
                     {Value = false});
         await Assert.That(CurrentUrl).Contains("&ext=none");
     }
 
-    /// <summary>A Windows-only extension is greyed out on another OS, says why, and is dropped from the url.</summary>
+    /// <summary>A Windows-only plugin is greyed out on another OS, says why, and is dropped from the url.</summary>
     [Test]
-    public async Task WindowsOnlyExtensionsAreUnavailableOffWindows()
+    public async Task WindowsOnlyPluginsAreUnavailableOffWindows()
     {
-        var page = Open("new?step=extensions&os=Linux&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=DiffPlex,WinForms");
+        var page = Open("new?step=plugins&os=Linux&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=DiffPlex,WinForms");
         await Assert.That(CurrentUrl).DoesNotContain("WinForms");
 
-        var card = page.Find(".extension-card[data-id=WinForms]");
+        var card = page.Find(".plugin-card[data-id=WinForms]");
         await Assert.That(card.ClassList.Contains("unavailable")).IsTrue();
         await Assert.That(card.GetAttribute("title")).IsEqualTo("Only runs on Windows, and the operating system chosen is Linux.");
-        await Assert.That(page.Find(".extension-card[data-id=WinForms] input").HasAttribute("disabled")).IsTrue();
+        await Assert.That(page.Find(".plugin-card[data-id=WinForms] input").HasAttribute("disabled")).IsTrue();
     }
 
-    /// <summary>An extension the chosen test framework cannot run is greyed out too, with the reason.</summary>
+    /// <summary>A plugin the chosen test framework cannot run is greyed out too, with the reason.</summary>
     [Test]
-    public async Task ExtensionsTheFrameworkCannotRunAreUnavailable()
+    public async Task PluginsTheFrameworkCannotRunAreUnavailable()
     {
-        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=TUnit&ci=None&ext=DiffPlex,Avalonia");
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=TUnit&ci=None&ext=DiffPlex,Avalonia");
         await Assert.That(CurrentUrl).DoesNotContain("Avalonia");
 
-        var card = page.Find(".extension-card[data-id=Avalonia]");
+        var card = page.Find(".plugin-card[data-id=Avalonia]");
         await Assert.That(card.ClassList.Contains("unavailable")).IsTrue();
         await Assert.That(card.GetAttribute("title")).StartsWith("Not available for TUnit: Avalonia.Headless ships test attributes");
     }
 
-    /// <summary>Two extensions registering the same thing cannot both be generated (plan 11.1).</summary>
+    /// <summary>Two plugins registering the same thing cannot both be generated (plan 11.1).</summary>
     [Test]
-    public async Task ConflictingExtensionsBlockNext()
+    public async Task ConflictingPluginsBlockNext()
     {
-        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry");
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry");
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
         await Assert.That(page.Find(".interaction-notice[data-rule=activity-listener]").TextContent).Contains("ActivityListener");
 
-        await page.Find(".extension-card[data-id=OpenTelemetry] input")
+        await page.Find(".plugin-card[data-id=OpenTelemetry] input")
             .ChangeAsync(
                 new()
                 {

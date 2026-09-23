@@ -9,7 +9,7 @@ This manifests in several ways:
 
 #### Source control settings
 
-All text extensions of `*.verified.*` should have:
+All text plugins of `*.verified.*` should have:
 
  * `eol` set to `lf`
  * `working-tree-encoding` set to `UTF-8`
@@ -77,9 +77,9 @@ indent_size = 2
 indent_style = space
 ```
 
-**Note that the above are suggested for subset of text extension. Add others as required based on the text file types being verified.**
+**Note that the above are suggested for subset of text plugin. Add others as required based on the text file types being verified.**
 
-**Visual Studio Code** does not apply the EditorConfig `end_of_line` setting natively. Without it, accepting a snapshot by editing in the built-in diff editor (for example reverting a block from received into verified) can save the verified file with `crlf` on Windows, taken from the default `files.eol`. Verify then rejects that file for containing a carriage return. Installing the [EditorConfig for VS Code extension](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig) applies `end_of_line = lf` on save. Setting `"files.eol": "\n"` in Visual Studio Code settings has the same effect without the extension.
+**Visual Studio Code** does not apply the EditorConfig `end_of_line` setting natively. Without it, accepting a snapshot by editing in the built-in diff editor (for example reverting a block from received into verified) can save the verified file with `crlf` on Windows, taken from the default `files.eol`. Verify then rejects that file for containing a carriage return. Installing the [EditorConfig for VS Code plugin](https://marketplace.visualstudio.com/items?itemName=EditorConfig.EditorConfig) applies `end_of_line = lf` on save. Setting `"files.eol": "\n"` in Visual Studio Code settings has the same effect without the plugin.
 
 
 #### Newline tolerance

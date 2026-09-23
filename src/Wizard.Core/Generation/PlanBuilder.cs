@@ -2,15 +2,15 @@ namespace Wizard.Core;
 
 /// <summary>
 /// Resolves the parts of a <see cref="Plan"/> that depend on the whole selection (plan 6.3): which
-/// packages each extension contributes, which of its samples are generated, which statements survive a
-/// rule, and the notices that follow from one extension's own data rather than from a combination.
+/// packages each plugin contributes, which of its samples are generated, which statements survive a
+/// rule, and the notices that follow from one plugin's own data rather than from a combination.
 /// </summary>
 public static class PlanBuilder
 {
-    public static IReadOnlyList<ResolvedExtension> Resolve(WizardState state, TestFramework framework)
+    public static IReadOnlyList<ResolvedPlugin> Resolve(WizardState state, TestFramework framework)
     {
-        var resolved = new List<ResolvedExtension>();
-        foreach (var definition in Extensions.Selected(state))
+        var resolved = new List<ResolvedPlugin>();
+        foreach (var definition in Plugins.Selected(state))
         {
             var depth = state.DepthOf(definition.Id);
             resolved.Add(
@@ -26,15 +26,15 @@ public static class PlanBuilder
     }
 
     /// <summary>
-    /// Extensions the project already has whose initialization a rule now changes: EntityFramework
+    /// Plugins the project already has whose initialization a rule now changes: EntityFramework
     /// added next to an existing SqlServer turns SqlServer's recording off, which is an edit to a call
-    /// the project already makes. Existing extensions no rule touches are left out entirely.
+    /// the project already makes. Existing plugins no rule touches are left out entirely.
     /// </summary>
-    public static IReadOnlyList<ResolvedExtension> ResolveExistingChanges(WizardState state)
+    public static IReadOnlyList<ResolvedPlugin> ResolveExistingChanges(WizardState state)
     {
         var additions = InteractionRules.Additions(state).Select(_ => _.Target).ToHashSet(StringComparer.Ordinal);
-        var changes = new List<ResolvedExtension>();
-        foreach (var definition in Extensions.All.Where(_ => state.IsExisting(_.Id)))
+        var changes = new List<ResolvedPlugin>();
+        foreach (var definition in Plugins.All.Where(_ => state.IsExisting(_.Id)))
         {
             var replacement = InteractionRules.Replacement(state, definition.Id);
             if (replacement == null &&
@@ -54,10 +54,10 @@ public static class PlanBuilder
     }
 
     /// <summary>
-    /// Samples are only generated for a framework the extension supports, and never for F#: the Expecto
+    /// Samples are only generated for a framework the plugin supports, and never for F#: the Expecto
     /// project gets the core sample only (plan D9).
     /// </summary>
-    static IReadOnlyList<Sample> SamplesFor(ExtensionDefinition definition, Depth depth, TestFramework framework)
+    static IReadOnlyList<Sample> SamplesFor(PluginDefinition definition, Depth depth, TestFramework framework)
     {
         if (framework == TestFramework.Expecto ||
             !definition.Supports(framework))
@@ -102,7 +102,7 @@ public static class PlanBuilder
         return template;
     }
 
-    /// <summary>Every choice in force, chosen or defaulted, from both extensions and rules.</summary>
+    /// <summary>Every choice in force, chosen or defaulted, from both plugins and rules.</summary>
     public static IReadOnlyDictionary<string, string> ChoiceValues(WizardState state)
     {
         var values = new Dictionary<string, string>(StringComparer.Ordinal);
@@ -115,23 +115,23 @@ public static class PlanBuilder
     }
 
     /// <summary>The choices the options step shows, in the order it shows them.</summary>
-    public static IEnumerable<ExtensionChoice> AvailableChoices(WizardState state) =>
-        Extensions.Selected(state)
+    public static IEnumerable<PluginChoice> AvailableChoices(WizardState state) =>
+        Plugins.Selected(state)
             .SelectMany(_ => _.Choices)
-            .Concat(InteractionRules.ChoicesFor(state.AllExtensions))
+            .Concat(InteractionRules.ChoicesFor(state.AllPlugins))
             .DistinctBy(_ => _.Id);
 
     /// <summary>
-    /// Notices that follow from a single extension's own data: needing Windows, a licence key, an
+    /// Notices that follow from a single plugin's own data: needing Windows, a licence key, an
     /// external tool, a framework it does not support, or an explicit call because plugin discovery
     /// cannot find it. Kept out of <see cref="InteractionRules"/>, which holds only combinations.
     /// </summary>
     public static IReadOnlyList<InteractionResult> Notices(WizardState state, Os os, TestFramework framework)
     {
         var notices = new List<InteractionResult>();
-        var selected = Extensions.Selected(state);
+        var selected = Plugins.Selected(state);
 
-        // An extension with no plugin type at all, such as a dotnet tool, is not something discovery
+        // A plugin with no plugin type at all, such as a dotnet tool, is not something discovery
         // could have found, so saying it was missed would be misleading.
         var undiscovered = selected
             .Where(_ => _ is {PluginType: not null, DiscoveredByInitializePlugins: false})
@@ -150,7 +150,7 @@ public static class PlanBuilder
         }
 
         // Plan A1: a project that relies on InitializePlugins() alone never enabled these.
-        var existingUndiscovered = Extensions.All
+        var existingUndiscovered = Plugins.All
             .Where(_ => state.IsExisting(_.Id) && _ is {PluginType: not null, DiscoveredByInitializePlugins: false})
             .Select(_ => _.Id)
             .ToList();

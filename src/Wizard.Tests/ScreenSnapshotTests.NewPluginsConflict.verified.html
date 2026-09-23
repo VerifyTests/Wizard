@@ -1,0 +1,720 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>New project · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">New project</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="os">
+                  <span class="step-title">Operating system</span>
+                  <span class="step-value">Windows</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ide">
+                  <span class="step-title">IDE</span>
+                  <span class="step-value">JetBrains Rider</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="cli">
+                  <span class="step-title">CLI or GUI</span>
+                  <span class="step-value">Prefer CLI</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tf">
+                  <span class="step-title">Test framework</span>
+                  <span class="step-value">xUnit v3</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ci">
+                  <span class="step-title">Build server</span>
+                  <span class="step-value">GitHub Actions</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tech">
+                  <span class="step-title">Tech stack</span>
+                  <span class="step-value">None</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Plugins</span>
+              </li>
+              <li class="future">
+                <span class="step-title">Plugin options</span>
+              </li>
+              <li class="future">
+                <span class="step-title">Maintenance fee</span>
+              </li>
+              <li class="future">
+                <span class="step-title">Result</span>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="plugins">
+            <h2>Plugins</h2>
+            <p class="hint">
+              Plugins teach Verify about one kind of value each. Nothing here is required, and anything chosen     can be deleted from what is generated later. 66 are available.
+            </p>
+            <div class="plugin-search">
+              <label for="pluginFilter">Filter</label>
+              <input type="text" id="pluginFilter" placeholder="Name or description">
+              <span class="selected-count">2 selected</span>
+            </div>
+            <div class="interactions">
+              <div class="interaction-notice conflict" data-rule="activity-listener">
+                <p class="interaction-heading">
+                  <span class="severity">Pick one</span>
+                  <span class="involved">Diagnostics, OpenTelemetry</span>
+                </p>
+                <p>Diagnostics and OpenTelemetry cannot be used together: each installs a process-wide ActivityListener recording under the name activity, so every activity would be recorded twice. Keep one of them.</p>
+              </div>
+              <div class="interaction-notice info" data-rule="recording-bus">
+                <p class="interaction-heading">
+                  <span class="severity">Worth knowing</span>
+                  <span class="involved">Diagnostics, OpenTelemetry</span>
+                </p>
+                <p>These plugins all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.</p>
+              </div>
+            </div>
+            <section class="plugin-category suggested">
+              <h3>Suggested</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="DiffPlex">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.DiffPlex</span>
+                    <span class="plugin-tag">For every project</span>
+                    <span class="plugin-description">Shows an inline diff in the failure message of a text snapshot, instead of both files in full.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Terminal">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Terminal</span>
+                    <span class="plugin-tag">Related to every project</span>
+                    <span class="plugin-description">A dotnet tool for reviewing, accepting and rejecting pending snapshots from the terminal.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Data</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="Cosmos">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Cosmos</span>
+                    <span class="plugin-description">Snapshots Azure Cosmos DB responses with diagnostics, ETags and policy metadata left out.</span>
+                    <span class="badges">
+                      <span class="badge" title="A Cosmos DB endpoint: The samples read the key from a CosmosKey environment variable and talk to https://localhost:8081, where the Azure Cosmos DB Emulator listens.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="CsvHelper">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.CsvHelper</span>
+                    <span class="plugin-description">Normalizes csv snapshots through CsvHelper, with per column ignore, scrub and translate hooks.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="EntityFramework">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.EntityFramework (EF Core)</span>
+                    <span class="plugin-description">Records the SQL EF Core runs, snapshots ChangeTracker state, and turns an IQueryable into readable SQL.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="EntityFrameworkClassic">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.EntityFrameworkClassic (EF6)</span>
+                    <span class="plugin-description">The same snapshot testing for EntityFramework 6: the SQL a query produces, and ChangeTracker state.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="LocalDb">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">LocalDb (EfLocalDb)</span>
+                    <span class="plugin-description">Gives each test its own SQL Server LocalDB database, cloned from a template, with Verify.EntityFramework folded in.</span>
+                    <span class="badges">
+                      <span class="badge" title="The samples go in a second test project that only builds on Windows.">Windows only</span>
+                      <span class="badge" title="SQL Server LocalDB: part of SQL Server Express LocalDB. LocalDb starts and stops the instance itself, but the SqlLocalDB installation has to exist.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="RavenDB">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.RavenDB</span>
+                    <span class="plugin-description">Verifies a RavenDB IDocumentSession, writing every pending change in that session to the snapshot.</span>
+                    <span class="badges">
+                      <span class="badge" title="RavenDB embedded server: RavenDB.Embedded downloads a RavenDB server on first use and starts it against a temporary data directory, so the tests need network access and a machine that can run it.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Sep">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Sep</span>
+                    <span class="plugin-description">Verifies csv through Sep: a csv scrubber and a SepReader converter, with per column ignore, scrub and translate.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="SqlServer">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.SqlServer</span>
+                    <span class="plugin-description">Snapshots a SQL Server database schema, and records every command executed on a connection.</span>
+                    <span class="badges">
+                      <span class="badge" title="A SQL Server instance: the samples open a connection to a local SQL Server. Selecting LocalDb as well gives each test a database of its own instead.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Web</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="AngleSharp">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.AngleSharp</span>
+                    <span class="plugin-description">Compares html, htm and svg snapshots as markup rather than as text, and pretty prints them.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="AspNetCore">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.AspNetCore</span>
+                    <span class="plugin-description">Snapshots ASP.NET Core types: HttpContext, requests, responses, headers, cookies and every ActionResult.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Blazor">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Blazor</span>
+                    <span class="plugin-description">Renders a Blazor component with the raw Blazor apis and snapshots both its html and its state.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Bunit">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Bunit</span>
+                    <span class="plugin-description">Snapshots a bUnit rendered Blazor component, with bUnit's full interaction api available first.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Flurl">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Flurl</span>
+                    <span class="plugin-description">Snapshots a Flurl HttpTest and the calls it recorded, instead of asserting on them one by one.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Http">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Http</span>
+                    <span class="plugin-description">Snapshots http requests and responses, records what an HttpClient sent, and ships a mock HttpClient.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Playwright">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Playwright</span>
+                    <span class="plugin-description">Verifies a Playwright page, element or locator as both its html and a screenshot png.</span>
+                    <span class="badges">
+                      <span class="badge" title="A Playwright browser: Playwright drives a real Chromium, which has to be downloaded once. Initialize(installPlaywright: true) does it on assembly load, and the samples also need the site under test running.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Puppeteer">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Puppeteer</span>
+                    <span class="plugin-description">Verifies a PuppeteerSharp page or element as both its html and a screenshot png.</span>
+                    <span class="badges">
+                      <span class="badge" title="A Chrome download: PuppeteerSharp downloads its own Chrome through BrowserFetcher on first use, and the samples also need the site under test running.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Selenium">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Selenium</span>
+                    <span class="plugin-description">Verifies a Selenium WebDriver page or element as both its html and a screenshot png.</span>
+                    <span class="badges">
+                      <span class="badge" title="Chrome and chromedriver: Selenium drives an installed Chrome through chromedriver, whose version has to match the browser, and the samples also need the site under test running.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Desktop UI</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="Avalonia">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Avalonia</span>
+                    <span class="plugin-description">Renders an Avalonia control headlessly to png, alongside a text snapshot of its visual tree.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="CommunityToolkitMvvm">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.CommunityToolkit.Mvvm</span>
+                    <span class="plugin-description">Serializes a RelayCommand or AsyncRelayCommand as the names of the methods behind it.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="WinForms">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.WinForms</span>
+                    <span class="plugin-description">Renders a WinForms form, control or context menu to png and verifies the image.</span>
+                    <span class="badges">
+                      <span class="badge" title="The samples go in a second test project that only builds on Windows.">Windows only</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Xaml">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Xaml</span>
+                    <span class="plugin-description">Verifies a WPF window or element twice over: the serialized XAML tree and a rendered png.</span>
+                    <span class="badges">
+                      <span class="badge" title="The samples go in a second test project that only builds on Windows.">Windows only</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Documents</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="Aspose">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Aspose</span>
+                    <span class="plugin-description">Converts pdf, docx, xlsx and pptx documents to a png per page, plus a metadata and text snapshot.</span>
+                    <span class="badges">
+                      <span class="badge" title="An Aspose licence: Aspose is commercial. Without a licence its renderers watermark the output and cap the page count, so no snapshot matches.">Needs a licence</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ClosedXml">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ClosedXml</span>
+                    <span class="plugin-description">Converts an Excel workbook into a metadata snapshot, a csv per sheet, and a deterministic xlsx.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="DocNet">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.DocNet</span>
+                    <span class="plugin-description">Renders a pdf to a png per page, with the text of each page as a metadata snapshot, using pdfium.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="OpenXml">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.OpenXml</span>
+                    <span class="plugin-description">Verifies Word, Excel and PowerPoint files: text, a csv per sheet, properties, a deterministic copy and page renders.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="PDFium">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.PDFium</span>
+                    <span class="plugin-description">Verifies pdf documents through PDFium: page sizes, extracted text, a normalized pdf and a png per page.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Pandoc">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Pandoc</span>
+                    <span class="plugin-description">Converts docx and rtf documents to markdown through pandoc, and verifies the markdown.</span>
+                    <span class="badges">
+                      <span class="badge" title="Pandoc: PandocNet shells out to the pandoc executable, so pandoc has to be installed on the machine running the tests.">Needs a tool</span>
+                      <span class="badge" title="Papyrine sponsorship declaration: The Pandoc package this depends on ships a second SponsorCheck gate, for the owner Papyrine. Without Papyrine_ prefixed sponsorship properties the build fails, on top of Verify's own Verify_ properties.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="PdfPig">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.PdfPig</span>
+                    <span class="plugin-description">Verifies pdf documents through PdfPig: document information, page count, page sizes and extracted text.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="QuestPDF">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.QuestPDF</span>
+                    <span class="plugin-description">Verifies a QuestPDF IDocument: a metadata and settings snapshot, a deterministic pdf, and a png per page.</span>
+                    <span class="badges">
+                      <span class="badge" title="QuestPDF licence: QuestPDF refuses to generate a document until a licence type is set. Community covers open source and small business use; commercial use above their threshold needs a paid key.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Sylvan">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Sylvan.Data.Excel</span>
+                    <span class="plugin-description">Verifies xls, xlsb and xlsx workbooks by converting each sheet to csv, with no Office install and no licence.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Syncfusion">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Syncfusion</span>
+                    <span class="plugin-description">Verifies pdf, docx, xlsx and pptx documents through Syncfusion File Formats, as text, csv and rendered pages.</span>
+                    <span class="badges">
+                      <span class="badge" title="A Syncfusion licence: Syncfusion File Formats is commercial. The key is read from an environment variable so it never lands in source control.">Needs a licence</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Images</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="ImageHash">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ImageHash</span>
+                    <span class="plugin-description">Compares png, jpg and bmp snapshots by perceptual hash, so a small rendering difference still passes.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ImageMagick">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ImageMagick</span>
+                    <span class="plugin-description">Renders pdf and svg to png through Magick.NET, and compares images with a fuzz tolerance.</span>
+                    <span class="badges">
+                      <span class="badge" title="Ghostscript: pdf pages are rendered by shelling out to Ghostscript; without it the conversion fails with exit code 127. Nothing else here needs it.">Needs a tool</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ImageSharp">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ImageSharp</span>
+                    <span class="plugin-description">Verifies ImageSharp images as an info file plus the image, with optional SSIM based comparison.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ImageSharpCompare">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ImageSharp.Compare</span>
+                    <span class="plugin-description">Compares png, jpg and bmp snapshots pixel by pixel, passing while the absolute error stays under a threshold.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Phash">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Phash</span>
+                    <span class="plugin-description">Compares image snapshots by perceptual hash, so a render that is perceptually equivalent still passes.</span>
+                    <span class="badges">
+                      <span class="badge" title="The samples go in a second test project that only builds on Windows.">Windows only</span>
+                    </span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Messaging</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="Brighter">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Brighter</span>
+                    <span class="plugin-description">A recording command processor for Brighter, so what a handler sent, published or deposited can be verified.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="MassTransit">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.MassTransit</span>
+                    <span class="plugin-description">Snapshots a MassTransit test harness: the messages sent, published and consumed, and saga state changes.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="NServiceBus">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.NServiceBus</span>
+                    <span class="plugin-description">Snapshots what an NServiceBus handler or saga sent, published, replied and forwarded, with stable ids.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Wolverine">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Wolverine</span>
+                    <span class="plugin-description">Verifies a Wolverine message handler by recording everything it sends, publishes, invokes and broadcasts.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Logging</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="MicrosoftLogging">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.MicrosoftLogging</span>
+                    <span class="plugin-description">Records what the code under test logged through ILogger and appends it to the snapshot.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Serilog">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Serilog</span>
+                    <span class="plugin-description">Captures the Serilog events written during a test and includes them in the snapshot under log.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ZeroLog">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ZeroLog</span>
+                    <span class="plugin-description">Captures what ZeroLog logs during a test into the recording, so the log lands in the snapshot.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Observability</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card selected" data-id="Diagnostics">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Diagnostics</span>
+                    <span class="plugin-description">Records every System.Diagnostics.Activity a test creates and adds them to the snapshot under activity.</span>
+                  </span>
+                </label>
+                <label class="plugin-card selected" data-id="OpenTelemetry">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.OpenTelemetry</span>
+                    <span class="plugin-description">Records Activity spans through a process-wide listener, and snapshots them and OpenTelemetry LogRecords.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Serialization</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="NewtonsoftJson">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.NewtonsoftJson</span>
+                    <span class="plugin-description">Writes Newtonsoft.Json JObject and JArray values as readable json, instead of as their object graphs.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="NodaTime">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.NodaTime</span>
+                    <span class="plugin-description">Snapshots NodaTime types, scrubbing each value to a counter such as LocalDateTime_1 so runs stay stable.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Quibble">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Quibble</span>
+                    <span class="plugin-description">Reports a failing json snapshot as structural, JSON-path level differences instead of as a text diff.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="SystemJson">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.SystemJson</span>
+                    <span class="plugin-description">Writes System.Text.Json types, JsonDocument, JsonElement and the JsonNode family, as readable snapshots.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Yaml">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Yaml</span>
+                    <span class="plugin-description">Verifies YamlDotNet types: a whole stream, a document, or a mapping, sequence or scalar node.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Email</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="EmailPreviewServices">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.EmailPreviewServices</span>
+                    <span class="plugin-description">Renders an html email in real email clients through a preview service, one scrubbed webp per device.</span>
+                    <span class="badges">
+                      <span class="badge" title="An EmailPreviewServices api key: EmailPreviewServices is a paid service. The key is read from the EmailPreviewServicesApiKey environment variable, or passed to Initialize, and the rendering happens over the network.">Needs a licence</span>
+                    </span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="MailMessage">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.MailMessage</span>
+                    <span class="plugin-description">Snapshots System.Net.Mail types: a MailMessage, its attachments, alternate views and content types.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="SendGrid">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.SendGrid</span>
+                    <span class="plugin-description">Snapshots SendGrid types: SendGridMessage, EmailAddress, Attachment and Personalization.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Mocking</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="FakeItEasy">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.FakeItEasy</span>
+                    <span class="plugin-description">Snapshots FakeItEasy fakes: the calls one received, their arguments, and its FakeManager.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Mockly">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Mockly</span>
+                    <span class="plugin-description">Snapshots a Mockly HttpMock and the requests it captured, instead of asserting on them one by one.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Moq">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Moq</span>
+                    <span class="plugin-description">Snapshots a Moq mock: the calls it received, their named arguments and what each one returned.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="NSubstitute">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.NSubstitute</span>
+                    <span class="plugin-description">Snapshots the calls an NSubstitute substitute received, with their arguments.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Compiler and code generation</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="ICSharpCodeDecompiler">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ICSharpCode.Decompiler</span>
+                    <span class="plugin-description">Verifies assemblies, types, methods and properties as decompiled IL, so a change in codegen is visible.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ReadableExpressions">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ReadableExpressions</span>
+                    <span class="plugin-description">Renders LINQ expression trees as readable C# source, instead of the default ToString() of the tree.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="SourceGenerators">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.SourceGenerators</span>
+                    <span class="plugin-description">Snapshots what a C# or VB source generator emits: one file per generated source, plus its diagnostics.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Scrubbing</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="NUlid">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.NUlid</span>
+                    <span class="plugin-description">Scrubs NUlid ULIDs out of snapshots, both as members and inline in text, the way Verify scrubs guids.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="Ulid">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Ulid</span>
+                    <span class="plugin-description">Scrubs ULIDs, both typed Ulid members and the 26 character form embedded in strings.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <section class="plugin-category">
+              <h3>Testing</h3>
+              <div class="plugin-cards">
+                <label class="plugin-card " data-id="Assertions">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.Assertions</span>
+                    <span class="plugin-description">Runs assertions against objects as they are serialized, so a value nested in a large graph can be checked mid-verification.</span>
+                  </span>
+                </label>
+                <label class="plugin-card " data-id="ParametersHashing">
+                  <input type="checkbox">
+                  <span class="plugin-body">
+                    <span class="plugin-name">Verify.ParametersHashing</span>
+                    <span class="plugin-description">Hashes test parameters into the snapshot file name with XxHash64, so large parameters cannot exceed path limits.</span>
+                  </span>
+                </label>
+              </div>
+            </section>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+              <button type="button" class="primary" disabled="">Next: Plugin options</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

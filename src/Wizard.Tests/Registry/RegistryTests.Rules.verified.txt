@@ -3,7 +3,7 @@
     {
       Id: pdf-converter,
       Label: PDF converter,
-      Reason: each registers a converter for the pdf extension, and the last one registered wins.,
+      Reason: each registers a converter for the pdf plugin, and the last one registered wins.,
       Members: [
         Aspose,
         DocNet,
@@ -28,7 +28,7 @@
     {
       Id: xlsx-converter,
       Label: Excel converter,
-      Reason: each registers a converter for the xlsx extension, and the last one registered wins.,
+      Reason: each registers a converter for the xlsx plugin, and the last one registered wins.,
       Members: [
         Aspose,
         ClosedXml,
@@ -40,7 +40,7 @@
     {
       Id: docx-converter,
       Label: Word converter,
-      Reason: each registers a converter for the docx extension, and the last one registered wins.,
+      Reason: each registers a converter for the docx plugin, and the last one registered wins.,
       Members: [
         Aspose,
         OpenXml,
@@ -51,7 +51,7 @@
     {
       Id: pptx-converter,
       Label: PowerPoint converter,
-      Reason: each registers a converter for the pptx extension, and the last one registered wins.,
+      Reason: each registers a converter for the pptx plugin, and the last one registered wins.,
       Members: [
         Aspose,
         OpenXml,
@@ -70,7 +70,7 @@
     {
       Id: image-comparer,
       Label: Image comparer,
-      Reason: each registers a comparer for png and the other image extensions, and the last one registered wins.,
+      Reason: each registers a comparer for png and the other image plugins, and the last one registered wins.,
       Members: [
         ImageHash,
         ImageMagick,

@@ -30,12 +30,12 @@ public class WizardStateUrlTests
         };
         yield return () => GeneratorTests.State() with
         {
-            SelectedExtensions = new HashSet<string>(StringComparer.Ordinal)
+            SelectedPlugins = new HashSet<string>(StringComparer.Ordinal)
         };
-        yield return () => GeneratorTests.WithExtensions(GeneratorTests.State(), "EntityFramework", "SqlServer");
+        yield return () => GeneratorTests.WithPlugins(GeneratorTests.State(), "EntityFramework", "SqlServer");
         yield return () =>
         {
-            var state = GeneratorTests.WithExtensions(GeneratorTests.State(), "AngleSharp", "DiffPlex");
+            var state = GeneratorTests.WithPlugins(GeneratorTests.State(), "AngleSharp", "DiffPlex");
             state.SetDepth("AngleSharp", Depth.Minimal);
             state.SetChoice("diffplex-output", "Full");
             return state;
@@ -54,7 +54,7 @@ public class WizardStateUrlTests
     public async Task AddFlowsStartWithNothingSelected()
     {
         var state = WizardStateUrl.Parse(Flow.Add, "tf=NUnit");
-        await Assert.That(state.SelectedExtensions).IsEmpty();
+        await Assert.That(state.SelectedPlugins).IsEmpty();
         await Assert.That(WizardStateUrl.ToQuery(state)).DoesNotContain("ext=");
     }
 
@@ -67,42 +67,42 @@ public class WizardStateUrlTests
         await Assert.That(added.BuildServer).IsNull();
         await Assert.That(added.Techs).IsEmpty();
         // something the project already has cannot be added again
-        await Assert.That(added.SelectedExtensions).IsEquivalentTo(["Http"]);
+        await Assert.That(added.SelectedPlugins).IsEquivalentTo(["Http"]);
 
         var created = WizardStateUrl.Parse(Flow.New, "have=SqlServer");
-        await Assert.That(created.ExistingExtensions).IsEmpty();
+        await Assert.That(created.ExistingPlugins).IsEmpty();
     }
 
     /// <summary>
     /// An absent ext key means the default selection, not an empty one, so a link made before the
-    /// extension step existed still generates what it used to.
+    /// plugin step existed still generates what it used to.
     /// </summary>
     [Test]
-    public async Task AbsentExtensionsMeansTheDefault()
+    public async Task AbsentPluginsMeansTheDefault()
     {
         var state = WizardStateUrl.Parse(Flow.New, "os=Windows");
-        await Assert.That(state.SelectedExtensions).IsEquivalentTo(WizardState.DefaultExtensions(Flow.New));
+        await Assert.That(state.SelectedPlugins).IsEquivalentTo(WizardState.DefaultPlugins(Flow.New));
     }
 
     [Test]
     public async Task NoneMeansNothingSelected()
     {
-        var state = WizardStateUrl.Parse(Flow.New, $"os=Windows&ext={WizardStateUrl.NoExtensions}");
-        await Assert.That(state.SelectedExtensions).IsEmpty();
+        var state = WizardStateUrl.Parse(Flow.New, $"os=Windows&ext={WizardStateUrl.NoPlugins}");
+        await Assert.That(state.SelectedPlugins).IsEmpty();
     }
 
     [Test]
-    public async Task UnknownExtensionsAndStaleOptionsAreDropped()
+    public async Task UnknownPluginsAndStaleOptionsAreDropped()
     {
-        var state = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,NotAnExtension&min=NotAnExtension&opt=nope:1");
-        await Assert.That(state.SelectedExtensions).IsEquivalentTo(["DiffPlex"]);
+        var state = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,NotAPlugin&min=NotAPlugin&opt=nope:1");
+        await Assert.That(state.SelectedPlugins).IsEquivalentTo(["DiffPlex"]);
         await Assert.That(state.Depths).IsEmpty();
         await Assert.That(state.Choices).IsEmpty();
     }
 
     /// <summary>The order ids were added in must not change the link.</summary>
     [Test]
-    public async Task ExtensionOrderIsTheRegistryOrder()
+    public async Task PluginOrderIsTheRegistryOrder()
     {
         var one = WizardStateUrl.Parse(Flow.New, "ext=SqlServer,DiffPlex");
         var other = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,SqlServer");

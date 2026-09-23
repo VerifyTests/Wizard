@@ -1,4 +1,4 @@
-@* Per extension depth, plus every choice the selection raised (plan 7.1 step 8). One compact form:
+@* Per plugin depth, plus every choice the selection raised (plan 7.1 step 8). One compact form:
    each row is a decision that changes the generated code, with the effect spelled out. *@
 <p class="hint">
     Verbose generates a commented test for every documented API, so the unwanted ones can be deleted.
@@ -6,21 +6,21 @@
 </p>
 
 <div class="depth-rows">
-    @foreach (var extension in selected)
+    @foreach (var plugin in selected)
     {
-        <div class="depth-row" data-id="@extension.Id">
-            <span class="depth-name">@extension.DisplayName</span>
+        <div class="depth-row" data-id="@plugin.Id">
+            <span class="depth-name">@plugin.DisplayName</span>
             <span class="depth-toggle">
                 @foreach (var depth in depths)
                 {
-                    var chosen = State.DepthOf(extension.Id) == depth;
+                    var chosen = State.DepthOf(plugin.Id) == depth;
                     <button type="button"
                             class="depth-option @(chosen ? "selected" : "")"
                             aria-pressed="@(chosen ? "true" : "false")"
-                            @onclick="() => SetDepth(extension.Id, depth)">@depth</button>
+                            @onclick="() => SetDepth(plugin.Id, depth)">@depth</button>
                 }
             </span>
-            <span class="depth-count">@Count(extension, Depth.Verbose) samples at verbose, @Count(extension, Depth.Minimal) at minimal</span>
+            <span class="depth-count">@Count(plugin, Depth.Verbose) samples at verbose, @Count(plugin, Depth.Minimal) at minimal</span>
         </div>
     }
 </div>
@@ -71,21 +71,21 @@
 
     static readonly Depth[] depths = [Depth.Verbose, Depth.Minimal];
 
-    IReadOnlyList<ExtensionDefinition> selected = [];
-    IReadOnlyList<ExtensionChoice> choices = [];
+    IReadOnlyList<PluginDefinition> selected = [];
+    IReadOnlyList<PluginChoice> choices = [];
     IReadOnlyList<InteractionResult> notes = [];
 
     protected override void OnParametersSet()
     {
-        selected = Extensions.Selected(State);
+        selected = Plugins.Selected(State);
         choices = [.. PlanBuilder.AvailableChoices(State)];
         notes = InteractionRules.For(State);
     }
 
-    static int Count(ExtensionDefinition definition, Depth depth) =>
+    static int Count(PluginDefinition definition, Depth depth) =>
         definition.SamplesFor(depth).Count();
 
-    string Value(ExtensionChoice choice) =>
+    string Value(PluginChoice choice) =>
         State.Choices.GetValueOrDefault(choice.Id, choice.Default);
 
     Task SetDepth(string id, Depth depth)

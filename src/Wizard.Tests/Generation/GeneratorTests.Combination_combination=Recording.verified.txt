@@ -14,7 +14,7 @@ Warning external-tool [SqlServer]
 SqlServer needs A SQL Server instance: the samples open a connection to a local SQL Server. Selecting LocalDb as well gives each test a database of its own instead.
 
 Info recording-bus [EntityFramework, Http, MicrosoftLogging, SqlServer]
-These extensions all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.
+These plugins all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.
 
 ==== src/VerifySample.Tests/ModuleInitializer.cs
 
@@ -95,7 +95,7 @@ src/VerifySample.Tests/Sample.Test.verified.txt
 src/VerifySample.Tests/ModuleInitializer.cs
 src/VerifySample.Tests/Sample.cs
 src/VerifySample.Tests/VerifyChecksTests.cs
-src/VerifySample.Tests/Extensions/EntityFrameworkTests.cs
-src/VerifySample.Tests/Extensions/HttpTests.cs
-src/VerifySample.Tests/Extensions/MicrosoftLoggingTests.cs
-src/VerifySample.Tests/Extensions/SqlServerTests.cs
+src/VerifySample.Tests/Plugins/EntityFrameworkTests.cs
+src/VerifySample.Tests/Plugins/HttpTests.cs
+src/VerifySample.Tests/Plugins/MicrosoftLoggingTests.cs
+src/VerifySample.Tests/Plugins/SqlServerTests.cs

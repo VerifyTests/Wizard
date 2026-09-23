@@ -116,7 +116,7 @@ public sealed record TestFrameworkInfo(
         SuppressedWarnings =
         [
             ("xUnit1051",
-                "the extension samples call library methods that take an optional CancellationToken " +
+                "the plugin samples call library methods that take an optional CancellationToken " +
                 "without passing TestContext.Current.CancellationToken. They are illustrations of one " +
                 "API each, and threading a token through every one would bury the thing being shown. " +
                 "Remove this once the samples become real tests.")

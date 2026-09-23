@@ -1,8 +1,8 @@
 namespace Wizard.Core;
 
 /// <param name="Id">Stable, because it is a url value and is kept in browser storage.</param>
-/// <param name="Recommended">Extensions pre-checked when the tech is chosen.</param>
-/// <param name="Related">Extensions listed under the suggestions but left unchecked.</param>
+/// <param name="Recommended">Plugins pre-checked when the tech is chosen.</param>
+/// <param name="Related">Plugins listed under the suggestions but left unchecked.</param>
 public sealed record Tech(
     string Id,
     string DisplayName,
@@ -11,8 +11,8 @@ public sealed record Tech(
     IReadOnlyList<string> Related);
 
 /// <summary>
-/// The tech stack a project uses, and the extensions each one suggests (plan 10). This table is the one
-/// place suggestions come from; extensions carry no tags of their own, so the mapping cannot disagree
+/// The tech stack a project uses, and the plugins each one suggests (plan 10). This table is the one
+/// place suggestions come from; plugins carry no tags of their own, so the mapping cannot disagree
 /// with itself.
 /// </summary>
 public static class Techs
@@ -91,8 +91,8 @@ public static class Techs
         All.GroupBy(_ => _.Group);
 
     /// <summary>
-    /// Extensions no tech suggests: they are useful whatever the stack, so they are listed under
+    /// Plugins no tech suggests: they are useful whatever the stack, so they are listed under
     /// "Everything else" rather than tied to one (plan 9.2).
     /// </summary>
-    public static IReadOnlyList<string> NotSuggestedByTech { get; } = [Extensions.DiffPlexId, "Terminal"];
+    public static IReadOnlyList<string> NotSuggestedByTech { get; } = [Plugins.DiffPlexId, "Terminal"];
 }

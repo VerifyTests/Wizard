@@ -95,9 +95,9 @@ public static class ProjectFiles
             """);
         AppendVersions(builder, $"Test framework: {plan.Framework.Framework.Name()}", plan.Framework.Packages, plan);
         var listed = new HashSet<string>(plan.Framework.Packages, StringComparer.Ordinal);
-        foreach (var extension in plan.Extensions)
+        foreach (var plugin in plan.Plugins)
         {
-            var packages = extension.Packages
+            var packages = plugin.Packages
                 .Where(_ => _.Kind == PackageKind.PackageReference && listed.Add(_.Id))
                 .ToList();
             if (packages.Count == 0)
@@ -107,7 +107,7 @@ public static class ProjectFiles
 
             AppendVersions(
                 builder,
-                $"{extension.Definition.DisplayName}: {extension.Definition.Description}",
+                $"{plugin.Definition.DisplayName}: {plugin.Definition.Description}",
                 packages.Select(_ => _.Id),
                 plan);
         }
@@ -297,14 +297,14 @@ public static class ProjectFiles
                </PropertyGroup>
 
              """);
-        var items = plan.Extensions
+        var items = plan.Plugins
             .SelectMany(_ => _.Definition.LibraryProjectItems)
             .Distinct(StringComparer.Ordinal)
             .ToList();
         if (plan.LibraryPackages.Count > 0 ||
             items.Count > 0)
         {
-            builder.Append("  <!-- What the sample types the extensions brought in compile against. -->\n");
+            builder.Append("  <!-- What the sample types the plugins brought in compile against. -->\n");
             builder.Append("  <ItemGroup>\n");
             foreach (var package in plan.LibraryPackages)
             {
@@ -323,17 +323,17 @@ public static class ProjectFiles
         return builder.ToString();
     }
 
-    /// <param name="windows">The second project, which holds the Windows-only extensions (plan D5).</param>
+    /// <param name="windows">The second project, which holds the Windows-only plugins (plan D5).</param>
     public static string TestProject(Plan plan, bool windows = false)
     {
         var framework = plan.Framework;
         var name = windows ? plan.WindowsTestProject : plan.TestProject;
-        var extensions = plan.ExtensionsIn(windows).ToList();
+        var plugins = plan.PluginsIn(windows).ToList();
         var builder = new StringBuilder("<Project Sdk=\"Microsoft.NET.Sdk\">\n");
         builder.Append("  <PropertyGroup>\n");
         if (windows)
         {
-            builder.Append("    <!-- Windows only: these extensions render with Windows APIs, so the target framework\n");
+            builder.Append("    <!-- Windows only: these plugins render with Windows APIs, so the target framework\n");
             builder.Append("         has the windows suffix. Nothing references this project, so the rest of the\n");
             builder.Append("         solution still builds and runs on any operating system. -->\n");
             builder.Append($"    <TargetFramework>{WizardDefaults.TargetFramework}-windows</TargetFramework>\n");
@@ -344,7 +344,7 @@ public static class ProjectFiles
         }
 
         builder.Append($"    <RootNamespace>{SolutionNames.RootNamespace(name)}</RootNamespace>\n");
-        foreach (var (property, value) in extensions.SelectMany(_ => _.Definition.ProjectProperties).Distinct())
+        foreach (var (property, value) in plugins.SelectMany(_ => _.Definition.ProjectProperties).Distinct())
         {
             builder.Append($"    <{property}>{value}</{property}>\n");
         }
@@ -365,12 +365,12 @@ public static class ProjectFiles
             builder.Append("    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>\n");
         }
 
-        if (extensions.Count > 0 &&
+        if (plugins.Count > 0 &&
             framework.SuppressedWarnings.Count > 0)
         {
             foreach (var (code, reason) in framework.SuppressedWarnings)
             {
-                foreach (var line in ExtensionTestFiles.Wrap($"{code}: {reason}", 92))
+                foreach (var line in PluginTestFiles.Wrap($"{code}: {reason}", 92))
                 {
                     builder.Append($"    <!-- {line} -->\n");
                 }
@@ -398,7 +398,7 @@ public static class ProjectFiles
 
         builder.Append("  </ItemGroup>\n");
 
-        var items = extensions.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal).ToList();
+        var items = plugins.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal).ToList();
         if (items.Count > 0)
         {
             builder.Append("  <ItemGroup>\n");

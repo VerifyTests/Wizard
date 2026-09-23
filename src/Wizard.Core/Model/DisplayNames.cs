@@ -68,7 +68,7 @@ public static class DisplayNames
         flow switch
         {
             Flow.New => "New project",
-            Flow.Add => "Add extensions",
+            Flow.Add => "Add plugins",
             Flow.AddByTech => "Add by tech stack",
             _ => throw new ArgumentOutOfRangeException(nameof(flow), flow, null)
         };

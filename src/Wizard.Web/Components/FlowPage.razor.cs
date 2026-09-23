@@ -16,8 +16,8 @@ public partial class FlowPage : IDisposable
 
     [Parameter, EditorRequired] public Flow Flow { get; set; }
 
-    /// <summary>An extension to start with selected, from a deep link such as <c>/add/EntityFramework</c> (plan D11).</summary>
-    [Parameter] public string? SeedExtension { get; set; }
+    /// <summary>A plugin to start with selected, from a deep link such as <c>/add/EntityFramework</c> (plan D11).</summary>
+    [Parameter] public string? SeedPlugin { get; set; }
 
     public WizardState State { get; private set; } = new();
 
@@ -27,7 +27,7 @@ public partial class FlowPage : IDisposable
     Restored restored = new(false, false, false);
     Remembered written = Remembered.None;
 
-    // Recomputed per render: selecting no extensions drops the options step from the flow.
+    // Recomputed per render: selecting no plugins drops the options step from the flow.
     IReadOnlyList<StepDefinition> Steps => FlowSteps.For(State);
 
     StepDefinition Current => Steps.Single(_ => _.Id == State.Step);
@@ -66,8 +66,8 @@ public partial class FlowPage : IDisposable
         var query = new Uri(Navigation.Uri).Query;
         State = WizardStateUrl.Parse(Flow, query);
 
-        if (SeedExtension is { } seed &&
-            Extensions.Contains(seed))
+        if (SeedPlugin is { } seed &&
+            Plugins.Contains(seed))
         {
             State.Select(seed, true);
             State.Normalize();

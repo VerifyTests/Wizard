@@ -42,12 +42,12 @@ public static class AdditionGenerator
             files.Add(new(ToolsFragment, Tools(plan)));
         }
 
-        foreach (var test in ExtensionTestFiles.For(plan, windows: false))
+        foreach (var test in PluginTestFiles.For(plan, windows: false))
         {
             files.Add(test);
         }
 
-        foreach (var source in plan.Extensions.SelectMany(_ => _.Definition.LibraryFiles).DistinctBy(_ => _.Path))
+        foreach (var source in plan.Plugins.SelectMany(_ => _.Definition.LibraryFiles).DistinctBy(_ => _.Path))
         {
             files.Add(new($"{SamplesFolder}/{source.Path}", CodeFiles.Banner(plan) + source.Content.TrimEnd('\n') + "\n"));
         }
@@ -75,15 +75,15 @@ public static class AdditionGenerator
         return builder.ToString();
     }
 
-    /// <summary>What the test project gains: package references, and any properties and items the extensions need.</summary>
+    /// <summary>What the test project gains: package references, and any properties and items the plugins need.</summary>
     public static string Project(Plan plan)
     {
         var builder = new StringBuilder("<!-- Merge into the test project. -->\n");
-        var properties = plan.Extensions
+        var properties = plan.Plugins
             .SelectMany(_ => _.Definition.ProjectProperties)
             .Distinct()
             .ToList();
-        var windowsOnly = plan.Extensions.Where(_ => _.IsWindowsOnly).Select(_ => _.Id).ToList();
+        var windowsOnly = plan.Plugins.Where(_ => _.IsWindowsOnly).Select(_ => _.Id).ToList();
         if (properties.Count > 0 ||
             windowsOnly.Count > 0)
         {
@@ -108,7 +108,7 @@ public static class AdditionGenerator
             builder.Append($"  <PackageReference Include=\"{package}\" />\n");
         }
 
-        foreach (var item in plan.Extensions.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal))
+        foreach (var item in plan.Plugins.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal))
         {
             builder.Append($"  {item}\n");
         }

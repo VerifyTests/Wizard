@@ -1,4 +1,4 @@
-using Extensions = Wizard.Core.Extensions;
+using Plugins = Wizard.Core.Plugins;
 
 /// <summary>Snapshots of everything the generators produce (plan 17.1). The clock is frozen.</summary>
 public class GeneratorTests
@@ -25,12 +25,12 @@ public class GeneratorTests
             Step = "output"
         };
 
-    /// <summary>A copy of the state with exactly these extensions selected.</summary>
-    public static WizardState WithExtensions(WizardState state, params string[] ids)
+    /// <summary>A copy of the state with exactly these plugins selected.</summary>
+    public static WizardState WithPlugins(WizardState state, params string[] ids)
     {
         var copy = state with
         {
-            SelectedExtensions = new HashSet<string>(ids, StringComparer.Ordinal)
+            SelectedPlugins = new HashSet<string>(ids, StringComparer.Ordinal)
         };
         copy.Normalize();
         return copy;
@@ -47,8 +47,8 @@ public class GeneratorTests
         {
             Flow = flow,
             TestFramework = framework,
-            ExistingExtensions = new HashSet<string>(existing, StringComparer.Ordinal),
-            SelectedExtensions = new HashSet<string>(added, StringComparer.Ordinal),
+            ExistingPlugins = new HashSet<string>(existing, StringComparer.Ordinal),
+            SelectedPlugins = new HashSet<string>(added, StringComparer.Ordinal),
             Step = "output"
         };
         state.Normalize();
@@ -119,7 +119,7 @@ public class GeneratorTests
         var files = SolutionGenerator.Build(PlanFor(State()))
             .Where(_ => _.Path.EndsWith(".verified.txt", StringComparison.Ordinal))
             .ToList();
-        // The core sample's snapshot, and any extension sample whose output is known (plan D6).
+        // The core sample's snapshot, and any plugin sample whose output is known (plan D6).
         await Assert.That(files).IsNotEmpty();
         foreach (var file in files)
         {
@@ -172,18 +172,18 @@ public class GeneratorTests
     }
 
     /// <summary>
-    /// Every extension on its own, at both depths (plan 17.1): the module initializer, the test file
-    /// and the packages it adds. One snapshot per extension makes a registry edit reviewable.
+    /// Every plugin on its own, at both depths (plan 17.1): the module initializer, the test file
+    /// and the packages it adds. One snapshot per plugin makes a registry edit reviewable.
     /// </summary>
     [Test]
-    [MethodDataSource(nameof(EachExtension))]
-    public Task Extension((string Id, Depth Depth) extension)
+    [MethodDataSource(nameof(EachPlugin))]
+    public Task Plugin((string Id, Depth Depth) plugin)
     {
-        var state = WithExtensions(State(), extension.Id);
-        state.SetDepth(extension.Id, extension.Depth);
+        var state = WithPlugins(State(), plugin.Id);
+        state.SetDepth(plugin.Id, plugin.Depth);
         var plan = PlanFor(state);
         var files = SolutionGenerator.Build(plan)
-            .Where(_ => _.Path.Contains("/Extensions/") || _.Path.EndsWith("ModuleInitializer.cs", StringComparison.Ordinal));
+            .Where(_ => _.Path.Contains("/Plugins/") || _.Path.EndsWith("ModuleInitializer.cs", StringComparison.Ordinal));
 
         return Verify(
                 $"""
@@ -196,12 +196,12 @@ public class GeneratorTests
 
                  {string.Join("\n", plan.Interactions.Select(_ => $"{_.Severity} {_.RuleId}: {_.Message}"))}
                  """)
-            .UseParameters($"{extension.Id}-{extension.Depth}");
+            .UseParameters($"{plugin.Id}-{plugin.Depth}");
     }
 
-    public static IEnumerable<Func<(string Id, Depth Depth)>> EachExtension()
+    public static IEnumerable<Func<(string Id, Depth Depth)>> EachPlugin()
     {
-        foreach (var definition in Extensions.All)
+        foreach (var definition in Plugins.All)
         {
             foreach (var depth in new[] {Depth.Minimal, Depth.Verbose})
             {
@@ -218,7 +218,7 @@ public class GeneratorTests
         yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
         yield return () => ("Recording", ["EntityFramework", "Http", "MicrosoftLogging", "SqlServer"]);
         yield return () => ("Windows", ["DiffPlex", "WinForms", "Xaml"]);
-        yield return () => ("Everything", [.. Extensions.All.Select(_ => _.Id)]);
+        yield return () => ("Everything", [.. Plugins.All.Select(_ => _.Id)]);
     }
 
     /// <summary>
@@ -229,12 +229,12 @@ public class GeneratorTests
     [MethodDataSource(nameof(Combinations))]
     public Task Combination((string Name, string[] Ids) combination)
     {
-        var plan = PlanFor(WithExtensions(State(), combination.Ids));
+        var plan = PlanFor(WithPlugins(State(), combination.Ids));
         return Verify(
                 $"""
                  ==== selected
 
-                 {string.Join("\n", plan.Extensions.Select(_ => _.Id))}
+                 {string.Join("\n", plan.Plugins.Select(_ => _.Id))}
 
                  ==== interactions
 
@@ -250,12 +250,12 @@ public class GeneratorTests
 
     /// <summary>
     /// A conflicting selection still generates, so the output step can show what it would produce;
-    /// the extension step is what stops the user moving on (plan 11.1).
+    /// the plugin step is what stops the user moving on (plan 11.1).
     /// </summary>
     [Test]
     public async Task ConflictingSelectionStillGenerates()
     {
-        var plan = PlanFor(WithExtensions(State(), "Diagnostics", "OpenTelemetry"));
+        var plan = PlanFor(WithPlugins(State(), "Diagnostics", "OpenTelemetry"));
         await Assert.That(plan.Blocked).IsTrue();
         await Assert.That(SolutionGenerator.Build(plan)).IsNotEmpty();
     }
@@ -266,7 +266,7 @@ public class GeneratorTests
         // The case the interaction rules were written for: EF Core added next to an existing SqlServer,
         // whose recording the project's own initializer now has to turn off.
         ["EfNextToExistingSql"] = () => Addition(Flow.Add, ["DiffPlex", "SqlServer"], ["EntityFramework"]),
-        // An existing extension plugin discovery never found, which the project may never have enabled.
+        // An existing plugin plugin discovery never found, which the project may never have enabled.
         ["ExistingUndiscovered"] = () => Addition(Flow.Add, ["AngleSharp"], ["Bunit"]),
         // A package with a maintenance fee check of its own, into a project whose Verify declaration
         // is left alone.

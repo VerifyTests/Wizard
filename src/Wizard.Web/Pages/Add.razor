@@ -1,11 +1,11 @@
 @page "/add"
-@page "/add/{ExtensionId}"
+@page "/add/{PluginId}"
 
-@* Flow B, adding extensions to an existing project (plan 7.2). /add/{ExtensionId} starts with that
-   extension selected, so each extension's readme can link straight to it (plan D11). The literal
+@* Flow B, adding plugins to an existing project (plan 7.2). /add/{PluginId} starts with that
+   plugin selected, so each plugin's readme can link straight to it (plan D11). The literal
    /add/by-tech route belongs to flow C and takes precedence over the parameter. *@
-<FlowPage Flow="Flow.Add" SeedExtension="@ExtensionId" />
+<FlowPage Flow="Flow.Add" SeedPlugin="@PluginId" />
 
 @code {
-    [Parameter] public string? ExtensionId { get; set; }
+    [Parameter] public string? PluginId { get; set; }
 }

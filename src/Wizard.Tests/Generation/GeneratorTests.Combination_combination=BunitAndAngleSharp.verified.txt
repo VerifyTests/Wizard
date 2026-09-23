@@ -10,7 +10,7 @@ Warning bunit-anglesharp-comparer [AngleSharp, Bunit]
 Both register a string comparer for html. Verify.Bunit is initialized first, so Verify.AngleSharp's semantic comparison wins.
 
 Info diffplex-default-comparer [AngleSharp, Bunit, DiffPlex]
-Verify.DiffPlex is the default comparer for text snapshots. The extensions selected here register comparers for specific extensions (html, json, svg), which take precedence over it.
+Verify.DiffPlex is the default comparer for text snapshots. The plugins selected here register comparers for specific plugins (html, json, svg), which take precedence over it.
 
 Info html-prettyprint [AngleSharp, Bunit]
 Rendered html is a single long line, which makes snapshot diffs unreadable. `HtmlPrettyPrint.All()` formats every html snapshot, and Verify.AngleSharp compares them semantically rather than as text.
@@ -86,7 +86,7 @@ src/VerifySample.Tests/Sample.Test.verified.txt
 src/VerifySample.Tests/ModuleInitializer.cs
 src/VerifySample.Tests/Sample.cs
 src/VerifySample.Tests/VerifyChecksTests.cs
-src/VerifySample.Tests/Extensions/AngleSharpTests.cs
-src/VerifySample.Tests/Extensions/BunitTests.cs
-src/VerifySample.Tests/Extensions/DiffPlexTests.cs
-src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt
+src/VerifySample.Tests/Plugins/AngleSharpTests.cs
+src/VerifySample.Tests/Plugins/BunitTests.cs
+src/VerifySample.Tests/Plugins/DiffPlexTests.cs
+src/VerifySample.Tests/Plugins/DiffPlexTests.PerTestOutput.verified.txt

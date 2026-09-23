@@ -101,7 +101,7 @@ public class VersionTests
     [Test]
     public async Task OnlyEmittedPackagesAreLookedUp()
     {
-        var plan = Plan.Build(GeneratorTests.WithExtensions(GeneratorTests.State(), "Http"), PackageVersions.Baked, GeneratorTests.Today);
+        var plan = Plan.Build(GeneratorTests.WithPlugins(GeneratorTests.State(), "Http"), PackageVersions.Baked, GeneratorTests.Today);
         await Assert.That(plan.EmittedPackages).IsEquivalentTo(["Verify.XunitV3", "xunit.v3", "Verify.Http", "verify.tool"]);
     }
 

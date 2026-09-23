@@ -81,28 +81,28 @@ public class ScreenSnapshotTests
     }
 
     [Test]
-    public async Task NewExtensions()
+    public async Task NewPlugins()
     {
-        var page = await Open($"/new?step=extensions&{beforeOutput}", ".extension-card[data-id=DiffPlex]");
+        var page = await Open($"/new?step=plugins&{beforeOutput}", ".plugin-card[data-id=DiffPlex]");
         await VerifyScreen(page, fullPage: false);
     }
 
-    /// <summary>The filter, a multi-extension selection, and the notices the combination raises.</summary>
+    /// <summary>The filter, a multi-plugin selection, and the notices the combination raises.</summary>
     [Test]
-    public async Task NewExtensionsWithInteractions()
+    public async Task NewPluginsWithInteractions()
     {
         var page = await Open(
-            $"/new?step=extensions&{beforeOutput}&ext=DiffPlex,EntityFramework,SqlServer",
+            $"/new?step=plugins&{beforeOutput}&ext=DiffPlex,EntityFramework,SqlServer",
             ".interaction-notice[data-rule=ef-sql-recording]");
         await VerifyScreen(page, fullPage: false);
     }
 
     /// <summary>A conflict, which is what stops the step being left (plan 11.1).</summary>
     [Test]
-    public async Task NewExtensionsConflict()
+    public async Task NewPluginsConflict()
     {
         var page = await Open(
-            $"/new?step=extensions&{beforeOutput}&ext=Diagnostics,OpenTelemetry",
+            $"/new?step=plugins&{beforeOutput}&ext=Diagnostics,OpenTelemetry",
             ".interaction-notice.conflict");
         await VerifyScreen(page, fullPage: false);
     }
@@ -130,12 +130,12 @@ public class ScreenSnapshotTests
         await VerifyScreen(page, fullPage: false);
     }
 
-    /// <summary>Suggestions first, the project's existing extensions locked, and the interaction between them.</summary>
+    /// <summary>Suggestions first, the project's existing plugins locked, and the interaction between them.</summary>
     [Test]
-    public async Task AddByTechExtensions()
+    public async Task AddByTechPlugins()
     {
         var page = await Open(
-            "/add/by-tech?step=extensions&tf=XunitV3&have=SqlServer&tech=efcore&ext=EntityFramework,LocalDb",
+            "/add/by-tech?step=plugins&tf=XunitV3&have=SqlServer&tech=efcore&ext=EntityFramework,LocalDb",
             ".interaction-notice[data-rule=ef-sql-recording]");
         await VerifyScreen(page, fullPage: false);
     }

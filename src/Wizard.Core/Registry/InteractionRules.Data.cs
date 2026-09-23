@@ -3,7 +3,7 @@ namespace Wizard.Core;
 public static partial class InteractionRules
 {
     /// <summary>
-    /// Sets of extensions that register the same thing for the same file extension, so only one of them
+    /// Sets of plugins that register the same thing for the same file extension, so only one of them
     /// can be in effect (plan 11.1). Registration is last wins, which makes the outcome depend on the
     /// order plugin discovery happens to find the assemblies in, so the wizard treats them as exclusive.
     /// </summary>
@@ -12,10 +12,10 @@ public static partial class InteractionRules
         new(
             "pdf-converter",
             "PDF converter",
-            "each registers a converter for the pdf extension, and the last one registered wins.",
+            "each registers a converter for the pdf plugin, and the last one registered wins.",
             ["Aspose", "DocNet", "ImageMagick", "PDFium", "PdfPig", "QuestPDF", "Syncfusion"])
         {
-            // ImageMagick always registers the pdf converter; comparer-only means another extension's
+            // ImageMagick always registers the pdf converter; comparer-only means another plugin's
             // converter is meant to override it, so the group no longer holds (plan A3).
             Conditions =
             [
@@ -25,17 +25,17 @@ public static partial class InteractionRules
         new(
             "xlsx-converter",
             "Excel converter",
-            "each registers a converter for the xlsx extension, and the last one registered wins.",
+            "each registers a converter for the xlsx plugin, and the last one registered wins.",
             ["Aspose", "ClosedXml", "OpenXml", "Sylvan", "Syncfusion"]),
         new(
             "docx-converter",
             "Word converter",
-            "each registers a converter for the docx extension, and the last one registered wins.",
+            "each registers a converter for the docx plugin, and the last one registered wins.",
             ["Aspose", "OpenXml", "Pandoc", "Syncfusion"]),
         new(
             "pptx-converter",
             "PowerPoint converter",
-            "each registers a converter for the pptx extension, and the last one registered wins.",
+            "each registers a converter for the pptx plugin, and the last one registered wins.",
             ["Aspose", "OpenXml", "Syncfusion"]),
         new(
             "csv-scrubber",
@@ -45,7 +45,7 @@ public static partial class InteractionRules
         new(
             "image-comparer",
             "Image comparer",
-            "each registers a comparer for png and the other image extensions, and the last one registered wins.",
+            "each registers a comparer for png and the other image plugins, and the last one registered wins.",
             ["ImageHash", "ImageMagick", "ImageSharpCompare", "Phash"])
         {
             Conditions =
@@ -72,7 +72,7 @@ public static partial class InteractionRules
 
     /// <summary>
     /// Combinations that change behaviour without being mutually exclusive (plan 11.2). Everything that
-    /// follows from one extension's own data, such as needing Windows, a licence key or an external
+    /// follows from one plugin's own data, such as needing Windows, a licence key or an external
     /// tool, is derived in <see cref="PlanBuilder"/> and is not a rule here.
     /// </summary>
     public static IReadOnlyList<InteractionRule> Rules { get; } =
@@ -89,7 +89,7 @@ public static partial class InteractionRules
                 "twice in each snapshot.",
             Choice = new(
                 "ef-sql-recording",
-                "Which extension records EF commands",
+                "Which plugin records EF commands",
                 "Both record them; recording is switched off in the other.",
                 [
                     new("keep-ef", "Verify.EntityFramework records them", "Adds the command type and transaction state. Verify.SqlServer still snapshots schema."),
@@ -99,7 +99,7 @@ public static partial class InteractionRules
                 ]),
             Notes =
             [
-                "The extension that stops recording is initialized with `recordCommands: false`, which has to happen before `VerifierSettings.InitializePlugins()`: discovery would otherwise initialize it with recording on, and the second call throws \"Already Initialized\".",
+                "The plugin that stops recording is initialized with `recordCommands: false`, which has to happen before `VerifierSettings.InitializePlugins()`: discovery would otherwise initialize it with recording on, and the second call throws \"Already Initialized\".",
                 "Verify.SqlServer's schema snapshots are unaffected by this choice."
             ],
             Order = [new("SqlServer", "EntityFramework")],
@@ -136,7 +136,7 @@ public static partial class InteractionRules
                     [
                         new(
                             "Recording.IgnoreNames(\"sql\");",
-                            "Both extensions record every EF command. This drops the sql entries from every",
+                            "Both plugins record every EF command. This drops the sql entries from every",
                             "snapshot, which needs no ordering, but each command is still cloned before being",
                             "discarded.")
                     ]),
@@ -145,7 +145,7 @@ public static partial class InteractionRules
                     "SqlServer",
                     [
                         new(
-                            "// Both extensions record every EF command, so each one appears twice in a snapshot:",
+                            "// Both plugins record every EF command, so each one appears twice in a snapshot:",
                             "once under ef, with the command type and transaction state, and once under sql.")
                     ])
             ],
@@ -272,13 +272,13 @@ public static partial class InteractionRules
             ],
             AnyCount = 2,
             Message =
-                "These extensions all append to the same recording, which lands in every snapshot taken " +
+                "These plugins all append to the same recording, which lands in every snapshot taken " +
                 "while it is running, each entry under its own name: ef, sql, httpCall, activity and log.",
             Notes =
             [
                 "`Recording.Start()` begins one; `Recording.Stop()` returns the entries instead of adding them to the snapshot.",
-                "`Recording.IgnoreNames(\"sql\")` drops one kind of entry everywhere, but the extension still produces it first.",
-                "Every logging extension records under `log`, so `IgnoreNames` cannot separate them (plan A12)."
+                "`Recording.IgnoreNames(\"sql\")` drops one kind of entry everywhere, but the plugin still produces it first.",
+                "Every logging plugin records under `log`, so `IgnoreNames` cannot separate them (plan A12)."
             ],
             RetiredBy = "U25"
         },
@@ -289,7 +289,7 @@ public static partial class InteractionRules
             Any = ["MicrosoftLogging", "Serilog", "ZeroLog"],
             AnyCount = 2,
             Message =
-                "Every logging extension records under the name log, so their entries interleave in one " +
+                "Every logging plugin records under the name log, so their entries interleave in one " +
                 "list and cannot be told apart or ignored separately.",
             RetiredBy = "U25"
         },
@@ -300,8 +300,8 @@ public static partial class InteractionRules
             All = ["DiffPlex"],
             Any = ["AngleSharp", "Bunit", "ImageMagick", "Quibble"],
             Message =
-                "Verify.DiffPlex is the default comparer for text snapshots. The extensions selected here " +
-                "register comparers for specific extensions (html, json, svg), which take precedence over it.",
+                "Verify.DiffPlex is the default comparer for text snapshots. The plugins selected here " +
+                "register comparers for specific plugins (html, json, svg), which take precedence over it.",
             Notes = ["A per test `UseDiffPlex()` overrides those comparers again, for that test only."]
         },
         new()
@@ -353,9 +353,9 @@ public static partial class InteractionRules
             All = ["ImageSharp"],
             Any = ["Aspose", "DocNet", "ImageMagick", "OpenXml", "PDFium", "Syncfusion"],
             Message =
-                "The selected extensions render pages to png, and Verify.ImageSharp then re-encodes that " +
+                "The selected plugins render pages to png, and Verify.ImageSharp then re-encodes that " +
                 "png: core ignores PerformConversion for a target a converter produced, so the image is " +
-                "written by ImageSharp rather than by the extension that rendered it.",
+                "written by ImageSharp rather than by the plugin that rendered it.",
             RetiredBy = "C5"
         },
         new()

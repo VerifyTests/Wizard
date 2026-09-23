@@ -77,9 +77,9 @@ src/VerifySample.Tests/Sample.Test.verified.txt
 src/VerifySample.Tests/ModuleInitializer.cs
 src/VerifySample.Tests/Sample.cs
 src/VerifySample.Tests/VerifyChecksTests.cs
-src/VerifySample.Tests/Extensions/DiffPlexTests.cs
-src/VerifySample.Tests/Extensions/DiffPlexTests.PerTestOutput.verified.txt
+src/VerifySample.Tests/Plugins/DiffPlexTests.cs
+src/VerifySample.Tests/Plugins/DiffPlexTests.PerTestOutput.verified.txt
 src/VerifySample.Tests.Windows/VerifySample.Tests.Windows.csproj
 src/VerifySample.Tests.Windows/ModuleInitializer.cs
-src/VerifySample.Tests.Windows/Extensions/WinFormsTests.cs
-src/VerifySample.Tests.Windows/Extensions/XamlTests.cs
+src/VerifySample.Tests.Windows/Plugins/WinFormsTests.cs
+src/VerifySample.Tests.Windows/Plugins/XamlTests.cs

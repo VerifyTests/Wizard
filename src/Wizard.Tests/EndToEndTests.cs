@@ -15,11 +15,11 @@ public class EndToEndTests
             await page.ClickAsync("button.primary");
         }
 
-        // The tech stack is optional, the extension step starts on the default selection, and the
+        // The tech stack is optional, the plugin step starts on the default selection, and the
         // options step on the defaults, so all three are passed by moving on.
         await page.WaitForSelectorAsync(".tech-group");
         await page.ClickAsync("button.primary");
-        await page.WaitForSelectorAsync(".extension-card[data-id=DiffPlex]");
+        await page.WaitForSelectorAsync(".plugin-card[data-id=DiffPlex]");
         await page.ClickAsync("button.primary");
         await page.WaitForSelectorAsync(".depth-row[data-id=DiffPlex]");
         await page.ClickAsync("button.primary");
@@ -61,20 +61,20 @@ public class EndToEndTests
     }
 
     /// <summary>
-    /// Selecting two extensions that register the same thing blocks the step, and the notice says which
+    /// Selecting two plugins that register the same thing blocks the step, and the notice says which
     /// ones (plan 11.1). Deselecting one unblocks it.
     /// </summary>
     [Test]
-    public async Task ConflictingExtensionsBlockTheStep()
+    public async Task ConflictingPluginsBlockTheStep()
     {
         var page = await ScreenSnapshotTests.Open(
-            "/new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry",
+            "/new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry",
             ".interaction-notice[data-rule=activity-listener]");
 
         var next = page.Locator("button.primary");
         await Assert.That(await next.IsDisabledAsync()).IsTrue();
 
-        await page.ClickAsync(".extension-card[data-id=OpenTelemetry] input");
+        await page.ClickAsync(".plugin-card[data-id=OpenTelemetry] input");
         await page.WaitForSelectorAsync(".interaction-notice[data-rule=activity-listener]", new() {State = WaitForSelectorState.Detached});
         await Assert.That(await next.IsDisabledAsync()).IsFalse();
     }
@@ -96,12 +96,12 @@ public class EndToEndTests
     }
 
     /// <summary>
-    /// Plan 17.3: an extension readme's deep link, in a browser that remembers the project already has
+    /// Plan 17.3: a plugin readme's deep link, in a browser that remembers the project already has
     /// Verify.SqlServer. The recording interaction appears though only EF Core is being added, and the
     /// download is the changes to merge, with SqlServer's call rewritten.
     /// </summary>
     [Test]
-    public async Task AddFlowFromADeepLinkWithRememberedExtensions()
+    public async Task AddFlowFromADeepLinkWithRememberedPlugins()
     {
         var page = await wizard.NewIsolatedPage();
         try
@@ -120,7 +120,7 @@ public class EndToEndTests
             await page.ClickAsync("button.primary");
 
             await page.WaitForSelectorAsync(".interaction-notice[data-rule=ef-sql-recording]");
-            await Assert.That(page.Url).EndsWith("/add?step=extensions&tf=NUnit&have=SqlServer&ext=EntityFramework");
+            await Assert.That(page.Url).EndsWith("/add?step=plugins&tf=NUnit&have=SqlServer&ext=EntityFramework");
 
             await page.GotoAsync(wizard.Url("/add?step=output&tf=NUnit&have=SqlServer&ext=EntityFramework"));
             var download = await page.RunAndWaitForDownloadAsync(() => page.ClickAsync("button.download-zip"));

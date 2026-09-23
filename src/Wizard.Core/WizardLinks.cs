@@ -12,8 +12,8 @@ public static class WizardLinks
     public const string AddByTech = Base + "/add/by-tech";
 
     /// <summary>
-    /// The add flow seeded with one extension, for extension readmes to link to (plan D11).
+    /// The add flow seeded with one plugin, for plugin readmes to link to (plan D11).
     /// </summary>
-    public static string AddExtension(string extensionId) =>
-        $"{Add}/{Uri.EscapeDataString(extensionId.Trim())}";
+    public static string AddPlugin(string pluginId) =>
+        $"{Add}/{Uri.EscapeDataString(pluginId.Trim())}";
 }
