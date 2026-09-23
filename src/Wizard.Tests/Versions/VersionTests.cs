@@ -1,5 +1,3 @@
-using Wizard.VersionRefresh;
-
 /// <summary>Picking versions (plan D3), the weekly refresh (plan 15.2) and pinning.</summary>
 public class VersionTests
 {

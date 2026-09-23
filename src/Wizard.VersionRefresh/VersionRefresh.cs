@@ -1,5 +1,3 @@
-namespace Wizard.VersionRefresh;
-
 /// <param name="Changes">Package id, old version, new version, in file order.</param>
 /// <param name="Unanswered">Ids nuget.org gave no answer for, left as they were.</param>
 public sealed record RefreshResult(

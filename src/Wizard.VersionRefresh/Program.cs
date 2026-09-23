@@ -1,5 +1,4 @@
-using System.Net.Http.Json;
-using Wizard.VersionRefresh;
+
 
 // Refreshes package-versions.json from nuget.org (plan 15.2). Run by refresh-versions.yml:
 //   dotnet run --project src/Wizard.VersionRefresh -- <package-versions.json> <summary.md>
