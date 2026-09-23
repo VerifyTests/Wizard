@@ -185,4 +185,16 @@ public class EndToEndTests
         await page.GoForwardAsync();
         await page.WaitForSelectorAsync("#ide-Rider");
     }
+
+    [Test]
+    public async Task NextStartsTheNextStepAtTheTop()
+    {
+        var page = await ScreenSnapshotTests.Open("/new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions", ".plugin-card[data-id=DiffPlex]");
+        await page.EvaluateAsync("() => window.scrollTo(0, document.body.scrollHeight)");
+        await Assert.That(await page.EvaluateAsync<double>("() => window.scrollY")).IsGreaterThan(0);
+
+        await page.ClickAsync("button.primary");
+        await page.WaitForSelectorAsync(".depth-row[data-id=DiffPlex]");
+        await page.WaitForFunctionAsync("() => window.scrollY === 0");
+    }
 }

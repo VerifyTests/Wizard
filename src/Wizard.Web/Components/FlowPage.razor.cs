@@ -13,6 +13,7 @@ public partial class FlowPage : IDisposable
     [Inject] public NavigationManager Navigation { get; set; } = null!;
     [Inject] public TimeProvider Time { get; set; } = null!;
     [Inject] public BrowserStorage Storage { get; set; } = null!;
+    [Inject] public IJSRuntime JS { get; set; } = null!;
 
     [Parameter, EditorRequired] public Flow Flow { get; set; }
 
@@ -24,6 +25,7 @@ public partial class FlowPage : IDisposable
     Date today;
     string lastUrl = "";
     bool ready;
+    bool scrollToTop;
     Restored restored = new(false, false, false);
     Remembered written = Remembered.None;
 
@@ -157,6 +159,20 @@ public partial class FlowPage : IDisposable
         State.Step = stepId;
         State.Step = FlowSteps.Reachable(State, today).Id;
         Navigate(WizardStateUrl.ToRelativeUrl(State), replace: false);
+        scrollToTop = true;
+    }
+
+    // Moving between steps stays on the same page, so the browser keeps the scroll position of the
+    // step just left, which after Next is usually its bottom.
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (!scrollToTop)
+        {
+            return;
+        }
+
+        scrollToTop = false;
+        await JS.InvokeVoidAsync("scrollTo", 0, 0);
     }
 
     public void Dispose() =>
