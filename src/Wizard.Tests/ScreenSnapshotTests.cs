@@ -18,7 +18,6 @@ public class ScreenSnapshotTests
     public static async Task<IPage> Open(string path, string readySelector)
     {
         var page = await wizard.NewPage();
-        await page.Clock.SetFixedTimeAsync(new DateTime(2026, 9, 22, 10, 0, 0, DateTimeKind.Utc));
         await page.GotoAsync(wizard.Url(path));
         await page.WaitForSelectorAsync(readySelector);
         return page;
@@ -78,6 +77,42 @@ public class ScreenSnapshotTests
     public async Task NewBuildServer()
     {
         var page = await Open("/new?step=ci&os=Windows&ide=Rider&cli=Cli&tf=XunitV3", "#ci-GitHubActions");
+        await VerifyScreen(page);
+    }
+
+    [Test]
+    public async Task NewExtensions()
+    {
+        var page = await Open($"/new?step=extensions&{beforeOutput}", ".extension-card[data-id=DiffPlex]");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    /// <summary>The filter, a multi-extension selection, and the notices the combination raises.</summary>
+    [Test]
+    public async Task NewExtensionsWithInteractions()
+    {
+        var page = await Open(
+            $"/new?step=extensions&{beforeOutput}&ext=DiffPlex,EntityFramework,SqlServer",
+            ".interaction-notice[data-rule=ef-sql-recording]");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    /// <summary>A conflict, which is what stops the step being left (plan 11.1).</summary>
+    [Test]
+    public async Task NewExtensionsConflict()
+    {
+        var page = await Open(
+            $"/new?step=extensions&{beforeOutput}&ext=Diagnostics,OpenTelemetry",
+            ".interaction-notice.conflict");
+        await VerifyScreen(page, fullPage: false);
+    }
+
+    [Test]
+    public async Task NewOptions()
+    {
+        var page = await Open(
+            $"/new?step=options&{beforeOutput}&ext=DiffPlex,EntityFramework,SqlServer",
+            ".choice[data-choice=ef-sql-recording]");
         await VerifyScreen(page);
     }
 

@@ -1,0 +1,330 @@
+﻿{
+  Groups: [
+    {
+      Id: pdf-converter,
+      Label: PDF converter,
+      Reason: each registers a converter for the pdf extension, and the last one registered wins.,
+      Members: [
+        Aspose,
+        DocNet,
+        ImageMagick,
+        PDFium,
+        PdfPig,
+        QuestPDF,
+        Syncfusion
+      ],
+      Conditions: [
+        {
+          Member: ImageMagick,
+          ChoiceId: imagemagick-role,
+          Default: converter-and-comparer,
+          Values: [
+            converter-and-comparer,
+            pdf-only
+          ]
+        }
+      ]
+    },
+    {
+      Id: xlsx-converter,
+      Label: Excel converter,
+      Reason: each registers a converter for the xlsx extension, and the last one registered wins.,
+      Members: [
+        Aspose,
+        ClosedXml,
+        OpenXml,
+        Sylvan,
+        Syncfusion
+      ]
+    },
+    {
+      Id: docx-converter,
+      Label: Word converter,
+      Reason: each registers a converter for the docx extension, and the last one registered wins.,
+      Members: [
+        Aspose,
+        OpenXml,
+        Pandoc,
+        Syncfusion
+      ]
+    },
+    {
+      Id: pptx-converter,
+      Label: PowerPoint converter,
+      Reason: each registers a converter for the pptx extension, and the last one registered wins.,
+      Members: [
+        Aspose,
+        OpenXml,
+        Syncfusion
+      ]
+    },
+    {
+      Id: csv-scrubber,
+      Label: CSV handling,
+      Reason: both register csv converters and scrubbers, and both define the same settings methods, which then fail to compile.,
+      Members: [
+        CsvHelper,
+        Sep
+      ]
+    },
+    {
+      Id: image-comparer,
+      Label: Image comparer,
+      Reason: each registers a comparer for png and the other image extensions, and the last one registered wins.,
+      Members: [
+        ImageHash,
+        ImageMagick,
+        ImageSharpCompare,
+        Phash
+      ],
+      Conditions: [
+        {
+          Member: ImageMagick,
+          ChoiceId: imagemagick-role,
+          Default: converter-and-comparer,
+          Values: [
+            converter-and-comparer,
+            comparer-only
+          ]
+        }
+      ]
+    },
+    {
+      Id: blazor-renderer,
+      Label: Blazor renderer,
+      Reason: they are alternative ways to render a component, and both register a comparer for html.,
+      Members: [
+        Blazor,
+        Bunit
+      ]
+    },
+    {
+      Id: activity-listener,
+      Label: Activity listener,
+      Reason: each installs a process-wide ActivityListener recording under the name activity, so every activity would be recorded twice.,
+      Members: [
+        Diagnostics,
+        OpenTelemetry
+      ]
+    },
+    {
+      Id: ulid-scrubber,
+      Label: ULID scrubbing,
+      Reason: both scrub 26 character ULIDs and both define DontScrubUlids, which then fails to compile.,
+      Members: [
+        NUlid,
+        Ulid
+      ]
+    }
+  ],
+  Rules: [
+    {
+      Id: ef-sql-recording,
+      Severity: Warning,
+      All: [
+        EntityFramework,
+        SqlServer
+      ],
+      AnyCount: 1,
+      Choice: ef-sql-recording,
+      Order: [
+        SqlServer before EntityFramework
+      ],
+      RetiredBy: U5
+    },
+    {
+      Id: ef-localdb,
+      All: [
+        EntityFramework,
+        LocalDb
+      ],
+      AnyCount: 1,
+      RetiredBy: U15
+    },
+    {
+      Id: sql-localdb,
+      All: [
+        SqlServer,
+        LocalDb
+      ],
+      AnyCount: 1
+    },
+    {
+      Id: flurl-http,
+      All: [
+        Flurl,
+        Http
+      ],
+      AnyCount: 1,
+      Order: [
+        Http before Flurl
+      ]
+    },
+    {
+      Id: nservicebus-logging,
+      All: [
+        NServiceBus,
+        MicrosoftLogging
+      ],
+      AnyCount: 1,
+      Order: [
+        MicrosoftLogging before NServiceBus
+      ],
+      RetiredBy: U21
+    },
+    {
+      Id: avalonia-mvvm,
+      Any: [
+        Avalonia,
+        Xaml
+      ],
+      AnyCount: 1,
+      Without: [
+        CommunityToolkitMvvm
+      ]
+    },
+    {
+      Id: html-prettyprint,
+      All: [
+        AngleSharp
+      ],
+      Any: [
+        AspNetCore,
+        Blazor,
+        Bunit,
+        Playwright,
+        Puppeteer,
+        Selenium
+      ],
+      AnyCount: 1
+    },
+    {
+      Id: bunit-anglesharp-comparer,
+      Severity: Warning,
+      All: [
+        AngleSharp,
+        Bunit
+      ],
+      AnyCount: 1,
+      Choice: bunit-html-comparer,
+      Order: [
+        Bunit before AngleSharp,
+        AngleSharp before Bunit
+      ],
+      RetiredBy: U19
+    },
+    {
+      Id: recording-bus,
+      Any: [
+        Diagnostics,
+        EntityFramework,
+        Http,
+        MicrosoftLogging,
+        NServiceBus,
+        OpenTelemetry,
+        Serilog,
+        SqlServer,
+        ZeroLog
+      ],
+      AnyCount: 2,
+      RetiredBy: U25
+    },
+    {
+      Id: shared-log-name,
+      Severity: Warning,
+      Any: [
+        MicrosoftLogging,
+        Serilog,
+        ZeroLog
+      ],
+      AnyCount: 2,
+      RetiredBy: U25
+    },
+    {
+      Id: diffplex-default-comparer,
+      All: [
+        DiffPlex
+      ],
+      Any: [
+        AngleSharp,
+        Bunit,
+        ImageMagick,
+        Quibble
+      ],
+      AnyCount: 1
+    },
+    {
+      Id: readable-expressions-priority,
+      All: [
+        EntityFramework,
+        ReadableExpressions
+      ],
+      AnyCount: 1
+    },
+    {
+      Id: settings-method-ambiguity,
+      Severity: Warning,
+      Any: [
+        Aspose,
+        DocNet,
+        PDFium,
+        PdfPig,
+        QuestPDF,
+        Syncfusion
+      ],
+      AnyCount: 2,
+      RetiredBy: C4
+    },
+    {
+      Id: imagemagick-svg-comparer,
+      Severity: Warning,
+      All: [
+        AngleSharp,
+        ImageMagick
+      ],
+      AnyCount: 1,
+      Order: [
+        ImageMagick before AngleSharp
+      ]
+    },
+    {
+      Id: png-converter,
+      Severity: Warning,
+      All: [
+        ImageMagick,
+        ImageSharp
+      ],
+      AnyCount: 1,
+      RetiredBy: C5
+    },
+    {
+      Id: imagesharp-reencode,
+      Severity: Warning,
+      All: [
+        ImageSharp
+      ],
+      Any: [
+        Aspose,
+        DocNet,
+        ImageMagick,
+        OpenXml,
+        PDFium,
+        Syncfusion
+      ],
+      AnyCount: 1,
+      RetiredBy: C5
+    },
+    {
+      Id: cosmos-etag,
+      All: [
+        Cosmos
+      ],
+      Any: [
+        AspNetCore,
+        Http
+      ],
+      AnyCount: 1,
+      RetiredBy: U23
+    }
+  ]
+}

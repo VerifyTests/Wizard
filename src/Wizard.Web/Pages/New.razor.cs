@@ -17,7 +17,8 @@ public partial class New : IDisposable
     Date today;
     string lastUrl = "";
 
-    static readonly IReadOnlyList<StepDefinition> steps = FlowSteps.For(Flow.New);
+    // Recomputed per render: selecting no extensions drops the options step from the flow.
+    IReadOnlyList<StepDefinition> steps => FlowSteps.For(state);
 
     StepDefinition current => steps.Single(_ => _.Id == state.Step);
 

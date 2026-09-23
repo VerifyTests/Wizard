@@ -94,7 +94,24 @@ public static class ProjectFiles
 
             """);
         AppendVersions(builder, $"Test framework: {plan.Framework.Framework.Name()}", plan.Framework.Packages, plan);
-        AppendVersions(builder, "Verify.DiffPlex: text snapshot failures show an inline diff", ["Verify.DiffPlex"], plan);
+        var listed = new HashSet<string>(plan.Framework.Packages, StringComparer.Ordinal);
+        foreach (var extension in plan.Extensions)
+        {
+            var packages = extension.Packages
+                .Where(_ => _.Kind == PackageKind.PackageReference && listed.Add(_.Id))
+                .ToList();
+            if (packages.Count == 0)
+            {
+                continue;
+            }
+
+            AppendVersions(
+                builder,
+                $"{extension.Definition.DisplayName}: {extension.Definition.Description}",
+                packages.Select(_ => _.Id),
+                plan);
+        }
+
         builder.Append("</Project>\n");
         return builder.ToString();
     }
@@ -229,6 +246,11 @@ public static class ProjectFiles
         builder.Append("  </Folder>\n");
         builder.Append($"  <Project Path=\"src/{plan.LibraryProject}/{plan.LibraryProject}.csproj\" />\n");
         builder.Append($"  <Project Path=\"src/{plan.TestProject}/{plan.TestProject}.{plan.Framework.ProjectExtension}\" />\n");
+        if (plan.HasWindowsProject)
+        {
+            builder.Append($"  <Project Path=\"src/{plan.WindowsTestProject}/{plan.WindowsTestProject}.csproj\" />\n");
+        }
+
         builder.Append("</Solution>\n");
         return builder.ToString();
     }
@@ -263,39 +285,87 @@ public static class ProjectFiles
 
           """;
 
-    public static string LibraryProject(Plan plan) =>
-        $"""
-         <Project Sdk="Microsoft.NET.Sdk">
-           <!-- The code under test. It references nothing test related. -->
-           <PropertyGroup>
-             <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>
-             <RootNamespace>{SolutionNames.RootNamespace(plan.LibraryProject)}</RootNamespace>
-           </PropertyGroup>
-         </Project>
+    public static string LibraryProject(Plan plan)
+    {
+        var builder = new StringBuilder(
+            $"""
+             <Project Sdk="Microsoft.NET.Sdk">
+               <!-- The code under test. It references nothing test related. -->
+               <PropertyGroup>
+                 <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>
+                 <RootNamespace>{SolutionNames.RootNamespace(plan.LibraryProject)}</RootNamespace>
+               </PropertyGroup>
 
-         """;
+             """);
+        if (plan.LibraryPackages.Count > 0)
+        {
+            builder.Append("  <ItemGroup>\n");
+            foreach (var package in plan.LibraryPackages)
+            {
+                builder.Append($"    <PackageReference Include=\"{package}\" />\n");
+            }
 
-    public static string TestProject(Plan plan)
+            builder.Append("  </ItemGroup>\n");
+        }
+
+        builder.Append("</Project>\n");
+        return builder.ToString();
+    }
+
+    /// <param name="windows">The second project, which holds the Windows-only extensions (plan D5).</param>
+    public static string TestProject(Plan plan, bool windows = false)
     {
         var framework = plan.Framework;
+        var name = windows ? plan.WindowsTestProject : plan.TestProject;
+        var extensions = plan.ExtensionsIn(windows).ToList();
         var builder = new StringBuilder("<Project Sdk=\"Microsoft.NET.Sdk\">\n");
         builder.Append("  <PropertyGroup>\n");
-        builder.Append($"    <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>\n");
-        builder.Append($"    <RootNamespace>{SolutionNames.RootNamespace(plan.TestProject)}</RootNamespace>\n");
+        if (windows)
+        {
+            builder.Append("    <!-- Windows only: these extensions render with Windows APIs, so the target framework\n");
+            builder.Append("         has the windows suffix. Nothing references this project, so the rest of the\n");
+            builder.Append("         solution still builds and runs on any operating system. -->\n");
+            builder.Append($"    <TargetFramework>{WizardDefaults.TargetFramework}-windows</TargetFramework>\n");
+        }
+        else
+        {
+            builder.Append($"    <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>\n");
+        }
+
+        builder.Append($"    <RootNamespace>{SolutionNames.RootNamespace(name)}</RootNamespace>\n");
+        foreach (var (property, value) in extensions.SelectMany(_ => _.Definition.ProjectProperties).Distinct())
+        {
+            builder.Append($"    <{property}>{value}</{property}>\n");
+        }
+
         if (framework.Properties.Count > 0)
         {
             builder.Append("    <!-- Run as a Microsoft.Testing.Platform app; dotnet test uses it through the runner set in global.json. -->\n");
         }
 
-        foreach (var (name, value) in framework.Properties)
+        foreach (var (property, value) in framework.Properties)
         {
-            builder.Append($"    <{name}>{value}</{name}>\n");
+            builder.Append($"    <{property}>{value}</{property}>\n");
         }
 
         if (framework.Framework == TestFramework.Expecto)
         {
             builder.Append("    <!-- Verify.Expecto needs a newer FSharp.Core than the SDK references implicitly, so it is referenced below. -->\n");
             builder.Append("    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>\n");
+        }
+
+        if (extensions.Count > 0 &&
+            framework.SuppressedWarnings.Count > 0)
+        {
+            foreach (var (code, reason) in framework.SuppressedWarnings)
+            {
+                foreach (var line in ExtensionTestFiles.Wrap($"{code}: {reason}", 92))
+                {
+                    builder.Append($"    <!-- {line} -->\n");
+                }
+            }
+
+            builder.Append($"    <NoWarn>$(NoWarn);{string.Join(";", framework.SuppressedWarnings.Select(_ => _.Code))}</NoWarn>\n");
         }
 
         builder.Append("  </PropertyGroup>\n");
@@ -309,12 +379,26 @@ public static class ProjectFiles
         }
 
         builder.Append("  <ItemGroup>\n");
-        foreach (var package in plan.TestPackages)
+        var packages = windows ? plan.WindowsTestPackages : plan.TestPackages;
+        foreach (var package in packages)
         {
             builder.Append($"    <PackageReference Include=\"{package}\" />\n");
         }
 
         builder.Append("  </ItemGroup>\n");
+
+        var items = extensions.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal).ToList();
+        if (items.Count > 0)
+        {
+            builder.Append("  <ItemGroup>\n");
+            foreach (var item in items)
+            {
+                builder.Append($"    {item}\n");
+            }
+
+            builder.Append("  </ItemGroup>\n");
+        }
+
         builder.Append("  <ItemGroup>\n");
         builder.Append($"    <ProjectReference Include=\"..\\{plan.LibraryProject}\\{plan.LibraryProject}.csproj\" />\n");
         builder.Append("  </ItemGroup>\n");

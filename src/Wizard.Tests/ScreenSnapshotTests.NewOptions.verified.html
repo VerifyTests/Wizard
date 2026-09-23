@@ -1,0 +1,240 @@
+﻿<!DOCTYPE html>
+<html lang="en" style="--blazor-load-percentage: 100%; --blazor-load-percentage-text: &quot;100%&quot;;">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <base href="/">
+    <link rel="icon" href="favicon.png" type="image/png">
+    <link rel="preload" href="css/app.css" as="style">
+    <link rel="preload" href="fonts/open-sans.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="fonts/ubuntu-mono.woff2" as="font" type="font/woff2" crossorigin="">
+    <link rel="preload" href="_framework/blazor.webassembly.js" as="script">
+    <link rel="stylesheet" href="css/app.css">
+    <title>New project · Verify Wizard</title>
+  </head>
+  <body>
+    <div id="app">
+      <header class="app-header">
+        <div class="inner">
+          <h1>
+            <a href="">Verify Wizard</a>
+          </h1>
+          <p>Set up
+            <a href="https://github.com/VerifyTests/Verify" target="_blank">Verify</a>
+            snapshot testing: a working solution, a guide, and instructions for an AI assistant.</p>
+        </div>
+      </header>
+      <main>
+        <div class="wizard-layout">
+          <nav class="breadcrumb" aria-label="Wizard progress">
+            <a class="breadcrumb-flow" href="">New project</a>
+            <ol>
+              <li class="done">
+                <button type="button" class="step-link" data-step="os">
+                  <span class="step-title">Operating system</span>
+                  <span class="step-value">Windows</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ide">
+                  <span class="step-title">IDE</span>
+                  <span class="step-value">JetBrains Rider</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="cli">
+                  <span class="step-title">CLI or GUI</span>
+                  <span class="step-value">Prefer CLI</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="tf">
+                  <span class="step-title">Test framework</span>
+                  <span class="step-value">xUnit v3</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="ci">
+                  <span class="step-title">Build server</span>
+                  <span class="step-value">GitHub Actions</span>
+                </button>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="extensions">
+                  <span class="step-title">Extensions</span>
+                  <span class="step-value">DiffPlex, EntityFramework, SqlServer</span>
+                </button>
+              </li>
+              <li class="current" aria-current="step">
+                <span class="step-title">Extension options</span>
+              </li>
+              <li class="done">
+                <button type="button" class="step-link" data-step="sponsor">
+                  <span class="step-title">Maintenance fee</span>
+                  <span class="step-value">Decide later</span>
+                </button>
+              </li>
+              <li class="open">
+                <button type="button" class="step-link" data-step="output">
+                  <span class="step-title">Result</span>
+                </button>
+              </li>
+            </ol>
+          </nav>
+          <section class="step-body" data-step="options">
+            <h2>Extension options</h2>
+            <p class="hint">
+              Verbose generates a commented test for every documented API, so the unwanted ones can be deleted.     Minimal generates the enable call and the most common usage only.
+            </p>
+            <div class="depth-rows">
+              <div class="depth-row" data-id="DiffPlex">
+                <span class="depth-name">Verify.DiffPlex</span>
+                <span class="depth-toggle">
+                  <button type="button" class="depth-option selected" aria-pressed="true">Verbose</button>
+                  <button type="button" class="depth-option " aria-pressed="false">Minimal</button>
+                </span>
+                <span class="depth-count">1 samples at verbose, 1 at minimal</span>
+              </div>
+              <div class="depth-row" data-id="EntityFramework">
+                <span class="depth-name">Verify.EntityFramework (EF Core)</span>
+                <span class="depth-toggle">
+                  <button type="button" class="depth-option selected" aria-pressed="true">Verbose</button>
+                  <button type="button" class="depth-option " aria-pressed="false">Minimal</button>
+                </span>
+                <span class="depth-count">7 samples at verbose, 2 at minimal</span>
+              </div>
+              <div class="depth-row" data-id="SqlServer">
+                <span class="depth-name">Verify.SqlServer</span>
+                <span class="depth-toggle">
+                  <button type="button" class="depth-option selected" aria-pressed="true">Verbose</button>
+                  <button type="button" class="depth-option " aria-pressed="false">Minimal</button>
+                </span>
+                <span class="depth-count">5 samples at verbose, 2 at minimal</span>
+              </div>
+            </div>
+            <h3>Choices this combination raised</h3>
+            <fieldset class="choice" data-choice="diffplex-output">
+              <legend>Failure message detail</legend>
+              <p class="hint">How much of the text a failed comparison prints.</p>
+              <label class="choice-option selected">
+                <input type="radio" name="diffplex-output">
+                <span>
+                  <strong>Compact</strong>
+                  <span class="choice-hint">Only changed lines, with one line of context and its line number.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="diffplex-output">
+                <span>
+                  <strong>Full</strong>
+                  <span class="choice-hint">The whole received text, with + and - markers on the changed lines.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="diffplex-output">
+                <span>
+                  <strong>Minimal</strong>
+                  <span class="choice-hint">Only the changed lines.</span>
+                </span>
+              </label>
+            </fieldset>
+            <fieldset class="choice" data-choice="ef-sql-format">
+              <legend>SQL formatting</legend>
+              <p class="hint">Verify reformats SQL Server SQL before writing it, so a snapshot reads the same however EF emitted it.</p>
+              <label class="choice-option selected">
+                <input type="radio" name="ef-sql-format">
+                <span>
+                  <strong>Reformat the SQL</strong>
+                  <span class="choice-hint">Indented and keyword aligned.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="ef-sql-format">
+                <span>
+                  <strong>Write it verbatim</strong>
+                  <span class="choice-hint">Sets VerifyEntityFramework.DisableSqlFormatting.</span>
+                </span>
+              </label>
+            </fieldset>
+            <fieldset class="choice" data-choice="ef-sql-recording">
+              <legend>Which extension records EF commands</legend>
+              <p class="hint">Both record them; recording is switched off in the other.</p>
+              <label class="choice-option selected">
+                <input type="radio" name="ef-sql-recording">
+                <span>
+                  <strong>Verify.EntityFramework records them</strong>
+                  <span class="choice-hint">Adds the command type and transaction state. Verify.SqlServer still snapshots schema.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="ef-sql-recording">
+                <span>
+                  <strong>Verify.SqlServer records them</strong>
+                  <span class="choice-hint">Records every SqlCommand, including ones EF did not issue.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="ef-sql-recording">
+                <span>
+                  <strong>Both record, the sql entries are dropped</strong>
+                  <span class="choice-hint">Recording.IgnoreNames("sql") needs no ordering, but every command is still cloned before being discarded.</span>
+                </span>
+              </label>
+              <label class="choice-option ">
+                <input type="radio" name="ef-sql-recording">
+                <span>
+                  <strong>Both record, both appear</strong>
+                  <span class="choice-hint">Every EF command appears twice in the snapshot.</span>
+                </span>
+              </label>
+            </fieldset>
+            <h3>What the selection implies</h3>
+            <div class="interactions">
+              <div class="interaction-notice warning" data-rule="ef-sql-recording">
+                <p class="interaction-heading">
+                  <span class="severity">Side effect</span>
+                  <span class="involved">EntityFramework, SqlServer</span>
+                </p>
+                <p>Verify.EntityFramework and Verify.SqlServer both record every command EF Core runs: Verify.EntityFramework under the name ef, with the command type and transaction state, and Verify.SqlServer under the name sql. Without a choice here every command appears twice in each snapshot.</p>
+                <ul>
+                  <li>The extension that stops recording is initialized with `recordCommands: false`, which has to happen before `VerifierSettings.InitializePlugins()`: discovery would otherwise initialize it with recording on, and the second call throws "Already Initialized".</li>
+                  <li>Verify.SqlServer's schema snapshots are unaffected by this choice.</li>
+                </ul>
+              </div>
+              <div class="interaction-notice info" data-rule="recording-bus">
+                <p class="interaction-heading">
+                  <span class="severity">Worth knowing</span>
+                  <span class="involved">EntityFramework, SqlServer</span>
+                </p>
+                <p>These extensions all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.</p>
+                <ul>
+                  <li>`Recording.Start()` begins one; `Recording.Stop()` returns the entries instead of adding them to the snapshot.</li>
+                  <li>`Recording.IgnoreNames("sql")` drops one kind of entry everywhere, but the extension still produces it first.</li>
+                  <li>Every logging extension records under `log`, so `IgnoreNames` cannot separate them (plan A12).</li>
+                </ul>
+              </div>
+            </div>
+            <div class="wizard-nav">
+              <button type="button" class="back">Back</button>
+              <button type="button" class="primary">Next: Maintenance fee</button>
+            </div>
+          </section>
+        </div>
+      </main>
+      <footer class="app-footer">
+        Full documentation is in the
+        <a href="https://github.com/VerifyTests/Verify#readme" target="_blank">Verify readme</a>
+        and the
+        <a href="https://github.com/VerifyTests/Verify/tree/main/docs" target="_blank">docs folder</a>. Wizard source:
+        <a href="https://github.com/VerifyTests/Wizard" target="_blank">VerifyTests/Wizard</a>.
+      </footer>
+    </div>
+    <div id="blazor-error-ui">
+      An unhandled error has occurred.
+      <a href="" class="reload">Reload</a>
+      <a class="dismiss">X</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="js/interop.js"></script>
+  </body>
+</html>

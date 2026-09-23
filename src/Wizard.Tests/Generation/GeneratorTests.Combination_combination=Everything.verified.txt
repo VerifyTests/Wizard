@@ -1,0 +1,513 @@
+﻿==== selected
+
+AngleSharp
+AspNetCore
+Aspose
+Assertions
+Avalonia
+Blazor
+Brighter
+Bunit
+ClosedXml
+CommunityToolkitMvvm
+Cosmos
+CsvHelper
+Diagnostics
+DiffPlex
+DocNet
+EmailPreviewServices
+EntityFramework
+EntityFrameworkClassic
+FakeItEasy
+Flurl
+Http
+ICSharpCodeDecompiler
+ImageHash
+ImageMagick
+ImageSharp
+ImageSharpCompare
+LocalDb
+MailMessage
+MassTransit
+MicrosoftLogging
+Mockly
+Moq
+NServiceBus
+NSubstitute
+NUlid
+NewtonsoftJson
+NodaTime
+OpenTelemetry
+OpenXml
+PDFium
+Pandoc
+ParametersHashing
+PdfPig
+Phash
+Playwright
+Puppeteer
+QuestPDF
+Quibble
+RavenDB
+ReadableExpressions
+Selenium
+SendGrid
+Sep
+Serilog
+SourceGenerators
+SqlServer
+Sylvan
+Syncfusion
+SystemJson
+Terminal
+Ulid
+WinForms
+Wolverine
+Xaml
+Yaml
+ZeroLog
+
+==== interactions
+
+Conflict activity-listener [Diagnostics, OpenTelemetry]
+Diagnostics and OpenTelemetry cannot be used together: each installs a process-wide ActivityListener recording under the name activity, so every activity would be recorded twice. Keep one of them.
+
+Conflict blazor-renderer [Blazor, Bunit]
+Blazor and Bunit cannot be used together: they are alternative ways to render a component, and both register a comparer for html. Keep one of them.
+
+Conflict csv-scrubber [CsvHelper, Sep]
+CsvHelper and Sep cannot be used together: both register csv converters and scrubbers, and both define the same settings methods, which then fail to compile. Keep one of them.
+
+Conflict docx-converter [Aspose, OpenXml, Pandoc, Syncfusion]
+Aspose, OpenXml, Pandoc and Syncfusion cannot be used together: each registers a converter for the docx extension, and the last one registered wins. Keep one of them.
+
+Conflict image-comparer [ImageHash, ImageMagick, ImageSharpCompare, Phash]
+ImageHash, ImageMagick, ImageSharpCompare and Phash cannot be used together: each registers a comparer for png and the other image extensions, and the last one registered wins. Keep one of them.
+
+Conflict pdf-converter [Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF, Syncfusion]
+Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF and Syncfusion cannot be used together: each registers a converter for the pdf extension, and the last one registered wins. Keep one of them.
+
+Conflict pptx-converter [Aspose, OpenXml, Syncfusion]
+Aspose, OpenXml and Syncfusion cannot be used together: each registers a converter for the pptx extension, and the last one registered wins. Keep one of them.
+
+Conflict ulid-scrubber [NUlid, Ulid]
+NUlid and Ulid cannot be used together: both scrub 26 character ULIDs and both define DontScrubUlids, which then fails to compile. Keep one of them.
+
+Conflict xlsx-converter [Aspose, ClosedXml, OpenXml, Sylvan, Syncfusion]
+Aspose, ClosedXml, OpenXml, Sylvan and Syncfusion cannot be used together: each registers a converter for the xlsx extension, and the last one registered wins. Keep one of them.
+
+Warning bunit-anglesharp-comparer [AngleSharp, Bunit]
+Both register a string comparer for html. Verify.Bunit is initialized first, so Verify.AngleSharp's semantic comparison wins.
+
+Warning ef-sql-recording [EntityFramework, SqlServer]
+Verify.EntityFramework and Verify.SqlServer both record every command EF Core runs: Verify.EntityFramework under the name ef, with the command type and transaction state, and Verify.SqlServer under the name sql. Without a choice here every command appears twice in each snapshot.
+
+Warning external-tool [Cosmos]
+Cosmos needs A Cosmos DB endpoint: The samples read the key from a CosmosKey environment variable and talk to https://localhost:8081, where the Azure Cosmos DB Emulator listens.
+
+Warning external-tool [ImageMagick]
+ImageMagick needs Ghostscript: pdf pages are rendered by shelling out to Ghostscript; without it the conversion fails with exit code 127. Nothing else here needs it.
+
+Warning external-tool [LocalDb]
+LocalDb needs SQL Server LocalDB: part of SQL Server Express LocalDB. LocalDb starts and stops the instance itself, but the SqlLocalDB installation has to exist.
+
+Warning external-tool [Pandoc]
+Pandoc needs Pandoc: PandocNet shells out to the pandoc executable, so pandoc has to be installed on the machine running the tests.
+
+Warning external-tool [Pandoc]
+Pandoc needs Papyrine sponsorship declaration: The Pandoc package this depends on ships a second SponsorCheck gate, for the owner Papyrine. Without Papyrine_ prefixed sponsorship properties the build fails, on top of Verify's own Verify_ properties.
+
+Warning external-tool [Playwright]
+Playwright needs A Playwright browser: Playwright drives a real Chromium, which has to be downloaded once. Initialize(installPlaywright: true) does it on assembly load, and the samples also need the site under test running.
+
+Warning external-tool [Puppeteer]
+Puppeteer needs A Chrome download: PuppeteerSharp downloads its own Chrome through BrowserFetcher on first use, and the samples also need the site under test running.
+
+Warning external-tool [QuestPDF]
+QuestPDF needs QuestPDF licence: QuestPDF refuses to generate a document until a licence type is set. Community covers open source and small business use; commercial use above their threshold needs a paid key.
+
+Warning external-tool [RavenDB]
+RavenDB needs RavenDB embedded server: RavenDB.Embedded downloads a RavenDB server on first use and starts it against a temporary data directory, so the tests need network access and a machine that can run it.
+
+Warning external-tool [Selenium]
+Selenium needs Chrome and chromedriver: Selenium drives an installed Chrome through chromedriver, whose version has to match the browser, and the samples also need the site under test running.
+
+Warning external-tool [SqlServer]
+SqlServer needs A SQL Server instance: the samples open a connection to a local SQL Server. Selecting LocalDb as well gives each test a database of its own instead.
+
+Warning imagemagick-svg-comparer [AngleSharp, ImageMagick]
+Both register a comparer for svg: Verify.AngleSharp compares it as markup, Verify.ImageMagick as an image. Whichever is initialized last is the one in effect.
+
+Warning imagesharp-reencode [Aspose, DocNet, ImageMagick, ImageSharp, OpenXml, PDFium, Syncfusion]
+The selected extensions render pages to png, and Verify.ImageSharp then re-encodes that png: core ignores PerformConversion for a target a converter produced, so the image is written by ImageSharp rather than by the extension that rendered it.
+
+Warning licence-required [Aspose]
+Aspose needs An Aspose licence: Aspose is commercial. Without a licence its renderers watermark the output and cap the page count, so no snapshot matches.
+
+Warning licence-required [EmailPreviewServices]
+EmailPreviewServices needs An EmailPreviewServices api key: EmailPreviewServices is a paid service. The key is read from the EmailPreviewServicesApiKey environment variable, or passed to Initialize, and the rendering happens over the network.
+
+Warning licence-required [Syncfusion]
+Syncfusion needs A Syncfusion licence: Syncfusion File Formats is commercial. The key is read from an environment variable so it never lands in source control.
+
+Warning png-converter [ImageMagick, ImageSharp]
+Both register a converter for png. The last one registered wins, so png snapshots are re-encoded by one library or the other, which changes the bytes.
+
+Warning settings-method-ambiguity [Aspose, DocNet, PDFium, PdfPig, QuestPDF, Syncfusion]
+These packages each define PagesToInclude and SkipPdfNormalization as extension methods in the VerifyTests namespace. With two of them referenced, calling one fails to compile with CS0121, ambiguous call, even though nothing conflicts at run time.
+
+Warning shared-log-name [MicrosoftLogging, Serilog, ZeroLog]
+Every logging extension records under the name log, so their entries interleave in one list and cannot be told apart or ignored separately.
+
+Info cosmos-etag [AspNetCore, Cosmos, Http]
+Verify.Cosmos ignores the member ETag on every type, not only on Cosmos types, so an ETag on an http response or an ASP.NET Core result is left out of the snapshot too.
+
+Info diffplex-default-comparer [AngleSharp, Bunit, DiffPlex, ImageMagick, Quibble]
+Verify.DiffPlex is the default comparer for text snapshots. The extensions selected here register comparers for specific extensions (html, json, svg), which take precedence over it.
+
+Info ef-localdb [EntityFramework, LocalDb]
+LocalDb runs the tests against a real SQL Server LocalDB instance, one database per test, so EF snapshots cover what the database actually returns. The EfLocalDb package for the chosen test framework already depends on Verify.EntityFramework.
+
+Info flurl-http [Flurl, Http]
+Verify.Flurl depends on Verify.Http and initializes it itself, so Verify.Http is initialized first here and Verify.Flurl leaves it alone.
+
+Info html-prettyprint [AngleSharp, AspNetCore, Blazor, Bunit, Playwright, Puppeteer, Selenium]
+Rendered html is a single long line, which makes snapshot diffs unreadable. `HtmlPrettyPrint.All()` formats every html snapshot, and Verify.AngleSharp compares them semantically rather than as text.
+
+Info nservicebus-logging [MicrosoftLogging, NServiceBus]
+Verify.NServiceBus depends on Verify.MicrosoftLogging, so plugin discovery initializes it either way. Verify.MicrosoftLogging is initialized first here, and both record under the name log.
+
+Info plugin-not-discovered [AngleSharp, Blazor, QuestPDF]
+VerifierSettings.InitializePlugins() cannot find AngleSharp, Blazor and QuestPDF: it looks for a type named after the assembly, and silently skips an assembly that has none. The module initializer calls each of them explicitly, so they are enabled either way.
+
+Info readable-expressions-priority [EntityFramework, ReadableExpressions]
+Verify.ReadableExpressions inserts its converter at the front of the list, so expression trees inside EF snapshots render as readable C# instead of as node graphs.
+
+Info recording-bus [Diagnostics, EntityFramework, Http, MicrosoftLogging, NServiceBus, OpenTelemetry, Serilog, SqlServer, ZeroLog]
+These extensions all append to the same recording, which lands in every snapshot taken while it is running, each entry under its own name: ef, sql, httpCall, activity and log.
+
+Info sql-localdb [LocalDb, SqlServer]
+LocalDb gives Verify.SqlServer a real database to read a schema from, without needing a SQL Server installation.
+
+==== src/VerifySample.Tests/ModuleInitializer.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&ext=AngleSharp,AspNetCore,Aspose,Assertions,Avalonia,Blazor,Brighter,Bunit,ClosedXml,CommunityToolkitMvvm,Cosmos,CsvHelper,Diagnostics,DiffPlex,DocNet,EmailPreviewServices,EntityFramework,EntityFrameworkClassic,FakeItEasy,Flurl,Http,ICSharpCodeDecompiler,ImageHash,ImageMagick,ImageSharp,ImageSharpCompare,LocalDb,MailMessage,MassTransit,MicrosoftLogging,Mockly,Moq,NServiceBus,NSubstitute,NUlid,NewtonsoftJson,NodaTime,OpenTelemetry,OpenXml,PDFium,Pandoc,ParametersHashing,PdfPig,Phash,Playwright,Puppeteer,QuestPDF,Quibble,RavenDB,ReadableExpressions,Selenium,SendGrid,Sep,Serilog,SourceGenerators,SqlServer,Sylvan,Syncfusion,SystemJson,Terminal,Ulid,WinForms,Wolverine,Xaml,Yaml,ZeroLog&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+using System.Runtime.CompilerServices;
+using CoenM.ImageHash.HashAlgorithms;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Metadata;
+using QuestPDF.Infrastructure;
+using Syncfusion.Licensing;
+using VerifyTests.AngleSharp;
+using VerifyTests.Blazor;
+using VerifyTests.DiffPlex;
+
+// Everything here runs once, when the test assembly loads, before any test.
+public static class ModuleInitializer
+{
+    [ModuleInitializer]
+    public static void Initialize()
+    {
+        // Verify.Quibble: Verify writes a relaxed variant of json by default, which Quibble cannot
+        // parse, so strict json is required. This changes every snapshot in the project to real json.
+        // It has to come first: Initialize() below throws without it, and it sets Initialized before
+        // it throws, so a failed call cannot be retried.
+        VerifierSettings.UseStrictJson();
+        // Verify.Quibble: registers a string comparer for json, so a mismatch is reported per JSON
+        // path rather than as a diff of the whole file.
+        // Both calls run before InitializePlugins(), which would otherwise initialize Quibble first,
+        // with strict json still off.
+        VerifyQuibble.Initialize();
+
+        // Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline
+        // diff instead of the whole received and verified text.
+        // OutputType.Compact prints only the changed lines, with a line of context either side.
+        // Alternatives: OutputType.Full, OutputType.Minimal.
+        VerifyDiffPlex.Initialize(OutputType.Compact);
+
+        // Verify.ImageHash: png, jpg and bmp snapshots are compared by perceptual hash rather than
+        // byte for byte, so anti-aliasing and font hinting differences no longer fail a test.
+        // Initialize() registers the comparers with the default threshold of 95 and is what marks
+        // the plugin initialized, so it has to run first: RegisterComparers() does not set that
+        // flag, and the trailing InitializePlugins() would call Initialize() again and win.
+        VerifyImageHash.Initialize();
+        // Re-registers the same three comparers with the values chosen in the wizard. The threshold
+        // is a similarity percentage, so a higher number is stricter.
+        VerifyImageHash.RegisterComparers(threshold: 95, algorithm: new DifferenceHash());
+        // VerifyImageHash.RegisterComparer(threshold: 95, algorithm: null, extension: "png");
+
+        // Verify.ImageSharp.Compare: png, jpg and bmp snapshots are compared pixel by pixel, and
+        // pass while the absolute error stays under the threshold.
+        // This runs before Initialize(): registration keeps the first comparer registered for each
+        // extension, and Initialize() would otherwise get in first with the default threshold of 5.
+        VerifyImageSharpCompare.RegisterComparers(threshold: 5);
+        // Marks the plugin initialized, so the trailing InitializePlugins() leaves the registration
+        // above alone.
+        VerifyImageSharpCompare.Initialize();
+
+        // Verify.AspNetCore: writes ASP.NET Core types as readable snapshots instead of as their raw object graphs.
+        VerifyAspNetCore.Initialize();
+
+        // Verify.Blazor: the plugin is initialized by the static constructor of Render, and initializing
+        // it throws once any verification has run. Forcing the constructor here means the outcome does
+        // not depend on whether a Blazor test happens to run before the others.
+        // There is nothing to call instead: VerifyBlazor is internal, so plugin discovery skips it too.
+        RuntimeHelpers.RunClassConstructor(typeof(Render).TypeHandle);
+
+        // Verify.Bunit: renders a component through bUnit and writes its markup as an html snapshot.
+        // excludeComponent decides whether the component's own state is written alongside the markup.
+        VerifyBunit.Initialize(excludeComponent: false);
+
+        // Verify.Http: requests, responses, headers and content are written as readable snapshots,
+        // and calls made while a recording is running are appended under the name httpCall.
+        // Called explicitly so it runs before Verify.Flurl, which initializes Verify.Http itself
+        // when it has not already run; a later VerifyHttp.Initialize() throws "Already Initialized".
+        VerifyHttp.Initialize();
+
+        // Verify.Flurl: an HttpTest, and each call it recorded, are written as a readable request
+        // and response rather than as their raw object graphs.
+        // It initializes Verify.Http itself when that has not already run, so it is called after it.
+        VerifyFlurl.Initialize();
+
+        // Verify.ImageMagick: registers the stream converters for pdf, svg, png, webp and tiff, so
+        // a document is snapshotted as one png per page rather than as bytes.
+        // Despite what the readme says, Initialize() registers no comparers. It is still what marks
+        // the plugin initialized, so it runs first: neither RegisterComparers() nor
+        // RegisterPdfToPngConverter() sets that flag, and InitializePlugins() would call
+        // Initialize() afterwards and overwrite whatever they had registered.
+        VerifyImageMagick.Initialize();
+        // Registers the image comparers: png, jpg, bmp, tiff and webp as streams, and svg as text.
+        // The threshold is a fuzz distortion, so a lower number is stricter.
+        VerifyImageMagick.RegisterComparers(threshold: .005);
+        // VerifyImageMagick.RegisterComparer(threshold: .005, metric: ErrorMetric.Fuzz, extension: "png");
+        // ImageMagickSettings.ImageMagickBackground(MagickColors.White);
+
+        // Verify.AngleSharp: compares html, htm and svg by parsing both sides and diffing the DOM, so
+        // reordered attributes, reformatted markup and whitespace no longer fail a test.
+        // The call is explicit because the class is named VerifyAngleSharpDiffing, and plugin discovery
+        // looks for a type named after the assembly, VerifyAngleSharp, so it never finds this one.
+        VerifyAngleSharpDiffing.Initialize();
+        // VerifyAngleSharpDiffing.Initialize(_ => _.AddDefaultOptions().AddFilter(SpanFilter));
+
+        // Verify.ImageSharp: an Image is verified as an info file with its dimensions plus the image
+        // itself, and bmp, gif, jpg, png and tif streams are re-encoded through ImageSharp.
+        // The threshold has to be passed here: SSIM comparers are only registered when it is below
+        // 1.0, and a per test SsimThreshold() does nothing until they are.
+        VerifyImageSharp.Initialize(ssimThreshold: 1.0);
+
+        // Verify.MicrosoftLogging: entries logged while a recording is running are appended to the
+        // snapshot under the name log.
+        // Called explicitly so it runs before Verify.NServiceBus, which initializes it itself when
+        // it has not already run.
+        VerifyMicrosoftLogging.Initialize();
+
+        // Verify.NServiceBus: a recording context is written as the sends, publishes, replies and
+        // forwards it saw, with deterministic message, conversation and correlation ids.
+        // captureLogs defaults to true and only initializes Verify.MicrosoftLogging when that has
+        // not already run, so passing it changes nothing: the package depends on it either way.
+        VerifyNServiceBus.Initialize();
+        // VerifyNServiceBus.AddSharedHeader("sharedKey", "sharedValue");
+
+        // Verify.OpenXml: the paper size used when a document states none. Left null it follows the
+        // machine's region, so a rendered page would differ between a US and a European agent.
+        // False is A4, true is US Letter. It only matters once a render backend is referenced.
+        VerifyOpenXml.UseLetterPageSize = false;
+        // VerifyOpenXml.FontDirectory = Path.Combine(AppContext.BaseDirectory, "Fonts");
+
+        // Verify.Playwright: an IPage, IElementHandle or ILocator is verified as its html and as a
+        // screenshot png, so both the markup and what the page looks like are covered.
+        // installPlaywright: true runs the Playwright browser install once when the assembly loads,
+        // so a clean machine or build agent downloads the browsers instead of failing.
+        VerifyPlaywright.Initialize(installPlaywright: true);
+        // VerifyPlaywright.Initialize();
+
+        // Verify.QuestPDF: QuestPDF throws on the first generated document until a licence type is
+        // set. Community covers open source and small business use; above their revenue threshold a
+        // paid key is needed instead.
+        QuestPDF.Settings.License = LicenseType.Community;
+        // Verify.QuestPDF: registers a file converter for IDocument, so verifying a document writes
+        // its metadata and settings, a deterministic pdf, and a png per rendered page.
+        // The call is explicit because the class is named VerifyQuestPdf, and plugin discovery looks
+        // for a type named after the assembly, VerifyQuestPDF, so it never finds this one.
+        VerifyQuestPdf.Initialize();
+
+        // Verify.SqlServer: schema snapshots stay, but recording is off, because
+        // Verify.EntityFramework records the same commands under the name ef, with the command
+        // type and the transaction state.
+        // This has to run before InitializePlugins(): discovery would otherwise initialize
+        // Verify.SqlServer with recording on, and a second Initialize throws "Already Initialized".
+        VerifySqlServer.Initialize(recordCommands: false);
+
+        // Verify.EntityFramework: the model is read once here so IgnoreNavigationProperties() can be
+        // called without arguments, and so navigation properties stay out of entity snapshots.
+        VerifyEntityFramework.Initialize(GetDbModel());
+
+        // Verify.Syncfusion: the licence has to be registered before anything is rendered, so it
+        // happens here rather than in a test.
+        // Without a licence every rendered page carries a trial watermark, which then lands in the
+        // verified png and makes the snapshot useless.
+        SyncfusionLicenseProvider.RegisterLicense(Environment.GetEnvironmentVariable("SyncfusionLicense")!);
+
+        // Initializes every Verify.* plugin the project references and has not initialized above.
+        // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
+        VerifierSettings.InitializePlugins();
+
+        // Formats every html and htm snapshot before it is written, so a rendered page is a
+        // readable tree rather than one long line. Takes an optional action for scrubbing the
+        // nodes, for example _ => _.ScrubAttributes("id").
+        HtmlPrettyPrint.All();
+    }
+
+    // Builds a context against a connection string that is never opened, purely to read the model.
+    static IModel GetDbModel()
+    {
+        var options = new DbContextOptionsBuilder<SampleDbContext>();
+        options.UseSqlServer("fake");
+        using var data = new SampleDbContext(options.Options);
+        return data.Model;
+    }
+}
+
+==== src/VerifySample.Tests.Windows/ModuleInitializer.cs
+
+// Generated by the Verify wizard: https://verifytests.github.io/Wizard/new?step=output&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions&ext=AngleSharp,AspNetCore,Aspose,Assertions,Avalonia,Blazor,Brighter,Bunit,ClosedXml,CommunityToolkitMvvm,Cosmos,CsvHelper,Diagnostics,DiffPlex,DocNet,EmailPreviewServices,EntityFramework,EntityFrameworkClassic,FakeItEasy,Flurl,Http,ICSharpCodeDecompiler,ImageHash,ImageMagick,ImageSharp,ImageSharpCompare,LocalDb,MailMessage,MassTransit,MicrosoftLogging,Mockly,Moq,NServiceBus,NSubstitute,NUlid,NewtonsoftJson,NodaTime,OpenTelemetry,OpenXml,PDFium,Pandoc,ParametersHashing,PdfPig,Phash,Playwright,Puppeteer,QuestPDF,Quibble,RavenDB,ReadableExpressions,Selenium,SendGrid,Sep,Serilog,SourceGenerators,SqlServer,Sylvan,Syncfusion,SystemJson,Terminal,Ulid,WinForms,Wolverine,Xaml,Yaml,ZeroLog&sponsor=Exempt&exempt=OpenSource&until=2027-09
+// Delete whatever is not needed.
+using System.Runtime.CompilerServices;
+
+// Everything here runs once, when the test assembly loads, before any test.
+public static class ModuleInitializer
+{
+    [ModuleInitializer]
+    public static void Initialize()
+    {
+        // Initializes every Verify.* plugin the project references and has not initialized above.
+        // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
+        VerifierSettings.InitializePlugins();
+
+        // LocalDb: builds the template database once, so each test can clone it in milliseconds
+        // instead of creating a schema of its own.
+        // It runs after InitializePlugins() because the base class expects the Verify plugins,
+        // Verify.EntityFramework among them, to be registered before the template is built.
+        // It does not pass the EF model to Verify.EntityFramework, so an explicit
+        // VerifyEntityFramework.Initialize(GetDbModel()) is still what enables
+        // IgnoreNavigationProperties() without arguments.
+        EfLocalDbXunitV3.LocalDbTestBase<LocalDbContext>.Initialize();
+        // LocalDb prefixes its instance name with chatbot_ when the tests run under an AI CLI, which
+        // would otherwise show up in any snapshot holding a connection string or a data source.
+        VerifierSettings.ScrubReplace("chatbot_", "");
+    }
+}
+
+
+==== files
+
+global.json
+Directory.Build.props
+Directory.Packages.props
+nuget.config
+.gitignore
+.gitattributes
+.editorconfig
+VerifySample.slnx
+VerifySample.slnx.DotSettings
+.config/dotnet-tools.json
+readme.md
+CLAUDE.md
+.github/copilot-instructions.md
+.claude/skills/verify-snapshot-testing/SKILL.md
+.github/workflows/build.yml
+src/VerifySample/VerifySample.csproj
+src/VerifySample/ClassBeingTested.cs
+src/VerifySample/SampleModels.cs
+src/VerifySample/MyController.cs
+src/VerifySample/BlazorComponent.cs
+src/VerifySample/BrighterHandler.cs
+src/VerifySample/BunitComponent.cs
+src/VerifySample/Family.cs
+src/VerifySample/SampleDbContext.cs
+src/VerifySample/ClassicSampleDbContext.cs
+src/VerifySample/ITarget.cs
+src/VerifySample/LocalDbContext.cs
+src/VerifySample/SubmitOrderConsumer.cs
+src/VerifySample/ConsumerSaga.cs
+src/VerifySample/ClassThatUsesLogging.cs
+src/VerifySample/MyHandler.cs
+src/VerifySample/UlidPerson.cs
+src/VerifySample/WordDocument.cs
+src/VerifySample/ExcelDocument.cs
+src/VerifySample/RavenPerson.cs
+src/VerifySample/HelloWorldGenerator.cs
+src/VerifySample/OrderHandlers.cs
+src/VerifySample.Tests/VerifySample.Tests.csproj
+src/VerifySample.Tests/Sample.Test.verified.txt
+src/VerifySample.Tests/ModuleInitializer.cs
+src/VerifySample.Tests/Sample.cs
+src/VerifySample.Tests/VerifyChecksTests.cs
+src/VerifySample.Tests/Extensions/AngleSharpTests.cs
+src/VerifySample.Tests/Extensions/AspNetCoreTests.cs
+src/VerifySample.Tests/Extensions/AsposeTests.cs
+src/VerifySample.Tests/Extensions/AssertionsTests.cs
+src/VerifySample.Tests/Extensions/AvaloniaTests.cs
+src/VerifySample.Tests/Extensions/BlazorTests.cs
+src/VerifySample.Tests/Extensions/BrighterTests.cs
+src/VerifySample.Tests/Extensions/BunitTests.cs
+src/VerifySample.Tests/Extensions/ClosedXmlTests.cs
+src/VerifySample.Tests/Extensions/CommunityToolkitMvvmTests.cs
+src/VerifySample.Tests/Extensions/CosmosTests.cs
+src/VerifySample.Tests/Extensions/CsvHelperTests.cs
+src/VerifySample.Tests/Extensions/DiagnosticsTests.cs
+src/VerifySample.Tests/Extensions/DiffPlexTests.cs
+src/VerifySample.Tests/Extensions/DocNetTests.cs
+src/VerifySample.Tests/Extensions/EmailPreviewServicesTests.cs
+src/VerifySample.Tests/Extensions/EntityFrameworkTests.cs
+src/VerifySample.Tests/Extensions/EntityFrameworkClassicTests.cs
+src/VerifySample.Tests/Extensions/FakeItEasyTests.cs
+src/VerifySample.Tests/Extensions/FlurlTests.cs
+src/VerifySample.Tests/Extensions/HttpTests.cs
+src/VerifySample.Tests/Extensions/ICSharpCodeDecompilerTests.cs
+src/VerifySample.Tests/Extensions/ImageHashTests.cs
+src/VerifySample.Tests/Extensions/ImageMagickTests.cs
+src/VerifySample.Tests/Extensions/ImageSharpTests.cs
+src/VerifySample.Tests/Extensions/ImageSharpCompareTests.cs
+src/VerifySample.Tests/Extensions/MailMessageTests.cs
+src/VerifySample.Tests/Extensions/MassTransitTests.cs
+src/VerifySample.Tests/Extensions/MicrosoftLoggingTests.cs
+src/VerifySample.Tests/Extensions/MocklyTests.cs
+src/VerifySample.Tests/Extensions/MoqTests.cs
+src/VerifySample.Tests/Extensions/NServiceBusTests.cs
+src/VerifySample.Tests/Extensions/NSubstituteTests.cs
+src/VerifySample.Tests/Extensions/NUlidTests.cs
+src/VerifySample.Tests/Extensions/NewtonsoftJsonTests.cs
+src/VerifySample.Tests/Extensions/NodaTimeTests.cs
+src/VerifySample.Tests/Extensions/OpenTelemetryTests.cs
+src/VerifySample.Tests/Extensions/OpenXmlTests.cs
+src/VerifySample.Tests/Extensions/PDFiumTests.cs
+src/VerifySample.Tests/Extensions/PandocTests.cs
+src/VerifySample.Tests/Extensions/ParametersHashingTests.cs
+src/VerifySample.Tests/Extensions/PdfPigTests.cs
+src/VerifySample.Tests/Extensions/PlaywrightTests.cs
+src/VerifySample.Tests/Extensions/PuppeteerTests.cs
+src/VerifySample.Tests/Extensions/QuestPDFTests.cs
+src/VerifySample.Tests/Extensions/QuibbleTests.cs
+src/VerifySample.Tests/Extensions/RavenDBTests.cs
+src/VerifySample.Tests/Extensions/ReadableExpressionsTests.cs
+src/VerifySample.Tests/Extensions/SeleniumTests.cs
+src/VerifySample.Tests/Extensions/SendGridTests.cs
+src/VerifySample.Tests/Extensions/SepTests.cs
+src/VerifySample.Tests/Extensions/SerilogTests.cs
+src/VerifySample.Tests/Extensions/SourceGeneratorsTests.cs
+src/VerifySample.Tests/Extensions/SqlServerTests.cs
+src/VerifySample.Tests/Extensions/SylvanTests.cs
+src/VerifySample.Tests/Extensions/SyncfusionTests.cs
+src/VerifySample.Tests/Extensions/SystemJsonTests.cs
+src/VerifySample.Tests/Extensions/UlidTests.cs
+src/VerifySample.Tests/Extensions/WolverineTests.cs
+src/VerifySample.Tests/Extensions/YamlTests.cs
+src/VerifySample.Tests/Extensions/ZeroLogTests.cs
+src/VerifySample.Tests.Windows/VerifySample.Tests.Windows.csproj
+src/VerifySample.Tests.Windows/ModuleInitializer.cs
+src/VerifySample.Tests.Windows/Extensions/LocalDbTests.cs
+src/VerifySample.Tests.Windows/Extensions/PhashTests.cs
+src/VerifySample.Tests.Windows/Extensions/WinFormsTests.cs
+src/VerifySample.Tests.Windows/Extensions/XamlTests.cs

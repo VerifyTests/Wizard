@@ -91,6 +91,48 @@ public class NewTests : WebTestContext
         await Assert.That(CurrentUrl).EndsWith("&sponsor=Sponsor&account=acme");
     }
 
+    /// <summary>Toggling a card writes the selection into the url, in registry order (plan 8.1).</summary>
+    [Test]
+    public async Task SelectingAnExtensionUpdatesTheUrl()
+    {
+        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
+        await page.Find(".extension-card[data-id=AngleSharp] input").ChangeAsync(new ChangeEventArgs {Value = true});
+        await Assert.That(CurrentUrl).Contains("&ext=AngleSharp,DiffPlex");
+
+        await page.Find(".extension-card[data-id=DiffPlex] input").ChangeAsync(new ChangeEventArgs {Value = false});
+        await Assert.That(CurrentUrl).Contains("&ext=AngleSharp");
+    }
+
+    /// <summary>Nothing selected is a real answer, and the url has to say so, not read as the default.</summary>
+    [Test]
+    public async Task DeselectingEverythingIsCarriedInTheUrl()
+    {
+        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
+        await page.Find(".extension-card[data-id=DiffPlex] input").ChangeAsync(new ChangeEventArgs {Value = false});
+        await Assert.That(CurrentUrl).Contains("&ext=none");
+    }
+
+    /// <summary>Two extensions registering the same thing cannot both be generated (plan 11.1).</summary>
+    [Test]
+    public async Task ConflictingExtensionsBlockNext()
+    {
+        var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry");
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
+        await Assert.That(page.Find(".interaction-notice[data-rule=activity-listener]").TextContent).Contains("ActivityListener");
+
+        await page.Find(".extension-card[data-id=OpenTelemetry] input").ChangeAsync(new ChangeEventArgs {Value = false});
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
+    }
+
+    /// <summary>With nothing selected the options step has nothing to ask, so the flow leaves it out.</summary>
+    [Test]
+    public async Task OptionsStepIsSkippedWhenNothingIsSelected()
+    {
+        var page = Open("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=none");
+        await Assert.That(page.Find("section.step-body").GetAttribute("data-step")).IsEqualTo("sponsor");
+        await Assert.That(page.FindAll("li [data-step=options]").Count).IsEqualTo(0);
+    }
+
     [Test]
     public Task OutputMarkup()
     {

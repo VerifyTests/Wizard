@@ -1,0 +1,87 @@
+@* The extension picker (plan 7.1 step 7). Cards are grouped by category so a long list stays
+   navigable, and every interaction the current selection implies appears above them, as soon as the
+   combination exists rather than at the end. *@
+<p class="hint">
+    Extensions teach Verify about one kind of value each. Nothing here is required, and anything chosen
+    can be deleted from the generated solution later. @Extensions.All.Count are available.
+</p>
+
+<div class="extension-search">
+    <label for="extensionFilter">Filter</label>
+    <input type="text"
+           id="extensionFilter"
+           placeholder="Name or description"
+           value="@filter"
+           @oninput="FilterChanged" />
+    <span class="selected-count">@State.SelectedExtensions.Count selected</span>
+</div>
+
+@if (interactions.Count > 0)
+{
+    <div class="interactions">
+        @foreach (var interaction in interactions)
+        {
+            <InteractionNotice Result="interaction" />
+        }
+    </div>
+}
+
+@foreach (var category in Categories)
+{
+    <section class="extension-category">
+        <h3>@category.Key.Label()</h3>
+        <div class="extension-cards">
+            @foreach (var definition in category)
+            {
+                <ExtensionCard Definition="definition"
+                               Framework="@(State.TestFramework ?? TestFramework.XunitV3)"
+                               Selected="State.Has(definition.Id)"
+                               SelectedChanged="_ => Toggle(definition.Id, _)" />
+            }
+        </div>
+    </section>
+}
+
+@code {
+    [Parameter, EditorRequired] public WizardState State { get; set; } = null!;
+    [Parameter] public EventCallback Changed { get; set; }
+
+    string filter = "";
+
+    IReadOnlyList<InteractionResult> interactions = [];
+
+    protected override void OnParametersSet() =>
+        interactions = InteractionRules.For(State);
+
+    IEnumerable<IGrouping<ExtensionCategory, ExtensionDefinition>> Categories =>
+        Extensions.All
+            .Where(Matches)
+            .GroupBy(_ => _.Category)
+            .OrderBy(_ => _.Key);
+
+    bool Matches(ExtensionDefinition definition)
+    {
+        if (filter.Length == 0)
+        {
+            return true;
+        }
+
+        // A selected extension stays visible whatever the filter says, so it cannot be lost from view.
+        if (State.Has(definition.Id))
+        {
+            return true;
+        }
+
+        return definition.DisplayName.Contains(filter, StringComparison.OrdinalIgnoreCase) ||
+               definition.Description.Contains(filter, StringComparison.OrdinalIgnoreCase);
+    }
+
+    void FilterChanged(ChangeEventArgs args) =>
+        filter = args.Value as string ?? "";
+
+    Task Toggle(string id, bool selected)
+    {
+        State.Select(id, selected);
+        return Changed.InvokeAsync();
+    }
+}

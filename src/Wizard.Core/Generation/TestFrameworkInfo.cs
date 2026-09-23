@@ -48,6 +48,28 @@ public sealed record TestFrameworkInfo(
     /// <summary>The class (and C# file) holding the sample test: the snapshot name's first segment.</summary>
     public string SampleClass => SampleVerifiedFile[..SampleVerifiedFile.IndexOf('.')];
 
+    /// <summary>Attributes on a generated test class, such as MSTest's <c>[TestClass]</c>.</summary>
+    public IReadOnlyList<string> ClassAttributes { get; init; } = [];
+
+    /// <summary>MSTest's source generator only handles partial classes.</summary>
+    public bool PartialClasses { get; init; }
+
+    /// <summary>The attribute marking a method as a test; empty for Fixie, which uses a convention.</summary>
+    public string TestAttribute { get; init; } = "";
+
+    /// <summary>
+    /// How a test that cannot run unattended, such as one needing a licence key, is kept out of a normal
+    /// run. Fixie has no such attribute, so the method is made private and its convention skips it.
+    /// </summary>
+    public Func<string, string>? SkipAttribute { get; init; }
+
+    /// <summary>
+    /// Analyzer warnings the generated test project suppresses, with the reason. The solution builds
+    /// with warnings as errors, so a rule the samples cannot satisfy has to be turned off rather than
+    /// left to fail the first build.
+    /// </summary>
+    public IReadOnlyList<(string Code, string Reason)> SuppressedWarnings { get; init; } = [];
+
     public static TestFrameworkInfo For(TestFramework framework) =>
         framework switch
         {
@@ -87,7 +109,19 @@ public sealed record TestFrameworkInfo(
                 VerifyChecks.Run();
         }
         """,
-        "Sample.Test.verified.txt");
+        "Sample.Test.verified.txt")
+    {
+        TestAttribute = "[Fact]",
+        SkipAttribute = _ => $"[Fact(Skip = \"{_}\")]",
+        SuppressedWarnings =
+        [
+            ("xUnit1051",
+                "the extension samples call library methods that take an optional CancellationToken " +
+                "without passing TestContext.Current.CancellationToken. They are illustrations of one " +
+                "API each, and threading a token through every one would bury the thing being shown. " +
+                "Remove this once the samples become real tests.")
+        ]
+    };
 
     static TestFrameworkInfo nunit = new(
         TestFramework.NUnit,
@@ -118,7 +152,12 @@ public sealed record TestFrameworkInfo(
                 VerifyChecks.Run();
         }
         """,
-        "Sample.Test.verified.txt");
+        "Sample.Test.verified.txt")
+    {
+        ClassAttributes = ["[TestFixture]"],
+        TestAttribute = "[Test]",
+        SkipAttribute = _ => $"[Explicit(\"{_}\")]"
+    };
 
     // TUnit sets OutputType itself and is always a Microsoft.Testing.Platform app
     static TestFrameworkInfo tunit = new(
@@ -148,7 +187,12 @@ public sealed record TestFrameworkInfo(
                 VerifyChecks.Run();
         }
         """,
-        "Sample.Test.verified.txt");
+        "Sample.Test.verified.txt")
+    {
+        TestAttribute = "[Test]",
+        // TUnit's [Explicit] carries no reason; the generated comment above the method has it.
+        SkipAttribute = _ => "[Explicit]"
+    };
 
     static TestFrameworkInfo msTest = new(
         TestFramework.MSTest,
@@ -179,7 +223,13 @@ public sealed record TestFrameworkInfo(
                 VerifyChecks.Run();
         }
         """,
-        "Sample.Test.verified.txt");
+        "Sample.Test.verified.txt")
+    {
+        ClassAttributes = ["[TestClass]"],
+        PartialClasses = true,
+        TestAttribute = "[TestMethod]",
+        SkipAttribute = _ => $"[Ignore(\"{_}\")]"
+    };
 
     static TestFrameworkInfo fixie = new(
         TestFramework.Fixie,

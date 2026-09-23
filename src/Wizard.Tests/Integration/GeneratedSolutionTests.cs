@@ -15,6 +15,79 @@ public class GeneratedSolutionTests
     [MatrixDataSource]
     public async Task CoreSolutionBuildsAndPasses(TestFramework framework)
     {
+        var directory = await Generate(State(framework), framework.ToString());
+
+        await Run(directory, "build --configuration Release");
+        // Plan.TestCommand, as the generated guide and build definitions run it
+        var output = await Run(directory, "test --configuration Release --no-build");
+
+        var received = Directory.EnumerateFiles(directory, "*.received.*", SearchOption.AllDirectories).ToList();
+        await Assert.That(received).IsEmpty();
+
+        // An undiscovered test is not a failure, so count them: the sample and the conventions check.
+        await Assert.That(PassedCount(output)).IsEqualTo(2).Because(output);
+    }
+
+    /// <summary>
+    /// Every extension on its own, at verbose depth, has to compile. This is the guarantee behind the
+    /// samples: they are copied from readmes, which drift, and only the compiler notices (plan 17.4).
+    /// The tests are not run, because most extensions need a database, a browser or a licence; the core
+    /// solution above covers running.
+    /// </summary>
+    [Test]
+    [MethodDataSource(nameof(EveryExtension))]
+    public async Task ExtensionSolutionBuilds(string id)
+    {
+        var state = State(TestFramework.XunitV3) with
+        {
+            SelectedExtensions = new HashSet<string>([id], StringComparer.Ordinal)
+        };
+        state.Normalize();
+
+        var directory = await Generate(state, $"extension-{id}");
+        await Run(directory, "build --configuration Release");
+    }
+
+    public static IEnumerable<Func<string>> EveryExtension() =>
+        Wizard.Core.Extensions.All
+            .Where(_ => _.Platform == Platform.CrossPlatform || OperatingSystem.IsWindows())
+            .Select<ExtensionDefinition, Func<string>>(definition => () => definition.Id);
+
+    /// <summary>
+    /// The combinations the interaction rules exist for, which is where a wrong ordering or a method
+    /// that two packages both define shows up as a compile error (plan A16).
+    /// </summary>
+    [Test]
+    [MethodDataSource(nameof(Combinations))]
+    public async Task CombinationBuilds((string Name, string[] Ids) combination)
+    {
+        var state = State(TestFramework.XunitV3) with
+        {
+            SelectedExtensions = new HashSet<string>(combination.Ids, StringComparer.Ordinal)
+        };
+        state.Normalize();
+
+        var directory = await Generate(state, $"combination-{combination.Name}");
+        await Run(directory, "build --configuration Release");
+    }
+
+    public static IEnumerable<Func<(string Name, string[] Ids)>> Combinations()
+    {
+        yield return () => ("EfAndSql", ["DiffPlex", "EntityFramework", "SqlServer"]);
+        yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
+        // Blazor's Render initializes the plugin from its static constructor, which throws once any
+        // verification has run, so the core sample and a Blazor test in one assembly is the case to
+        // prove (plan A2).
+        yield return () => ("BlazorAndCore", ["AngleSharp", "Blazor", "DiffPlex"]);
+        // Both define PagesToInclude and SkipPdfNormalization in the VerifyTests namespace (plan A6).
+        yield return () => ("QuestPdfAndPdfPig", ["PdfPig", "QuestPDF"]);
+        // Verify.Flurl is built against an older Verify.Http than the one pinned here (plan A11).
+        yield return () => ("FlurlAndHttp", ["Flurl", "Http"]);
+        yield return () => ("Recording", ["EntityFramework", "Http", "MicrosoftLogging", "SqlServer"]);
+    }
+
+    static WizardState State(TestFramework framework)
+    {
         var state = new WizardState
         {
             Flow = Flow.New,
@@ -27,11 +100,16 @@ public class GeneratedSolutionTests
             SponsorMode = SponsorMode.Exempt,
             Exemption = Exemption.OpenSource
         };
+        SponsorRules.ApplyDefaults(state, Date.FromDateTime(DateTime.UtcNow));
+        return state;
+    }
+
+    static async Task<string> Generate(WizardState state, string name)
+    {
         var today = Date.FromDateTime(DateTime.UtcNow);
-        SponsorRules.ApplyDefaults(state, today);
         var plan = Plan.Build(state, PackageVersions.Baked, today);
 
-        var directory = Path.Combine(Path.GetTempPath(), "VerifyWizardIntegration", framework.ToString());
+        var directory = Path.Combine(Path.GetTempPath(), "VerifyWizardIntegration", name);
         if (Directory.Exists(directory))
         {
             Directory.Delete(directory, recursive: true);
@@ -44,15 +122,7 @@ public class GeneratedSolutionTests
             await File.WriteAllBytesAsync(path, file.ToBytes());
         }
 
-        await Run(directory, "build --configuration Release");
-        // Plan.TestCommand, as the generated guide and build definitions run it
-        var output = await Run(directory, "test --configuration Release --no-build");
-
-        var received = Directory.EnumerateFiles(directory, "*.received.*", SearchOption.AllDirectories).ToList();
-        await Assert.That(received).IsEmpty();
-
-        // An undiscovered test is not a failure, so count them: the sample and the conventions check.
-        await Assert.That(PassedCount(output)).IsEqualTo(2).Because(output);
+        return directory;
     }
 
     /// <summary>VSTest prints "Passed: n", Microsoft.Testing.Platform prints "succeeded: n".</summary>

@@ -1,0 +1,66 @@
+@* One selectable extension (plan 7.1 step 7). The whole card is the checkbox's label, so clicking
+   anywhere toggles it. Badges say up front what selecting it will cost: a licence, a tool, Windows. *@
+<label class="extension-card @(Selected ? "selected" : "")" data-id="@Definition.Id">
+    <input type="checkbox"
+           checked="@Selected"
+           @onchange="_ => SelectedChanged.InvokeAsync((bool?) _.Value ?? false)" />
+    <span class="extension-body">
+        <span class="extension-name">@Definition.DisplayName</span>
+        <span class="extension-description">@Definition.Description</span>
+        @if (Badges.Count > 0)
+        {
+            <span class="badges">
+                @foreach (var badge in Badges)
+                {
+                    <span class="badge" title="@badge.Hint">@badge.Label</span>
+                }
+            </span>
+        }
+    </span>
+</label>
+
+@code {
+    [Parameter, EditorRequired] public ExtensionDefinition Definition { get; set; } = null!;
+    [Parameter] public bool Selected { get; set; }
+    [Parameter] public EventCallback<bool> SelectedChanged { get; set; }
+
+    /// <summary>The chosen test framework, which decides whether the samples can be generated.</summary>
+    [Parameter] public TestFramework Framework { get; set; }
+
+    record Badge(string Label, string Hint);
+
+    IReadOnlyList<Badge> Badges
+    {
+        get
+        {
+            var badges = new List<Badge>();
+            if (Definition.Platform == Platform.WindowsOnly)
+            {
+                badges.Add(new("Windows only", "The samples go in a second test project that only builds on Windows."));
+            }
+
+            foreach (var requirement in Definition.ExternalRequirements)
+            {
+                var label = "Needs a tool";
+                if (requirement.EnvironmentVariable != null)
+                {
+                    label = "Needs a licence";
+                }
+
+                badges.Add(new(label, $"{requirement.Name}: {requirement.Description}"));
+            }
+
+            if (!Definition.Supports(Framework))
+            {
+                badges.Add(new($"No {Framework.Name()} samples", Definition.UnsupportedTestFrameworks.First(_ => _.Framework == Framework).Reason));
+            }
+
+            if (Definition.Beta)
+            {
+                badges.Add(new("Prerelease", "This package has no stable release yet."));
+            }
+
+            return badges;
+        }
+    }
+}

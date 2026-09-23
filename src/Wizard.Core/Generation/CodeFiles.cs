@@ -97,32 +97,6 @@ public static class CodeFiles
         }
         """;
 
-    public static string ModuleInitializer(Plan plan) =>
-        Banner(plan) +
-        """
-        using System.Runtime.CompilerServices;
-        using VerifyTests.DiffPlex;
-
-        // Everything here runs once, when the test assembly loads, before any test.
-        public static class ModuleInitializer
-        {
-            [ModuleInitializer]
-            public static void Initialize()
-            {
-                // Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline
-                // diff instead of the whole received and verified text.
-                // OutputType.Compact prints only the changed lines, with a line of context either side.
-                // Alternatives: OutputType.Full, OutputType.Minimal.
-                VerifyDiffPlex.Initialize(OutputType.Compact);
-
-                // Initializes every Verify.* plugin the project references and has not initialized above.
-                // Explicit calls come first so their parameters apply: a plugin can only be initialized once.
-                VerifierSettings.InitializePlugins();
-            }
-        }
-
-        """;
-
     public static string SampleTest(Plan plan)
     {
         var verified = plan.Framework.SampleVerifiedFile;
@@ -186,16 +160,14 @@ public static class CodeFiles
         open System.Reflection
         open Expecto
         open VerifyTests
-        open VerifyTests.DiffPlex
+        {{string.Join("\n", ExpectoOpens(plan))}}
         open VerifyExpecto
 
         // F# has no module initializers, so each test forces this before verifying. It runs once.
-        // Verify.DiffPlex: a failed text snapshot shows an inline diff instead of the whole text.
-        // InitializePlugins initializes any other Verify.* plugin the project references.
+        // Extension samples are C# only (plan D9), but every selected plugin is still enabled here.
         let initialize =
             lazy (
-                VerifyDiffPlex.Initialize(OutputType.Compact)
-                VerifierSettings.InitializePlugins())
+        {{ExpectoInitialize(plan)}})
 
         // Verify serializes what FindPerson returns and compares it with Tests.findPerson.verified.txt.
         {{plan.Framework.SampleTest}}
@@ -204,4 +176,34 @@ public static class CodeFiles
         {{plan.Framework.VerifyChecksTest}}
 
         """;
+
+    static IEnumerable<string> ExpectoOpens(Plan plan) =>
+        ModuleInitializerGenerator.Blocks(plan, windows: false)
+            .SelectMany(_ => _.Usings)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .Select(_ => $"open {_}");
+
+    /// <summary>
+    /// The same calls, in the same order, as the C# module initializer, translated to F#: no
+    /// semicolons, and helper members become local functions, which the registry does not carry, so an
+    /// extension needing one is not offered for Expecto.
+    /// </summary>
+    static string ExpectoInitialize(Plan plan)
+    {
+        var builder = new StringBuilder();
+        foreach (var line in ModuleInitializerGenerator.Statements(plan, windows: false, skipBlocksNeedingMembers: true))
+        {
+            if (line.Length == 0)
+            {
+                builder.Append('\n');
+                continue;
+            }
+
+            // F# statements carry no terminator; comments are the same in both languages.
+            builder.Append($"        {line.TrimEnd(';')}\n");
+        }
+
+        return builder.ToString().TrimEnd('\n');
+    }
 }

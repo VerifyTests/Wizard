@@ -61,6 +61,16 @@ public enum SponsorMode
     Ignore
 }
 
+/// <summary>How much of an extension's API the generated samples cover (plan D7).</summary>
+public enum Depth
+{
+    /// <summary>Everything the catalogue documents, one commented test per API. The default.</summary>
+    Verbose,
+
+    /// <summary>The enable call and the one or two most common usages.</summary>
+    Minimal
+}
+
 public enum Exemption
 {
     OpenSource,

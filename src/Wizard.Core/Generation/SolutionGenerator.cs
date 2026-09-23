@@ -48,15 +48,21 @@ public static class SolutionGenerator
         Add("CLAUDE.md", ai);
         Add(".github/copilot-instructions.md", ai);
         Add(".claude/skills/verify-snapshot-testing/SKILL.md", AiContentGenerator.Skill());
-        if (buildServer is { } file)
+        if (buildServer is { } definition)
         {
-            Add(file.Path, file.Content);
+            Add(definition.Path, definition.Content);
         }
 
         var library = $"src/{plan.LibraryProject}";
         Add($"{library}/{plan.LibraryProject}.csproj", ProjectFiles.LibraryProject(plan));
         Add($"{library}/ClassBeingTested.cs", CodeFiles.ClassBeingTested(plan));
         Add($"{library}/SampleModels.cs", CodeFiles.SampleModels(plan));
+        // Types the extension samples exercise: a DbContext, a controller, a component. Each one is a
+        // placeholder for the reader's own code, which is why they live beside it rather than in the tests.
+        foreach (var file in plan.Extensions.SelectMany(_ => _.Definition.LibraryFiles).DistinctBy(_ => _.Path))
+        {
+            Add($"{library}/{file.Path}", CodeFiles.Banner(plan) + file.Content.TrimEnd('\n') + "\n");
+        }
 
         var tests = $"src/{plan.TestProject}";
         Add($"{tests}/{plan.TestProject}.{plan.Framework.ProjectExtension}", ProjectFiles.TestProject(plan));
@@ -67,7 +73,7 @@ public static class SolutionGenerator
         }
         else
         {
-            Add($"{tests}/ModuleInitializer.cs", CodeFiles.ModuleInitializer(plan));
+            Add($"{tests}/ModuleInitializer.cs", ModuleInitializerGenerator.Build(plan));
             Add($"{tests}/{plan.Framework.SampleClass}.cs", CodeFiles.SampleTest(plan));
             Add($"{tests}/VerifyChecksTests.cs", CodeFiles.VerifyChecksTest(plan));
         }
@@ -80,6 +86,32 @@ public static class SolutionGenerator
         if (plan.Framework.Framework == TestFramework.Fixie)
         {
             Add($"{tests}/TestProject.cs", CodeFiles.FixieTestProject(plan));
+        }
+
+        foreach (var test in ExtensionTestFiles.For(plan, windows: false))
+        {
+            Add($"{tests}/{test.Path}", test.Text);
+        }
+
+        if (plan.HasWindowsProject)
+        {
+            var windows = $"src/{plan.WindowsTestProject}";
+            Add($"{windows}/{plan.WindowsTestProject}.csproj", ProjectFiles.TestProject(plan, windows: true));
+            Add($"{windows}/ModuleInitializer.cs", ModuleInitializerGenerator.BuildWindows(plan));
+            if (plan.Framework.Framework == TestFramework.MSTest)
+            {
+                Add($"{windows}/AssemblyInfo.cs", CodeFiles.MsTestAssemblyInfo(plan));
+            }
+
+            if (plan.Framework.Framework == TestFramework.Fixie)
+            {
+                Add($"{windows}/TestProject.cs", CodeFiles.FixieTestProject(plan));
+            }
+
+            foreach (var test in ExtensionTestFiles.For(plan, windows: true))
+            {
+                Add($"{windows}/{test.Path}", test.Text);
+            }
         }
 
         return files;

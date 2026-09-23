@@ -49,7 +49,9 @@ public class BreadcrumbTests : WebTestContext
     {
         var rail = RenderRail(MidFlow());
         await Assert.That(rail.FindAll("li.future").Select(_ => _.TextContent.Trim()))
-            .IsEquivalentTo(["Build server", "Maintenance fee", "Result"], TUnit.Assertions.Enums.CollectionOrdering.Matching);
+            .IsEquivalentTo(
+                ["Build server", "Extensions", "Extension options", "Maintenance fee", "Result"],
+                TUnit.Assertions.Enums.CollectionOrdering.Matching);
         await Assert.That(rail.FindAll("button[data-step=ci]").Count).IsEqualTo(0);
     }
 }

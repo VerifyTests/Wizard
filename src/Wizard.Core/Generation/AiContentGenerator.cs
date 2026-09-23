@@ -27,6 +27,7 @@ public static class AiContentGenerator
             $"The Open Source Maintenance Fee declaration is in `Directory.Build.props` ({SponsorRules.Summary(plan.State)}). Do not remove it: without it every build fails with SC021."
         ]);
 
+        AppendExtensions(builder, plan);
         builder.Raw(ContentFiles.Raw("context.md"));
 
         builder.Heading(2, "Environment");
@@ -37,6 +38,68 @@ public static class AiContentGenerator
             "A new test fails on its first run because it has no `.verified.*` file yet. Review the `.received.*` file, then accept it by copying it to the `Verified:` path from the exception message."
         ]);
         return builder.ToString();
+    }
+
+    /// <summary>
+    /// The extension cheat sheet (plan 12.6 §6): what each one is enabled by, what it puts in a
+    /// snapshot, and the decisions the interaction rules took, as instructions rather than as prose.
+    /// </summary>
+    static void AppendExtensions(MarkdownBuilder builder, Plan plan)
+    {
+        if (plan.Extensions.Count == 0)
+        {
+            return;
+        }
+
+        builder.Heading(2, "Verify extensions in this project");
+        foreach (var extension in plan.Extensions)
+        {
+            var definition = extension.Definition;
+            builder.Heading(3, definition.DisplayName);
+            var facts = new List<string>
+            {
+                definition.Description,
+                $"Repository: {definition.RepoUrl}"
+            };
+            if (extension.Statements.Count > 0)
+            {
+                facts.Add($"Enabled in `ModuleInitializer.cs` by `{string.Join(" ", extension.Statements.Select(_ => _.Code))}`. Do not move that call after `VerifierSettings.InitializePlugins()`.");
+            }
+
+            if (extension.Samples.Count > 0)
+            {
+                facts.Add($"Samples: `Extensions/{extension.TestClass}.cs`, using {string.Join(", ", extension.Samples.Select(_ => $"`{_.Name}`"))}.");
+            }
+
+            if (definition.Usings.Count > 0)
+            {
+                facts.Add($"Needs {string.Join(", ", definition.Usings.Select(_ => $"`using {_};`"))} in the test file, not in global usings: extensions define colliding type names.");
+            }
+
+            facts.AddRange(definition.Notes);
+            builder.Bullets(facts);
+        }
+
+        if (plan.Interactions.Count == 0)
+        {
+            return;
+        }
+
+        builder.Heading(2, "Decisions already taken");
+        builder.Paragraph("These follow from the combination of extensions. Changing one of them changes behaviour across the whole test project.");
+        builder.Bullets(plan.Interactions.Select(Instruction));
+    }
+
+    static string Instruction(InteractionResult interaction)
+    {
+        var text = $"**{string.Join(", ", interaction.Involved)}**: {interaction.Message}";
+        if (interaction.Choice is { } choice &&
+            choice.Options.FirstOrDefault(_ => _.Value == interaction.ChosenValue) is { } chosen)
+        {
+            return $"{text} In force: {chosen.Label}.";
+        }
+
+        return text;
     }
 
     /// <summary>The Verify skill file (plan 12.6), for .claude/skills/verify-snapshot-testing/SKILL.md.</summary>

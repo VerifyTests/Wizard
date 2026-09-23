@@ -38,6 +38,13 @@ tests, with a `{*path}` fallback that mirrors GitHub Pages serving `404.html` fo
   generator tests stay fast. `GenerateWizardDefaults` in its csproj bakes the SDK version (from `global.json`)
   and the target framework (`GeneratedTargetFramework` in `src/Directory.Build.props`) into
   `WizardDefaults`. Generated solutions use those values.
+  - `Registry/Extensions.<A-D>.cs` hold one `ExtensionDefinition` per extension, split by the catalogue
+    file each was researched from. `Registry/InteractionRules.Data.cs` holds the combinations. Read
+    `ExtensionDefinition.cs` before adding an entry: its xml docs are the contract, and `RegistryTests`
+    enforces most of it.
+  - Every package id an entry names needs a version in `Versions/package-versions.json`, and it must be
+    one that exists on nuget.org. The catalogue records each repo's own `<Version>`, which is often the
+    next unreleased one.
 - `src/Wizard.Web`: the Blazor UI.
 - `src/Wizard.Tests`: TUnit tests. There are bunit component tests, Playwright screen snapshots (PNG and
   HTML), and `RepoContractTests` anti-rot checks.
@@ -45,6 +52,11 @@ tests, with a `{*path}` fallback that mirrors GitHub Pages serving `404.html` fo
 ## Conventions
 
 - Snapshot everything the generators produce with Verify; generators are pure functions of their inputs.
+- Generated code is written in string literals, so nothing may leak the line endings of the file holding
+  them. Split source with `ModuleInitializerGenerator.Lines`, which drops the carriage return.
+- A registry sample has to compile for xUnit v3, NUnit, TUnit, MSTest and Fixie, so it is a method body
+  only; the generator supplies the signature and the framework's attribute. `GeneratedSolutionTests`
+  proves it by building a solution per extension.
 - The bundled fonts in `wwwroot/fonts` keep screenshots identical across OSes.
   `RepoContractTests.ShippedFontsCoverRenderedText` fails if rendered text uses a character the fonts
   don't cover.

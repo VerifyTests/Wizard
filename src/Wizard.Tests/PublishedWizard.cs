@@ -59,6 +59,9 @@ public sealed class PublishedWizard : IAsyncDisposable
     public Task<IPage> NewPage() =>
         context.NewPageAsync();
 
+    /// <summary>What every page believes "now" is, so dates the wizard derives are the same every run.</summary>
+    public static readonly DateTime FixedTime = new(2026, 9, 22, 10, 0, 0, DateTimeKind.Utc);
+
     public static async Task<PublishedWizard> Start()
     {
         var installExitCode = Program.Main(["install", "chromium"]);
@@ -125,6 +128,11 @@ public sealed class PublishedWizard : IAsyncDisposable
                     Height = 900
                 }
             });
+        // Fixed on the context rather than per page: the wizard derives dates from today, and installing
+        // the clock on a page that has not navigated yet fails, because the script it calls into is
+        // injected on navigation.
+        await context.Clock.SetFixedTimeAsync(FixedTime);
+
         var wizard = new PublishedWizard(app, playwright, browser, context, port);
         await wizard.WarmUp();
         return wizard;

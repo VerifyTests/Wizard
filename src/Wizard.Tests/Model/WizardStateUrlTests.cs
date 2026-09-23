@@ -18,6 +18,51 @@ public class WizardStateUrlTests
         };
         yield return () => GeneratorTests.State() with {SponsorMode = SponsorMode.PrivateArrangement, SponsorUntil = "2027-06"};
         yield return () => GeneratorTests.State() with {SponsorMode = SponsorMode.Ignore};
+        yield return () => GeneratorTests.State() with {SelectedExtensions = new HashSet<string>(StringComparer.Ordinal)};
+        yield return () => GeneratorTests.WithExtensions(GeneratorTests.State(), "EntityFramework", "SqlServer");
+        yield return () =>
+        {
+            var state = GeneratorTests.WithExtensions(GeneratorTests.State(), "AngleSharp", "DiffPlex");
+            state.SetDepth("AngleSharp", Depth.Minimal);
+            state.SetChoice("diffplex-output", "Full");
+            return state;
+        };
+    }
+
+    /// <summary>
+    /// An absent ext key means the default selection, not an empty one, so a link made before the
+    /// extension step existed still generates what it used to.
+    /// </summary>
+    [Test]
+    public async Task AbsentExtensionsMeansTheDefault()
+    {
+        var state = WizardStateUrl.Parse(Flow.New, "os=Windows");
+        await Assert.That(state.SelectedExtensions).IsEquivalentTo(WizardState.DefaultExtensions);
+    }
+
+    [Test]
+    public async Task NoneMeansNothingSelected()
+    {
+        var state = WizardStateUrl.Parse(Flow.New, $"os=Windows&ext={WizardStateUrl.NoExtensions}");
+        await Assert.That(state.SelectedExtensions).IsEmpty();
+    }
+
+    [Test]
+    public async Task UnknownExtensionsAndStaleOptionsAreDropped()
+    {
+        var state = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,NotAnExtension&min=NotAnExtension&opt=nope:1");
+        await Assert.That(state.SelectedExtensions).IsEquivalentTo(new[] {"DiffPlex"});
+        await Assert.That(state.Depths).IsEmpty();
+        await Assert.That(state.Choices).IsEmpty();
+    }
+
+    /// <summary>The order ids were added in must not change the link.</summary>
+    [Test]
+    public async Task ExtensionOrderIsTheRegistryOrder()
+    {
+        var one = WizardStateUrl.Parse(Flow.New, "ext=SqlServer,DiffPlex");
+        var other = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,SqlServer");
+        await Assert.That(WizardStateUrl.ToQuery(one)).IsEqualTo(WizardStateUrl.ToQuery(other));
     }
 
     [Test]

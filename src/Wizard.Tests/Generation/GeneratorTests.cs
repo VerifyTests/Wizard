@@ -25,6 +25,17 @@ public class GeneratorTests
             Step = "output"
         };
 
+    /// <summary>A copy of the state with exactly these extensions selected.</summary>
+    public static WizardState WithExtensions(WizardState state, params string[] ids)
+    {
+        var copy = state with
+        {
+            SelectedExtensions = new HashSet<string>(ids, StringComparer.Ordinal)
+        };
+        copy.Normalize();
+        return copy;
+    }
+
     static Plan PlanFor(WizardState state) =>
         Plan.Build(state, PackageVersions.Baked, Today);
 
@@ -122,6 +133,95 @@ public class GeneratorTests
                  Url: {WizardStateUrl.ToQuery(plan.State)}
                  """)
             .UseParameters(sponsor.Name);
+    }
+
+    /// <summary>
+    /// Every extension on its own, at both depths (plan 17.1): the module initializer, the test file
+    /// and the packages it adds. One snapshot per extension makes a registry edit reviewable.
+    /// </summary>
+    [Test]
+    [MethodDataSource(nameof(EachExtension))]
+    public Task Extension((string Id, Depth Depth) extension)
+    {
+        var state = WithExtensions(State(), extension.Id);
+        state.SetDepth(extension.Id, extension.Depth);
+        var plan = PlanFor(state);
+        var files = SolutionGenerator.Build(plan)
+            .Where(_ => _.Path.Contains("/Extensions/") || _.Path.EndsWith("ModuleInitializer.cs", StringComparison.Ordinal));
+
+        return Verify(
+                $"""
+                 {Render(files)}
+                 ==== packages
+
+                 {string.Join("\n", plan.AllPackages)}
+
+                 ==== interactions
+
+                 {string.Join("\n", plan.Interactions.Select(_ => $"{_.Severity} {_.RuleId}: {_.Message}"))}
+                 """)
+            .UseParameters($"{extension.Id}-{extension.Depth}");
+    }
+
+    public static IEnumerable<Func<(string Id, Depth Depth)>> EachExtension()
+    {
+        foreach (var definition in Wizard.Core.Extensions.All)
+        {
+            foreach (var depth in new[] {Depth.Minimal, Depth.Verbose})
+            {
+                var id = definition.Id;
+                yield return () => (id, depth);
+            }
+        }
+    }
+
+    /// <summary>The combinations the interaction rules exist for (plan 17.1).</summary>
+    public static IEnumerable<Func<(string Name, string[] Ids)>> Combinations()
+    {
+        yield return () => ("EfAndSql", ["DiffPlex", "EntityFramework", "SqlServer"]);
+        yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
+        yield return () => ("Recording", ["EntityFramework", "Http", "MicrosoftLogging", "SqlServer"]);
+        yield return () => ("Windows", ["DiffPlex", "WinForms", "Xaml"]);
+        yield return () => ("Everything", [.. Wizard.Core.Extensions.All.Select(_ => _.Id)]);
+    }
+
+    /// <summary>
+    /// Ids the registry does not have yet are dropped by Normalize, so a combination still produces a
+    /// reviewable snapshot while the registry is being filled in.
+    /// </summary>
+    [Test]
+    [MethodDataSource(nameof(Combinations))]
+    public Task Combination((string Name, string[] Ids) combination)
+    {
+        var plan = PlanFor(WithExtensions(State(), combination.Ids));
+        return Verify(
+                $"""
+                 ==== selected
+
+                 {string.Join("\n", plan.Extensions.Select(_ => _.Id))}
+
+                 ==== interactions
+
+                 {string.Join("\n\n", plan.Interactions.Select(_ => $"{_.Severity} {_.RuleId} [{string.Join(", ", _.Involved)}]\n{_.Message}"))}
+
+                 {Render(SolutionGenerator.Build(plan).Where(_ => _.Path.EndsWith("ModuleInitializer.cs", StringComparison.Ordinal)))}
+                 ==== files
+
+                 {string.Join("\n", SolutionGenerator.Build(plan).Select(_ => _.Path))}
+                 """)
+            .UseParameters(combination.Name);
+    }
+
+    /// <summary>
+    /// A conflicting selection still generates, so the output step can show what it would produce;
+    /// the extension step is what stops the user moving on (plan 11.1).
+    /// </summary>
+    [Test]
+    public async Task ConflictingSelectionStillGenerates()
+    {
+        var plan = PlanFor(WithExtensions(State(), "Diagnostics", "OpenTelemetry"));
+        await Assert.That(plan.Blocked).IsTrue();
+        await Assert.That(SolutionGenerator.Build(plan)).IsNotEmpty();
     }
 
     static string Render(IEnumerable<GeneratedFile> files)

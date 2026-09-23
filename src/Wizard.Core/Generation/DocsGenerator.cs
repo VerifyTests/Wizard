@@ -17,7 +17,8 @@ public static class DocsGenerator
         AppendImplicitUsings(builder);
         AppendConventions(builder, plan);
         AppendSnapshotManagement(builder, plan);
-        AppendDiffPlex(builder);
+        AppendExtensions(builder, plan);
+        AppendInteractions(builder, plan);
         AppendModuleInitializer(builder, plan);
         AppendSample(builder, plan);
         AppendDiffTools(builder, plan);
@@ -39,10 +40,21 @@ public static class DocsGenerator
             $"Package management: {plan.Cli.Name()}",
             $"Test framework: {plan.Framework.Framework.Name()}",
             $"Build server: {plan.BuildServer.Name()}",
+            $"Extensions: {ExtensionSummary(plan)}",
             $"Maintenance fee: {SponsorRules.Summary(plan.State)}",
             $".NET: {WizardDefaults.TargetFramework} (SDK {WizardDefaults.SdkVersion})"
         ]);
         builder.Paragraph("The downloadable solution already contains everything described below: a class library, a test project with a passing sample test, and the settings files. This guide explains each part, so the same setup can be applied to an existing solution.");
+    }
+
+    static string ExtensionSummary(Plan plan)
+    {
+        if (plan.Extensions.Count == 0)
+        {
+            return "none";
+        }
+
+        return string.Join(", ", plan.Extensions.Select(_ => $"{_.Id} ({_.Depth.ToString().ToLowerInvariant()})"));
     }
 
     static void AppendPackages(MarkdownBuilder builder, Plan plan)
@@ -156,12 +168,107 @@ public static class DocsGenerator
         }
     }
 
-    static void AppendDiffPlex(MarkdownBuilder builder)
+    /// <summary>One subsection per selected extension (plan 12.3 §9).</summary>
+    static void AppendExtensions(MarkdownBuilder builder, Plan plan)
     {
-        builder.Heading(2, "DiffPlex");
-        builder.Paragraph("The text comparison behavior of Verify is pluggable. The default behaviour, on failure, is to output both the received and the verified contents as part of the exception. This can be noisy when verifying large strings.");
-        builder.Paragraph("[Verify.DiffPlex](https://github.com/VerifyTests/Verify.DiffPlex) changes the text compare result to highlighting text differences inline. This is optional, but recommended. It is enabled in the module initializer below.");
+        if (plan.Extensions.Count == 0)
+        {
+            return;
+        }
+
+        builder.Heading(2, "Extensions");
+        builder.Paragraph("Each extension below teaches Verify about one kind of value: how to serialize it, how to compare two of them, or how to turn it into something readable. They are independent; removing one changes nothing else.");
+
+        foreach (var extension in plan.Extensions)
+        {
+            AppendExtension(builder, plan, extension);
+        }
     }
+
+    static void AppendExtension(MarkdownBuilder builder, Plan plan, ResolvedExtension extension)
+    {
+        var definition = extension.Definition;
+        builder.Heading(3, definition.DisplayName);
+        builder.Paragraph($"{definition.Description} ([repository]({definition.RepoUrl}))");
+
+        var packages = extension.Packages.Where(_ => _.Kind == PackageKind.PackageReference).ToList();
+        if (packages.Count > 0)
+        {
+            builder.Paragraph($"Package{(packages.Count == 1 ? "" : "s")}: {string.Join(", ", packages.Select(_ => Package(plan, _)))}.");
+        }
+
+        if (extension.Statements.Count > 0)
+        {
+            builder.Paragraph("Enabled by:");
+            builder.Code(string.Join('\n', extension.Statements.Select(_ => _.Code)), "cs");
+        }
+        else
+        {
+            builder.Paragraph("Enabled by `VerifierSettings.InitializePlugins()`, which needs no call of its own.");
+        }
+
+        foreach (var requirement in definition.ExternalRequirements)
+        {
+            builder.Paragraph($"Before running: {requirement.Name} is required. {requirement.Description}");
+        }
+
+        if (extension.Samples.Count > 0)
+        {
+            var depth = extension.Depth == Depth.Verbose ? "every documented API" : "the most common usage";
+            builder.Paragraph($"`Extensions/{extension.TestClass}.cs` in the solution shows {depth}:");
+            foreach (var sample in extension.Samples)
+            {
+                builder.Paragraph($"**{sample.Name}** — {string.Join(" ", sample.Comment)}");
+                builder.Code(sample.Body, "cs");
+            }
+        }
+
+        if (definition.Notes.Count > 0)
+        {
+            builder.Paragraph("Notes:");
+            builder.Bullets(definition.Notes);
+        }
+    }
+
+    static string Package(Plan plan, PackageRequirement package)
+    {
+        var text = $"`{package.Id}` {plan.Version(package.Id)}";
+        if (package.Comment is { } comment)
+        {
+            return $"{text} ({comment})";
+        }
+
+        return text;
+    }
+
+    /// <summary>Everything the selection implies that no single extension does (plan 12.3 §10).</summary>
+    static void AppendInteractions(MarkdownBuilder builder, Plan plan)
+    {
+        if (plan.Interactions.Count == 0)
+        {
+            return;
+        }
+
+        builder.Heading(2, "Interactions between the selected extensions");
+        foreach (var interaction in plan.Interactions)
+        {
+            builder.Heading(3, $"{interaction.Severity}: {string.Join(", ", interaction.Involved)}");
+            builder.Paragraph(interaction.Message);
+            if (interaction.Choice is { } choice)
+            {
+                builder.Paragraph($"{choice.Label}: **{Label(choice, interaction.ChosenValue)}**. The alternatives:");
+                builder.Bullets(choice.Options.Select(_ => $"**{_.Label}** — {_.Hint}"));
+            }
+
+            if (interaction.Notes.Count > 0)
+            {
+                builder.Bullets(interaction.Notes);
+            }
+        }
+    }
+
+    static string Label(ExtensionChoice choice, string? value) =>
+        choice.Options.FirstOrDefault(_ => _.Value == value)?.Label ?? choice.Options[0].Label;
 
     static void AppendModuleInitializer(MarkdownBuilder builder, Plan plan)
     {
@@ -181,7 +288,7 @@ public static class DocsGenerator
         }
 
         builder.Paragraph("Verify is configured once, before any test runs, in a [module initializer](https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/general#moduleinitializer-attribute). The solution's `ModuleInitializer.cs`:");
-        builder.Code(StripBanner(CodeFiles.ModuleInitializer(plan)), "cs");
+        builder.Code(StripBanner(ModuleInitializerGenerator.Build(plan)), "cs");
     }
 
     static void AppendSample(MarkdownBuilder builder, Plan plan)
@@ -255,6 +362,37 @@ public static class DocsGenerator
         if (plan.Framework.UsesTestingPlatform)
         {
             builder.Paragraph($"The test project is also an executable, so `dotnet run --project src/{plan.TestProject}` runs the tests directly.");
+        }
+
+        if (plan.HasWindowsProject)
+        {
+            builder.Paragraph($"`{plan.WindowsTestProject}` targets `{WizardDefaults.TargetFramework}-windows`, because {InteractionRules.Join([.. plan.WindowsExtensions.Select(_ => _.Id)])} renders with Windows APIs. It is part of the solution, so `dotnet test` builds it on Windows and fails on other operating systems. To build only the portable projects there, name them: `dotnet test src/{plan.TestProject}`.");
+        }
+
+        var requirements = plan.Extensions
+            .SelectMany(_ => _.Definition.ExternalRequirements)
+            .DistinctBy(_ => _.Name)
+            .ToList();
+        if (requirements.Count > 0)
+        {
+            builder.Heading(3, "Before running");
+            builder.Bullets(
+                requirements.Select(
+                    _ =>
+                    {
+                        var text = $"**{_.Name}** — {_.Description}";
+                        if (_.EnvironmentVariable is { } variable)
+                        {
+                            text += $" Read from the environment variable `{variable}`.";
+                        }
+
+                        if (_.Url is { } url)
+                        {
+                            text += $" <{url}>";
+                        }
+
+                        return text;
+                    }));
         }
 
         builder.Paragraph("A new test has no `.verified.` file, so its first run fails and writes a `.received.` file. Review it, then accept it by renaming it to `.verified.`, accepting it in the diff tool, DiffEngineTray or IDE plugin, or running `dotnet verify accept`.");

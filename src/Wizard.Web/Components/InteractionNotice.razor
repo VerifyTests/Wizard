@@ -1,0 +1,33 @@
+@* One fired rule (plan 11). A conflict is blocking, so it says what to do; the rest explain what the
+   combination does that neither extension does alone. *@
+<div class="interaction-notice @Result.Severity.ToString().ToLowerInvariant()" data-rule="@Result.RuleId">
+    <p class="interaction-heading">
+        <span class="severity">@Heading</span>
+        <span class="involved">@string.Join(", ", Result.Involved)</span>
+    </p>
+    <p>@Result.Message</p>
+    @if (ShowNotes && Result.Notes.Count > 0)
+    {
+        <ul>
+            @foreach (var note in Result.Notes)
+            {
+                <li>@note</li>
+            }
+        </ul>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public InteractionResult Result { get; set; } = null!;
+
+    /// <summary>The options step has room for the detail; the extension step stays scannable.</summary>
+    [Parameter] public bool ShowNotes { get; set; }
+
+    string Heading =>
+        Result.Severity switch
+        {
+            Severity.Conflict => "Pick one",
+            Severity.Warning => "Side effect",
+            _ => "Worth knowing"
+        };
+}

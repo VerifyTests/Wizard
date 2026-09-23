@@ -1,0 +1,1616 @@
+﻿[
+  {
+    Id: AngleSharp,
+    DisplayName: Verify.AngleSharp,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.AngleSharp
+    ],
+    PluginType: VerifyAngleSharpDiffing,
+    DiscoveredByInitializePlugins: false,
+    Initialize: [
+      VerifyAngleSharpDiffing.Initialize();
+    ],
+    Usings: [
+      AngleSharp.Diffing.Core,
+      VerifyTests.AngleSharp
+    ],
+    Minimal: [
+      Html,
+      PrettyPrint
+    ],
+    Verbose: [
+      IgnoreElements,
+      ScrubAttributes,
+      ScrubEmptyDivs
+    ]
+  },
+  {
+    Id: AspNetCore,
+    DisplayName: Verify.AspNetCore,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.AspNetCore
+    ],
+    PluginType: VerifyAspNetCore,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyAspNetCore.Initialize();
+    ],
+    Usings: [
+      Microsoft.AspNetCore.Http,
+      Microsoft.AspNetCore.Mvc
+    ],
+    Minimal: [
+      Controller
+    ],
+    Verbose: [
+      ScrubResponse
+    ]
+  },
+  {
+    Id: Aspose,
+    DisplayName: Verify.Aspose,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Aspose
+    ],
+    PluginType: VerifyAspose,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Aspose.Cells,
+      VerifyTestsAspose
+    ],
+    ExclusiveGroups: [
+      pdf-converter,
+      xlsx-converter,
+      docx-converter,
+      pptx-converter
+    ],
+    Minimal: [
+      Pdf,
+      Workbook
+    ],
+    Verbose: [
+      PagesToInclude,
+      ExcludeXlsx
+    ],
+    Requirements: [
+      An Aspose licence
+    ]
+  },
+  {
+    Id: Assertions,
+    DisplayName: Verify.Assertions,
+    Category: Testing,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Assertions
+    ],
+    PluginType: VerifyAssertions,
+    DiscoveredByInitializePlugins: true,
+    Minimal: [
+      AssertNested
+    ],
+    Verbose: [
+      AssertOnSettings
+    ]
+  },
+  {
+    Id: Avalonia,
+    DisplayName: Verify.Avalonia,
+    Category: Ui,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Avalonia,
+      Avalonia.Headless.XUnit,
+      Avalonia.Headless.NUnit,
+      Avalonia.Themes.Fluent,
+      Avalonia.Skia
+    ],
+    PluginType: VerifyAvalonia,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Avalonia.Controls
+    ],
+    Minimal: [
+      UserControl
+    ],
+    Verbose: [
+      ControlTree
+    ]
+  },
+  {
+    Id: Blazor,
+    DisplayName: Verify.Blazor,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Blazor,
+      Microsoft.AspNetCore.Components
+    ],
+    PluginType: VerifyBlazor,
+    DiscoveredByInitializePlugins: false,
+    Initialize: [
+      RuntimeHelpers.RunClassConstructor(typeof(Render).TypeHandle);
+    ],
+    Usings: [
+      Microsoft.AspNetCore.Components,
+      VerifyTests.Blazor
+    ],
+    ExclusiveGroups: [
+      blazor-renderer
+    ],
+    Minimal: [
+      Parameters
+    ],
+    Verbose: [
+      Template
+    ]
+  },
+  {
+    Id: Brighter,
+    DisplayName: Verify.Brighter,
+    Category: Messaging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Brighter,
+      Paramore.Brighter
+    ],
+    PluginType: VerifyBrighter,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      VerifyTests.Brighter
+    ],
+    Minimal: [
+      Handler
+    ],
+    Verbose: [
+      Sends
+    ]
+  },
+  {
+    Id: Bunit,
+    DisplayName: Verify.Bunit,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Bunit,
+      bunit,
+      Microsoft.AspNetCore.Components
+    ],
+    PluginType: VerifyBunit,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyBunit.Initialize(excludeComponent: {bunit-component-state});
+    ],
+    Usings: [
+      Bunit
+    ],
+    ExclusiveGroups: [
+      blazor-renderer
+    ],
+    Choices: [
+      bunit-component-state
+    ],
+    Minimal: [
+      Component
+    ],
+    Verbose: [
+      Nodes
+    ]
+  },
+  {
+    Id: ClosedXml,
+    DisplayName: Verify.ClosedXml,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ClosedXml,
+      ClosedXML
+    ],
+    PluginType: VerifyClosedXml,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      ClosedXML.Excel
+    ],
+    ExclusiveGroups: [
+      xlsx-converter
+    ],
+    Minimal: [
+      Workbook
+    ],
+    Verbose: [
+      WorkbookFile,
+      UniqueForRuntime
+    ]
+  },
+  {
+    Id: CommunityToolkitMvvm,
+    DisplayName: Verify.CommunityToolkit.Mvvm,
+    Category: Ui,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.CommunityToolkit.Mvvm,
+      CommunityToolkit.Mvvm
+    ],
+    PluginType: VerifyCommunityToolkitMvvm,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      CommunityToolkit.Mvvm.Input
+    ],
+    Minimal: [
+      RelayCommand
+    ],
+    Verbose: [
+      AsyncRelayCommand
+    ]
+  },
+  {
+    Id: Cosmos,
+    DisplayName: Verify.Cosmos,
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Cosmos,
+      Microsoft.Azure.Cosmos,
+      Newtonsoft.Json
+    ],
+    PluginType: VerifyCosmos,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Microsoft.Azure.Cosmos,
+      Microsoft.Azure.Cosmos.Linq
+    ],
+    Minimal: [
+      ItemResponse
+    ],
+    Verbose: [
+      FeedResponse
+    ],
+    Requirements: [
+      A Cosmos DB endpoint
+    ]
+  },
+  {
+    Id: CsvHelper,
+    DisplayName: Verify.CsvHelper,
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.CsvHelper,
+      CsvHelper
+    ],
+    PluginType: VerifyCsvHelper,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      CsvHelper,
+      System.Globalization
+    ],
+    ExclusiveGroups: [
+      csv-scrubber
+    ],
+    Minimal: [
+      Csv
+    ],
+    Verbose: [
+      IgnoreColumns,
+      ScrubColumns,
+      TranslateColumn,
+      Reader
+    ]
+  },
+  {
+    Id: Diagnostics,
+    DisplayName: Verify.Diagnostics,
+    Category: Observability,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Diagnostics
+    ],
+    PluginType: VerifyDiagnostics,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Diagnostics
+    ],
+    ExclusiveGroups: [
+      activity-listener
+    ],
+    Minimal: [
+      Activities
+    ],
+    Verbose: [
+      StopRecording
+    ]
+  },
+  {
+    Id: DiffPlex,
+    DisplayName: Verify.DiffPlex,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.DiffPlex
+    ],
+    PluginType: VerifyDiffPlex,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyDiffPlex.Initialize(OutputType.{diffplex-output});
+    ],
+    Usings: [
+      VerifyTests.DiffPlex
+    ],
+    Choices: [
+      diffplex-output
+    ],
+    Minimal: [
+      PerTestOutput
+    ]
+  },
+  {
+    Id: DocNet,
+    DisplayName: Verify.DocNet,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.DocNet
+    ],
+    PluginType: VerifyDocNet,
+    DiscoveredByInitializePlugins: true,
+    ExclusiveGroups: [
+      pdf-converter
+    ],
+    Minimal: [
+      Pdf
+    ],
+    Verbose: [
+      FirstPage,
+      PageDimensions,
+      PreserveTransparency
+    ]
+  },
+  {
+    Id: EmailPreviewServices,
+    DisplayName: Verify.EmailPreviewServices,
+    Category: Email,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.EmailPreviewServices
+    ],
+    PluginType: VerifyEmailPreviewServices,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      VerifyTests.EmailPreviewServices
+    ],
+    Minimal: [
+      Preview
+    ],
+    Requirements: [
+      An EmailPreviewServices api key
+    ]
+  },
+  {
+    Id: EntityFramework,
+    DisplayName: Verify.EntityFramework (EF Core),
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.EntityFramework,
+      Microsoft.EntityFrameworkCore.SqlServer
+    ],
+    PluginType: VerifyEntityFramework,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyEntityFramework.Initialize(GetDbModel());
+    ],
+    Usings: [
+      Microsoft.EntityFrameworkCore
+    ],
+    Choices: [
+      ef-sql-format
+    ],
+    Minimal: [
+      RecordCommands,
+      Queryable
+    ],
+    Verbose: [
+      ChangeTracker,
+      IgnoreNavigationProperties,
+      StopRecording,
+      DescriptiveSql,
+      ScrubDateTimes
+    ]
+  },
+  {
+    Id: EntityFrameworkClassic,
+    DisplayName: Verify.EntityFrameworkClassic (EF6),
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.EntityFrameworkClassic,
+      EntityFramework
+    ],
+    PluginType: VerifyEntityFrameworkClassic,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Data.Entity
+    ],
+    Minimal: [
+      Queryable
+    ],
+    Verbose: [
+      ChangeTracker
+    ]
+  },
+  {
+    Id: FakeItEasy,
+    DisplayName: Verify.FakeItEasy,
+    Category: Mocking,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.FakeItEasy
+    ],
+    PluginType: VerifyFakeItEasy,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      FakeItEasy
+    ],
+    Minimal: [
+      ReceivedCalls
+    ],
+    Verbose: [
+      FakeManager
+    ]
+  },
+  {
+    Id: Flurl,
+    DisplayName: Verify.Flurl,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Flurl
+    ],
+    PluginType: VerifyFlurl,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyFlurl.Initialize();
+    ],
+    Usings: [
+      Flurl.Http,
+      Flurl.Http.Testing
+    ],
+    Minimal: [
+      HttpTest
+    ],
+    Verbose: [
+      SingleCall
+    ]
+  },
+  {
+    Id: Http,
+    DisplayName: Verify.Http,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Http
+    ],
+    PluginType: VerifyHttp,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyHttp.Initialize();
+    ],
+    Usings: [
+      Microsoft.Extensions.DependencyInjection,
+      VerifyTests.Http
+    ],
+    Minimal: [
+      MockResponse,
+      RecordCalls
+    ],
+    Verbose: [
+      ScrubResponseBody,
+      IgnoreHeaders,
+      RecordingHttpClientFactory,
+      SimulateNetworkStream,
+      FilterRecordedCalls
+    ]
+  },
+  {
+    Id: ICSharpCodeDecompiler,
+    DisplayName: Verify.ICSharpCode.Decompiler,
+    Category: Compiler,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ICSharpCode.Decompiler
+    ],
+    PluginType: VerifyICSharpCodeDecompiler,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      ICSharpCode.Decompiler.Metadata,
+      VerifyTests.ICSharpCode.Decompiler
+    ],
+    Minimal: [
+      DecompileType,
+      DecompileMethod
+    ],
+    Verbose: [
+      DecompileAssembly,
+      DontNormalize,
+      ScrubComments
+    ]
+  },
+  {
+    Id: ImageHash,
+    DisplayName: Verify.ImageHash,
+    Category: Images,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ImageHash
+    ],
+    PluginType: VerifyImageHash,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyImageHash.Initialize();,
+      VerifyImageHash.RegisterComparers(threshold: {imagehash-threshold}, algorithm: new {imagehash-algorithm}());
+    ],
+    Usings: [
+      CoenM.ImageHash.HashAlgorithms,
+      SixLabors.ImageSharp,
+      SixLabors.ImageSharp.PixelFormats
+    ],
+    ExclusiveGroups: [
+      image-comparer
+    ],
+    Choices: [
+      imagehash-threshold,
+      imagehash-algorithm
+    ],
+    Minimal: [
+      CompareImage
+    ],
+    Verbose: [
+      PerTestThreshold,
+      PerTestAlgorithm
+    ]
+  },
+  {
+    Id: ImageMagick,
+    DisplayName: Verify.ImageMagick,
+    Category: Images,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ImageMagick
+    ],
+    PluginType: VerifyImageMagick,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyImageMagick.Initialize();,
+      VerifyImageMagick.RegisterComparers(threshold: {imagemagick-threshold});
+    ],
+    Usings: [
+      ImageMagick,
+      VerifyTestsImageMagick
+    ],
+    ExclusiveGroups: [
+      pdf-converter,
+      image-comparer
+    ],
+    Choices: [
+      imagemagick-role,
+      imagemagick-threshold
+    ],
+    Minimal: [
+      Svg
+    ],
+    Verbose: [
+      ComparerPerTest,
+      BackgroundColor,
+      PdfToPng
+    ],
+    Requirements: [
+      Ghostscript
+    ]
+  },
+  {
+    Id: ImageSharp,
+    DisplayName: Verify.ImageSharp,
+    Category: Images,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ImageSharp
+    ],
+    PluginType: VerifyImageSharp,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyImageSharp.Initialize(ssimThreshold: {imagesharp-ssim});
+    ],
+    Usings: [
+      SixLabors.ImageSharp,
+      SixLabors.ImageSharp.PixelFormats
+    ],
+    Choices: [
+      imagesharp-ssim
+    ],
+    Minimal: [
+      VerifyImage
+    ],
+    Verbose: [
+      SsimThreshold,
+      EncodeAsJpeg
+    ]
+  },
+  {
+    Id: ImageSharpCompare,
+    DisplayName: Verify.ImageSharp.Compare,
+    Category: Images,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ImageSharp.Compare
+    ],
+    PluginType: VerifyImageSharpCompare,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyImageSharpCompare.RegisterComparers(threshold: {imagesharpcompare-threshold});,
+      VerifyImageSharpCompare.Initialize();
+    ],
+    Usings: [
+      SixLabors.ImageSharp,
+      SixLabors.ImageSharp.PixelFormats
+    ],
+    ExclusiveGroups: [
+      image-comparer
+    ],
+    Choices: [
+      imagesharpcompare-threshold
+    ],
+    Minimal: [
+      CompareImage
+    ],
+    Verbose: [
+      PerTestThreshold
+    ]
+  },
+  {
+    Id: LocalDb,
+    DisplayName: LocalDb (EfLocalDb),
+    Category: Data,
+    Platform: WindowsOnly,
+    Packages: [
+      EfLocalDb.Xunit.V3,
+      EfLocalDb.NUnit,
+      EfLocalDb.MSTest,
+      EfLocalDb.TUnit,
+      EfLocalDb,
+      Verify.EntityFramework,
+      Microsoft.EntityFrameworkCore.SqlServer
+    ],
+    DiscoveredByInitializePlugins: false,
+    Initialize: [
+      EfLocalDbXunitV3.LocalDbTestBase<LocalDbContext>.Initialize();,
+      EfLocalDbNunit.LocalDbTestBase<LocalDbContext>.Initialize();,
+      EfLocalDbMSTest.LocalDbTestBase<LocalDbContext>.Initialize();,
+      EfLocalDbTUnit.LocalDbTestBase<LocalDbContext>.Initialize();,
+      VerifierSettings.ScrubReplace("chatbot_", "");
+    ],
+    Minimal: [
+      AddAndVerify
+    ],
+    Verbose: [
+      FilteredQuery
+    ],
+    Requirements: [
+      SQL Server LocalDB
+    ]
+  },
+  {
+    Id: MailMessage,
+    DisplayName: Verify.MailMessage,
+    Category: Email,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.MailMessage
+    ],
+    PluginType: VerifyMailMessage,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Net.Mail,
+      System.Net.Mime
+    ],
+    Minimal: [
+      MailMessage
+    ],
+    Verbose: [
+      Attachment,
+      ContentType,
+      ContentDisposition
+    ]
+  },
+  {
+    Id: MassTransit,
+    DisplayName: Verify.MassTransit,
+    Category: Messaging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.MassTransit,
+      MassTransit
+    ],
+    PluginType: VerifyMassTransit,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      MassTransit,
+      MassTransit.Testing
+    ],
+    Minimal: [
+      ConsumerHarness
+    ],
+    Verbose: [
+      SagaHarness
+    ]
+  },
+  {
+    Id: MicrosoftLogging,
+    DisplayName: Verify.MicrosoftLogging,
+    Category: Logging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.MicrosoftLogging,
+      Microsoft.Extensions.Logging.Abstractions
+    ],
+    PluginType: VerifyMicrosoftLogging,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyMicrosoftLogging.Initialize();
+    ],
+    Usings: [
+      VerifyTests.MicrosoftLogging
+    ],
+    Minimal: [
+      Logging
+    ],
+    Verbose: [
+      TypedLogger
+    ]
+  },
+  {
+    Id: Mockly,
+    DisplayName: Verify.Mockly,
+    Category: Mocking,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Mockly
+    ],
+    PluginType: VerifyMockly,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Mockly,
+      System.Net
+    ],
+    Minimal: [
+      GetRequest
+    ],
+    Verbose: [
+      RequestCollection,
+      ScrubBody
+    ]
+  },
+  {
+    Id: Moq,
+    DisplayName: Verify.Moq,
+    Category: Mocking,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Moq
+    ],
+    PluginType: VerifyMoq,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Moq
+    ],
+    Minimal: [
+      RecordedInvocations
+    ],
+    Verbose: [
+      ScrubArguments
+    ]
+  },
+  {
+    Id: NServiceBus,
+    DisplayName: Verify.NServiceBus,
+    Category: Messaging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.NServiceBus,
+      NServiceBus
+    ],
+    PluginType: VerifyNServiceBus,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyNServiceBus.Initialize();
+    ],
+    Usings: [
+      VerifyTests.NServiceBus
+    ],
+    Minimal: [
+      HandlerContext
+    ],
+    Verbose: [
+      Recording,
+      MessageToHandlerMap
+    ]
+  },
+  {
+    Id: NSubstitute,
+    DisplayName: Verify.NSubstitute,
+    Category: Mocking,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.NSubstitute
+    ],
+    PluginType: VerifyNSubstitute,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      NSubstitute
+    ],
+    Minimal: [
+      ReceivedCalls
+    ]
+  },
+  {
+    Id: NUlid,
+    DisplayName: Verify.NUlid,
+    Category: Scrubbing,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.NUlid,
+      NUlid
+    ],
+    PluginType: VerifyNUlid,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      NUlid
+    ],
+    ExclusiveGroups: [
+      ulid-scrubber
+    ],
+    Minimal: [
+      UlidScrubbing
+    ],
+    Verbose: [
+      DontScrubFluent,
+      DontScrubInstance
+    ]
+  },
+  {
+    Id: NewtonsoftJson,
+    DisplayName: Verify.NewtonsoftJson,
+    Category: Serialization,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.NewtonsoftJson,
+      Newtonsoft.Json
+    ],
+    PluginType: VerifyNewtonsoftJson,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Newtonsoft.Json.Linq
+    ],
+    Minimal: [
+      JsonObject
+    ],
+    Verbose: [
+      JsonArray,
+      JsonToken
+    ]
+  },
+  {
+    Id: NodaTime,
+    DisplayName: Verify.NodaTime,
+    Category: Serialization,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.NodaTime,
+      NodaTime
+    ],
+    PluginType: VerifyNodaTime,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      NodaTime
+    ],
+    Minimal: [
+      Scrubbing
+    ],
+    Verbose: [
+      DontScrub,
+      InstantAndInterval
+    ]
+  },
+  {
+    Id: OpenTelemetry,
+    DisplayName: Verify.OpenTelemetry,
+    Category: Observability,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.OpenTelemetry,
+      OpenTelemetry.Exporter.InMemory,
+      Microsoft.Extensions.Logging
+    ],
+    PluginType: VerifyOpenTelemetry,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Diagnostics,
+      Microsoft.Extensions.Logging,
+      OpenTelemetry,
+      OpenTelemetry.Logs
+    ],
+    ExclusiveGroups: [
+      activity-listener
+    ],
+    Minimal: [
+      Activity
+    ],
+    Verbose: [
+      LogRecords,
+      StopRecording
+    ]
+  },
+  {
+    Id: OpenXml,
+    DisplayName: Verify.OpenXml,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.OpenXml,
+      DocumentFormat.OpenXml,
+      Morph.Skia,
+      Morph.ImageSharp
+    ],
+    PluginType: VerifyOpenXml,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyOpenXml.UseLetterPageSize = false;
+    ],
+    Usings: [
+      DocumentFormat.OpenXml.Packaging
+    ],
+    ExclusiveGroups: [
+      xlsx-converter,
+      docx-converter,
+      pptx-converter
+    ],
+    Choices: [
+      openxml-render
+    ],
+    Minimal: [
+      Word,
+      Excel
+    ],
+    Verbose: [
+      WordDocumentObject,
+      ExcludeExcelPackage,
+      UniqueForRuntime
+    ]
+  },
+  {
+    Id: PDFium,
+    DisplayName: Verify.PDFium,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.PDFium
+    ],
+    PluginType: VerifyPDFium,
+    DiscoveredByInitializePlugins: true,
+    ExclusiveGroups: [
+      pdf-converter
+    ],
+    Minimal: [
+      Pdf
+    ],
+    Verbose: [
+      PdfStream,
+      ExcludePdfDocument,
+      SkipPdfNormalization
+    ]
+  },
+  {
+    Id: Pandoc,
+    DisplayName: Verify.Pandoc,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Pandoc
+    ],
+    PluginType: VerifyPandoc,
+    DiscoveredByInitializePlugins: true,
+    ExclusiveGroups: [
+      docx-converter
+    ],
+    Minimal: [
+      Word,
+      Rtf
+    ],
+    Verbose: [
+      WordStream,
+      RtfStream
+    ],
+    Requirements: [
+      Pandoc,
+      Papyrine sponsorship declaration
+    ]
+  },
+  {
+    Id: ParametersHashing,
+    DisplayName: Verify.ParametersHashing,
+    Category: Testing,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ParametersHashing
+    ],
+    PluginType: VerifyParametersHashing,
+    DiscoveredByInitializePlugins: true,
+    Minimal: [
+      HashParameters
+    ],
+    Verbose: [
+      HashParametersFluent
+    ]
+  },
+  {
+    Id: PdfPig,
+    DisplayName: Verify.PdfPig,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.PdfPig
+    ],
+    PluginType: VerifyPdfPig,
+    DiscoveredByInitializePlugins: true,
+    ExclusiveGroups: [
+      pdf-converter
+    ],
+    Minimal: [
+      Pdf
+    ],
+    Verbose: [
+      PdfStream,
+      ExcludePdf,
+      SkipNormalization
+    ]
+  },
+  {
+    Id: Phash,
+    DisplayName: Verify.Phash,
+    Category: Images,
+    Platform: WindowsOnly,
+    Packages: [
+      Verify.Phash,
+      System.Drawing.Common
+    ],
+    PluginType: VerifyPhash,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Drawing,
+      System.Drawing.Imaging
+    ],
+    ExclusiveGroups: [
+      image-comparer
+    ],
+    Minimal: [
+      Png
+    ],
+    Verbose: [
+      CompareSettings
+    ]
+  },
+  {
+    Id: Playwright,
+    DisplayName: Verify.Playwright,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Playwright,
+      Microsoft.Playwright
+    ],
+    PluginType: VerifyPlaywright,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifyPlaywright.Initialize(installPlaywright: true);
+    ],
+    Usings: [
+      Microsoft.Playwright,
+      VerifyTestsPlaywright
+    ],
+    Minimal: [
+      Page
+    ],
+    Verbose: [
+      ScreenshotOnly,
+      Locator
+    ],
+    Requirements: [
+      A Playwright browser
+    ]
+  },
+  {
+    Id: Puppeteer,
+    DisplayName: Verify.Puppeteer,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Puppeteer
+    ],
+    PluginType: VerifyPuppeteer,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      PuppeteerSharp
+    ],
+    Minimal: [
+      Page
+    ],
+    Verbose: [
+      Element
+    ],
+    Requirements: [
+      A Chrome download
+    ]
+  },
+  {
+    Id: QuestPDF,
+    DisplayName: Verify.QuestPDF,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.QuestPDF,
+      QuestPDF
+    ],
+    PluginType: VerifyQuestPdf,
+    DiscoveredByInitializePlugins: false,
+    Initialize: [
+      QuestPDF.Settings.License = LicenseType.Community;,
+      VerifyQuestPdf.Initialize();
+    ],
+    Usings: [
+      QuestPDF.Fluent,
+      QuestPDF.Helpers,
+      QuestPDF.Infrastructure,
+      VerifyQuestPDF
+    ],
+    ExclusiveGroups: [
+      pdf-converter
+    ],
+    Minimal: [
+      VerifyDocument
+    ],
+    Verbose: [
+      PagesToInclude,
+      PagesToIncludeDynamic,
+      ExcludePdf
+    ],
+    Requirements: [
+      QuestPDF licence
+    ]
+  },
+  {
+    Id: Quibble,
+    DisplayName: Verify.Quibble,
+    Category: Serialization,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Quibble
+    ],
+    PluginType: VerifyQuibble,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifierSettings.UseStrictJson();,
+      VerifyQuibble.Initialize();
+    ],
+    Minimal: [
+      Json
+    ],
+    Verbose: [
+      NestedJson
+    ]
+  },
+  {
+    Id: RavenDB,
+    DisplayName: Verify.RavenDB,
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.RavenDB,
+      RavenDB.Embedded
+    ],
+    PluginType: VerifyRavenDB,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Raven.Client.Documents,
+      Raven.Embedded
+    ],
+    Minimal: [
+      AddDocument
+    ],
+    Verbose: [
+      UpdateDocument
+    ],
+    Requirements: [
+      RavenDB embedded server
+    ]
+  },
+  {
+    Id: ReadableExpressions,
+    DisplayName: Verify.ReadableExpressions,
+    Category: Compiler,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ReadableExpressions
+    ],
+    PluginType: VerifyReadableExpressions,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Linq.Expressions
+    ],
+    Minimal: [
+      QueryExpression
+    ],
+    Verbose: [
+      MethodCall,
+      NestedExpression
+    ]
+  },
+  {
+    Id: Selenium,
+    DisplayName: Verify.Selenium,
+    Category: Web,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Selenium,
+      Selenium.WebDriver.ChromeDriver
+    ],
+    PluginType: VerifySelenium,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      OpenQA.Selenium,
+      OpenQA.Selenium.Chrome,
+      VerifyTests.Selenium
+    ],
+    Minimal: [
+      Driver
+    ],
+    Verbose: [
+      Element
+    ],
+    Requirements: [
+      Chrome and chromedriver
+    ]
+  },
+  {
+    Id: SendGrid,
+    DisplayName: Verify.SendGrid,
+    Category: Email,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.SendGrid,
+      SendGrid
+    ],
+    PluginType: VerifySendGrid,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      SendGrid.Helpers.Mail
+    ],
+    Minimal: [
+      Message
+    ],
+    Verbose: [
+      EmailAttachment,
+      Personalizations
+    ]
+  },
+  {
+    Id: Sep,
+    DisplayName: Verify.Sep,
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Sep
+    ],
+    PluginType: VerifySep,
+    DiscoveredByInitializePlugins: true,
+    ExclusiveGroups: [
+      csv-scrubber
+    ],
+    Minimal: [
+      Csv
+    ],
+    Verbose: [
+      IgnoreColumns,
+      ScrubColumns,
+      TranslateColumn
+    ]
+  },
+  {
+    Id: Serilog,
+    DisplayName: Verify.Serilog,
+    Category: Logging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Serilog,
+      Serilog
+    ],
+    PluginType: VerifySerilog,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Serilog
+    ],
+    Minimal: [
+      Logging
+    ],
+    Verbose: [
+      StructuredProperties,
+      StopRecording
+    ]
+  },
+  {
+    Id: SourceGenerators,
+    DisplayName: Verify.SourceGenerators,
+    Category: Compiler,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.SourceGenerators,
+      Microsoft.CodeAnalysis.CSharp
+    ],
+    PluginType: VerifySourceGenerators,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Microsoft.CodeAnalysis,
+      Microsoft.CodeAnalysis.CSharp
+    ],
+    Minimal: [
+      Driver
+    ],
+    Verbose: [
+      RunResults,
+      SingleResult,
+      IgnoreGeneratedResult,
+      ScrubLines
+    ]
+  },
+  {
+    Id: SqlServer,
+    DisplayName: Verify.SqlServer,
+    Category: Data,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.SqlServer,
+      Microsoft.Data.SqlClient
+    ],
+    PluginType: VerifySqlServer,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      VerifySqlServer.Initialize();
+    ],
+    Usings: [
+      Microsoft.Data.SqlClient,
+      VerifyTests.SqlServer
+    ],
+    Minimal: [
+      Schema,
+      RecordCommands
+    ],
+    Verbose: [
+      SchemaIncludes,
+      SchemaFilter,
+      SchemaAsSql
+    ],
+    Requirements: [
+      A SQL Server instance
+    ]
+  },
+  {
+    Id: Sylvan,
+    DisplayName: Verify.Sylvan.Data.Excel,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Sylvan.Data.Excel
+    ],
+    PluginType: VerifySylvanDataExcel,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      Sylvan.Data.Csv,
+      Sylvan.Data.Excel
+    ],
+    ExclusiveGroups: [
+      xlsx-converter
+    ],
+    Minimal: [
+      ExcelFile,
+      ExcelStream
+    ],
+    Verbose: [
+      ExcelReader,
+      WriterOptions
+    ]
+  },
+  {
+    Id: Syncfusion,
+    DisplayName: Verify.Syncfusion,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Syncfusion
+    ],
+    PluginType: VerifySyncfusion,
+    DiscoveredByInitializePlugins: true,
+    Initialize: [
+      SyncfusionLicenseProvider.RegisterLicense(Environment.GetEnvironmentVariable("SyncfusionLicense")!);
+    ],
+    ExclusiveGroups: [
+      pdf-converter,
+      xlsx-converter,
+      docx-converter,
+      pptx-converter
+    ],
+    Minimal: [
+      Pdf,
+      Excel
+    ],
+    Verbose: [
+      Word,
+      PowerPoint,
+      FirstPageOnly,
+      UniqueForRuntime
+    ],
+    Requirements: [
+      A Syncfusion licence
+    ]
+  },
+  {
+    Id: SystemJson,
+    DisplayName: Verify.SystemJson,
+    Category: Serialization,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.SystemJson
+    ],
+    PluginType: VerifySystemJson,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      System.Text.Json
+    ],
+    Minimal: [
+      ParseJsonDocument
+    ],
+    Verbose: [
+      StrictJson,
+      ScrubMembers,
+      ScrubInline
+    ]
+  },
+  {
+    Id: Terminal,
+    DisplayName: Verify.Terminal,
+    Category: Tooling,
+    Platform: CrossPlatform,
+    Packages: [
+      verify.tool
+    ],
+    DiscoveredByInitializePlugins: false
+  },
+  {
+    Id: Ulid,
+    DisplayName: Verify.Ulid,
+    Category: Scrubbing,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Ulid
+    ],
+    PluginType: VerifyUlid,
+    DiscoveredByInitializePlugins: true,
+    ExclusiveGroups: [
+      ulid-scrubber
+    ],
+    Minimal: [
+      UlidScrubbing
+    ],
+    Verbose: [
+      DontScrubFluent,
+      DontScrubInstance
+    ]
+  },
+  {
+    Id: WinForms,
+    DisplayName: Verify.WinForms,
+    Category: Ui,
+    Platform: WindowsOnly,
+    Packages: [
+      Verify.WinForms
+    ],
+    PluginType: VerifyWinForms,
+    DiscoveredByInitializePlugins: true,
+    Minimal: [
+      FormUsage
+    ],
+    Verbose: [
+      ContextMenuStrip,
+      UniqueForRuntime
+    ]
+  },
+  {
+    Id: Wolverine,
+    DisplayName: Verify.Wolverine,
+    Category: Messaging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Wolverine,
+      WolverineFx
+    ],
+    PluginType: VerifyWolverine,
+    DiscoveredByInitializePlugins: true,
+    Minimal: [
+      HandlerSends
+    ],
+    Verbose: [
+      RequestReply,
+      Broadcast
+    ]
+  },
+  {
+    Id: Xaml,
+    DisplayName: Verify.Xaml,
+    Category: Ui,
+    Platform: WindowsOnly,
+    Packages: [
+      Verify.Xaml
+    ],
+    PluginType: VerifyXaml,
+    DiscoveredByInitializePlugins: true,
+    Minimal: [
+      WindowUsage
+    ],
+    Verbose: [
+      FrameworkElement
+    ]
+  },
+  {
+    Id: Yaml,
+    DisplayName: Verify.Yaml,
+    Category: Serialization,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.Yaml
+    ],
+    PluginType: VerifyYaml,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      YamlDotNet.RepresentationModel
+    ],
+    Minimal: [
+      YamlStreamSample
+    ],
+    Verbose: [
+      ScrubMembers,
+      ScrubInline
+    ]
+  },
+  {
+    Id: ZeroLog,
+    DisplayName: Verify.ZeroLog,
+    Category: Logging,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.ZeroLog
+    ],
+    PluginType: VerifyZeroLog,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      ZeroLog
+    ],
+    Minimal: [
+      Usage
+    ],
+    Verbose: [
+      StopRecording
+    ]
+  }
+]

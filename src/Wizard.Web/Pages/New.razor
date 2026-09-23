@@ -30,6 +30,12 @@
                 <p class="hint">Generates a build definition that runs the tests and publishes any <code>*.received.*</code> files when they fail.</p>
                 <ChoiceCards TValue="BuildServer" Options="buildServerChoices" Value="state.BuildServer" ValueChanged="_ => Set(wizard => wizard.BuildServer = _)" IdPrefix="ci" Label="Build server" />
                 break;
+            case "extensions":
+                <ExtensionsStep State="state" Changed="Changed" />
+                break;
+            case "options":
+                <OptionsStep State="state" Changed="Changed" />
+                break;
             case "sponsor":
                 <SponsorStep State="state" Today="today" Changed="Changed" />
                 break;

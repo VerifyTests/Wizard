@@ -19,5 +19,6 @@
   src/VerifySample.Tests/Sample.Test.verified.txt,
   src/VerifySample.Tests/ModuleInitializer.cs,
   src/VerifySample.Tests/Sample.cs,
-  src/VerifySample.Tests/VerifyChecksTests.cs
+  src/VerifySample.Tests/VerifyChecksTests.cs,
+  src/VerifySample.Tests/Extensions/DiffPlexTests.cs
 ]

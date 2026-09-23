@@ -18,6 +18,61 @@ public sealed record WizardState
 
     public string SolutionName { get; set; } = DefaultSolutionName;
 
+    /// <summary>
+    /// Extension ids to include, as a set so membership is cheap; emitted in registry order everywhere,
+    /// so the url and the generated output do not depend on insertion order. Collections are replaced
+    /// rather than mutated, so <c>with { }</c> copies do not share them.
+    /// </summary>
+    public IReadOnlySet<string> SelectedExtensions { get; set; } = new HashSet<string>(DefaultExtensions, StringComparer.Ordinal);
+
+    /// <summary>
+    /// Verify.DiffPlex is selected until it is deselected: an inline diff on a failed text snapshot
+    /// helps in any project, and the wizard has recommended it unconditionally since the old pages.
+    /// </summary>
+    public static IReadOnlyList<string> DefaultExtensions { get; } = [Extensions.DiffPlexId];
+
+    /// <summary>Extension id to depth. Missing means <see cref="Depth.Verbose"/> (plan D7).</summary>
+    public IReadOnlyDictionary<string, Depth> Depths { get; set; } = EmptyDepths;
+
+    /// <summary>Choice id to value, for the per-extension and per-rule options (plan 7.1 step 8).</summary>
+    public IReadOnlyDictionary<string, string> Choices { get; set; } = EmptyChoices;
+
+    static readonly IReadOnlyDictionary<string, Depth> EmptyDepths = new Dictionary<string, Depth>(StringComparer.Ordinal);
+    static readonly IReadOnlyDictionary<string, string> EmptyChoices = new Dictionary<string, string>(StringComparer.Ordinal);
+
+    public bool Has(string extensionId) =>
+        SelectedExtensions.Contains(extensionId);
+
+    public Depth DepthOf(string extensionId) =>
+        Depths.GetValueOrDefault(extensionId, Depth.Verbose);
+
+    public void Select(string extensionId, bool selected)
+    {
+        var selection = new HashSet<string>(SelectedExtensions, StringComparer.Ordinal);
+        if (selected)
+        {
+            selection.Add(extensionId);
+        }
+        else
+        {
+            selection.Remove(extensionId);
+        }
+
+        SelectedExtensions = selection;
+    }
+
+    public void SetDepth(string extensionId, Depth depth) =>
+        Depths = new Dictionary<string, Depth>(Depths, StringComparer.Ordinal)
+        {
+            [extensionId] = depth
+        };
+
+    public void SetChoice(string choiceId, string value) =>
+        Choices = new Dictionary<string, string>(Choices, StringComparer.Ordinal)
+        {
+            [choiceId] = value
+        };
+
     public SponsorMode SponsorMode { get; set; }
 
     /// <summary>The GitHub organization or user the VerifyTests sponsorship is made from.</summary>
@@ -52,6 +107,8 @@ public sealed record WizardState
 
         SolutionName = SolutionNames.Clean(SolutionName);
 
+        NormalizeExtensions();
+
         // Values for other sponsor modes are dropped, so the url holds everything the state does.
         if (SponsorMode != SponsorMode.Sponsor)
         {
@@ -70,10 +127,102 @@ public sealed record WizardState
             SponsorUntil = "";
         }
 
-        var steps = FlowSteps.For(Flow);
-        if (!steps.Any(_ => _.Id == Step))
+        Step = FlowSteps.Nearest(this, Step);
+    }
+
+    /// <summary>
+    /// A record compares its members with <see cref="object.Equals(object?)"/>, which for a set or a
+    /// dictionary is reference equality, so two states holding the same selection would differ. Every
+    /// comparison here is about what the state says, which is also what the url carries.
+    /// </summary>
+    public bool Equals(WizardState? other)
+    {
+        if (other is null)
         {
-            Step = steps[0].Id;
+            return false;
         }
+
+        if (ReferenceEquals(this, other))
+        {
+            return true;
+        }
+
+        return Flow == other.Flow &&
+               Os == other.Os &&
+               Ide == other.Ide &&
+               Cli == other.Cli &&
+               TestFramework == other.TestFramework &&
+               BuildServer == other.BuildServer &&
+               SolutionName == other.SolutionName &&
+               SponsorMode == other.SponsorMode &&
+               SponsorAccount == other.SponsorAccount &&
+               SponsorshipStart == other.SponsorshipStart &&
+               SponsorshipPrivateUntil == other.SponsorshipPrivateUntil &&
+               Exemption == other.Exemption &&
+               SponsorUntil == other.SponsorUntil &&
+               Step == other.Step &&
+               SelectedExtensions.SetEquals(other.SelectedExtensions) &&
+               SameEntries(Depths, other.Depths) &&
+               SameEntries(Choices, other.Choices);
+    }
+
+    static bool SameEntries<T>(IReadOnlyDictionary<string, T> left, IReadOnlyDictionary<string, T> right)
+    {
+        if (left.Count != right.Count)
+        {
+            return false;
+        }
+
+        return left.All(_ => right.TryGetValue(_.Key, out var value) && Equals(value, _.Value));
+    }
+
+    public override int GetHashCode()
+    {
+        var hash = new HashCode();
+        hash.Add(Flow);
+        hash.Add(Os);
+        hash.Add(Ide);
+        hash.Add(Cli);
+        hash.Add(TestFramework);
+        hash.Add(BuildServer);
+        hash.Add(SolutionName);
+        hash.Add(SponsorMode);
+        hash.Add(SponsorAccount);
+        hash.Add(SponsorshipStart);
+        hash.Add(SponsorshipPrivateUntil);
+        hash.Add(Exemption);
+        hash.Add(SponsorUntil);
+        hash.Add(Step);
+        hash.Add(SelectedExtensions.Count);
+        hash.Add(Depths.Count);
+        hash.Add(Choices.Count);
+        return hash.ToHashCode();
+    }
+
+    /// <summary>
+    /// Drops ids the registry does not have, and depths and choices that nothing selected uses, so the
+    /// url holds exactly what the state holds and a stale link cannot carry hidden values.
+    /// </summary>
+    void NormalizeExtensions()
+    {
+        SelectedExtensions = new HashSet<string>(
+            SelectedExtensions.Where(Extensions.Contains),
+            StringComparer.Ordinal);
+
+        Depths = new Dictionary<string, Depth>(
+            Depths.Where(_ => _.Value != Depth.Verbose && Has(_.Key)),
+            StringComparer.Ordinal);
+
+        var available = SelectedExtensions
+            .SelectMany(_ => Extensions.ById[_].Choices)
+            .Concat(InteractionRules.ChoicesFor(SelectedExtensions))
+            .ToDictionary(_ => _.Id, StringComparer.Ordinal);
+
+        Choices = new Dictionary<string, string>(
+            Choices.Where(_ =>
+                available.TryGetValue(_.Key, out var choice) &&
+                choice.Options.Any(option => option.Value == _.Value) &&
+                choice.Default != _.Value),
+            StringComparer.Ordinal);
     }
 }
