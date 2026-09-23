@@ -414,7 +414,7 @@ public static class DocsGenerator
         builder.Heading(2, "Diff Tool");
         builder.Paragraph("Verify supports many [Diff Tools](https://github.com/VerifyTests/DiffEngine/blob/main/docs/diff-tool.md#supported-tools) for comparing received to verified. While IDEs are supported, due to their MDI nature, using a different Diff Tool is recommended.");
         builder.Paragraph($"Tools supported by {plan.Os.Name()}:");
-        builder.Bullets(DiffTools.For(plan.Os).Select(_ => $"[{_.Name}]({_.Url})"));
+        builder.Bullets(DiffToolLinks.For(plan.Os).Select(_ => $"[{_.Name}]({_.Url})"));
     }
 
     static void AppendBuildServer(MarkdownBuilder builder, Plan plan)

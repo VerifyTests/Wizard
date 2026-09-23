@@ -1,10 +1,8 @@
-using DiffTools = Wizard.Core.DiffTools;
-
 /// <summary>
 /// The wizard lists diff tools from a static copy, because DiffEngine is not meant for WASM. This keeps
 /// the copy equal to DiffEngine's own list: non-MDI tools that support the OS, in DiffEngine's order.
 /// </summary>
-public class DiffToolsTests
+public class DiffToolLinksTests
 {
     [Test]
     [MatrixDataSource]
@@ -13,7 +11,7 @@ public class DiffToolsTests
         var expected = Definitions.Tools
             .Where(_ => !_.IsMdi && Supports(_, os))
             .Select(_ => $"{_.Tool} {_.Url}");
-        var actual = DiffTools.For(os).Select(_ => $"{_.Name} {_.Url}");
+        var actual = DiffToolLinks.For(os).Select(_ => $"{_.Name} {_.Url}");
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 
