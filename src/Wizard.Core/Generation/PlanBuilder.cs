@@ -134,7 +134,7 @@ public static class PlanBuilder
         // An extension with no plugin type at all, such as a dotnet tool, is not something discovery
         // could have found, so saying it was missed would be misleading.
         var undiscovered = selected
-            .Where(_ => _.PluginType != null && !_.DiscoveredByInitializePlugins)
+            .Where(_ => _ is {PluginType: not null, DiscoveredByInitializePlugins: false})
             .Select(_ => _.Id)
             .ToList();
         if (undiscovered.Count > 0)
@@ -151,7 +151,7 @@ public static class PlanBuilder
 
         // Plan A1: a project that relies on InitializePlugins() alone never enabled these.
         var existingUndiscovered = Extensions.All
-            .Where(_ => state.IsExisting(_.Id) && _.PluginType != null && !_.DiscoveredByInitializePlugins)
+            .Where(_ => state.IsExisting(_.Id) && _ is {PluginType: not null, DiscoveredByInitializePlugins: false})
             .Select(_ => _.Id)
             .ToList();
         if (existingUndiscovered.Count > 0)

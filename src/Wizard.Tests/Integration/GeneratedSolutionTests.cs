@@ -1,5 +1,3 @@
-using System.Diagnostics;
-
 namespace Wizard.Tests.Integration;
 
 /// <summary>
@@ -56,7 +54,7 @@ public class GeneratedSolutionTests
     }
 
     public static IEnumerable<Func<string>> EveryExtension() =>
-        Wizard.Core.Extensions.All
+        Core.Extensions.All
             .Where(_ => _.Platform == Platform.CrossPlatform || OperatingSystem.IsWindows())
             .Select<ExtensionDefinition, Func<string>>(definition => () => definition.Id);
 

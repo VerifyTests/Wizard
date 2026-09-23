@@ -116,15 +116,15 @@ public partial class FlowPage : IDisposable
         return Changed();
     }
 
-    async Task Changed()
+    Task Changed()
     {
         State.Normalize();
         Navigate(WizardStateUrl.ToRelativeUrl(State), replace: true);
-        await Remember();
+        return Remember();
     }
 
     /// <summary>Writes only what changed, so a step that never touches an answer never rewrites it.</summary>
-    async Task Remember()
+    Task Remember()
     {
         var current = BrowserMemory.For(State);
         var changes = new Remembered(
@@ -133,11 +133,11 @@ public partial class FlowPage : IDisposable
             Difference(current.Sponsor, written.Sponsor));
         if (changes == Remembered.None)
         {
-            return;
+            return Task.CompletedTask;
         }
 
         written = new(current.Tech ?? written.Tech, current.Existing ?? written.Existing, current.Sponsor);
-        await Storage.WriteAsync(changes);
+        return Storage.WriteAsync(changes);
     }
 
     /// <summary>The value to write: null when nothing changed, empty when it is to be forgotten.</summary>

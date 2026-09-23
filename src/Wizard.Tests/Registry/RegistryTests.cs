@@ -1,6 +1,5 @@
 // System.Xml.Linq, which the test project's implicit usings bring in, also has an Extensions class.
 using Extensions = Wizard.Core.Extensions;
-using Wizard.Tests.Generation;
 
 namespace Wizard.Tests.Registry;
 
@@ -168,7 +167,13 @@ public class RegistryTests
     [Test]
     public async Task UndiscoveredExtensionsAreInitializedExplicitly()
     {
-        foreach (var extension in Extensions.All.Where(_ => _.PluginType != null && !_.DiscoveredByInitializePlugins))
+        foreach (var extension in Extensions
+                     .All
+                     .Where(_ => _ is
+                     {
+                         PluginType: not null,
+                         DiscoveredByInitializePlugins: false
+                     }))
         {
             await Assert.That(extension.Initialize)
                 .IsNotEmpty()

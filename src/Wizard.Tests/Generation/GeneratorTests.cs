@@ -201,7 +201,7 @@ public class GeneratorTests
 
     public static IEnumerable<Func<(string Id, Depth Depth)>> EachExtension()
     {
-        foreach (var definition in Wizard.Core.Extensions.All)
+        foreach (var definition in Core.Extensions.All)
         {
             foreach (var depth in new[] {Depth.Minimal, Depth.Verbose})
             {
@@ -218,7 +218,7 @@ public class GeneratorTests
         yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
         yield return () => ("Recording", ["EntityFramework", "Http", "MicrosoftLogging", "SqlServer"]);
         yield return () => ("Windows", ["DiffPlex", "WinForms", "Xaml"]);
-        yield return () => ("Everything", [.. Wizard.Core.Extensions.All.Select(_ => _.Id)]);
+        yield return () => ("Everything", [.. Core.Extensions.All.Select(_ => _.Id)]);
     }
 
     /// <summary>

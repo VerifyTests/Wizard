@@ -112,7 +112,7 @@ public sealed record Plan(
         [
             .. Extensions
                 .SelectMany(_ => _.Packages)
-                .Where(_ => _.ForLibrary && _.Kind == PackageKind.PackageReference)
+                .Where(_ => _ is {ForLibrary: true, Kind: PackageKind.PackageReference})
                 .Select(_ => _.Id)
                 .Distinct(StringComparer.Ordinal)
         ];

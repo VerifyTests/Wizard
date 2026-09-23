@@ -1,5 +1,3 @@
-using Wizard.Tests.Generation;
-
 namespace Wizard.Tests.Model;
 
 public class WizardStateUrlTests
@@ -54,7 +52,7 @@ public class WizardStateUrlTests
         await Assert.That(added.BuildServer).IsNull();
         await Assert.That(added.Techs).IsEmpty();
         // something the project already has cannot be added again
-        await Assert.That(added.SelectedExtensions).IsEquivalentTo(new[] {"Http"});
+        await Assert.That(added.SelectedExtensions).IsEquivalentTo(["Http"]);
 
         var created = WizardStateUrl.Parse(Flow.New, "have=SqlServer");
         await Assert.That(created.ExistingExtensions).IsEmpty();
@@ -82,7 +80,7 @@ public class WizardStateUrlTests
     public async Task UnknownExtensionsAndStaleOptionsAreDropped()
     {
         var state = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,NotAnExtension&min=NotAnExtension&opt=nope:1");
-        await Assert.That(state.SelectedExtensions).IsEquivalentTo(new[] {"DiffPlex"});
+        await Assert.That(state.SelectedExtensions).IsEquivalentTo(["DiffPlex"]);
         await Assert.That(state.Depths).IsEmpty();
         await Assert.That(state.Choices).IsEmpty();
     }

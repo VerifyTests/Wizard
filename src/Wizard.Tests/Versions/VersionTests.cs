@@ -1,6 +1,3 @@
-using Wizard.Tests.Generation;
-using Wizard.VersionRefresh;
-
 namespace Wizard.Tests.Versions;
 
 /// <summary>Picking versions (plan D3), the weekly refresh (plan 15.2) and pinning.</summary>
@@ -73,7 +70,7 @@ public class VersionTests
         {
             ["Moq"] = ["4.1.0"]
         }, new(2026, 9, 29));
-        await Assert.That(result.Unanswered).IsEquivalentTo(new[] {"Verify"});
+        await Assert.That(result.Unanswered).IsEquivalentTo(["Verify"]);
         await Assert.That(result.Json).Contains("\"Verify\": \"33.1.1\"");
     }
 
@@ -105,7 +102,7 @@ public class VersionTests
     public async Task OnlyEmittedPackagesAreLookedUp()
     {
         var plan = Plan.Build(GeneratorTests.WithExtensions(GeneratorTests.State(), "Http"), PackageVersions.Baked, GeneratorTests.Today);
-        await Assert.That(plan.EmittedPackages).IsEquivalentTo(new[] {"Verify.XunitV3", "xunit.v3", "Verify.Http", "verify.tool"});
+        await Assert.That(plan.EmittedPackages).IsEquivalentTo(["Verify.XunitV3", "xunit.v3", "Verify.Http", "verify.tool"]);
     }
 
     [Test]

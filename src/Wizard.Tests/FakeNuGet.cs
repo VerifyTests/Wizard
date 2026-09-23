@@ -1,5 +1,3 @@
-using System.Net;
-
 namespace Wizard.Tests;
 
 /// <summary>
@@ -19,7 +17,7 @@ public sealed class FakeNuGet : HttpMessageHandler
 
     public List<string> Requested { get; } = [];
 
-    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancel)
+    protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, Cancel cancel)
     {
         lock (Requested)
         {

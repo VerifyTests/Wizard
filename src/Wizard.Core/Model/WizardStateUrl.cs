@@ -230,7 +230,7 @@ public static class WizardStateUrl
     {
         if (value == null)
         {
-            return new(WizardState.DefaultExtensions(flow), StringComparer.Ordinal);
+            return [with(StringComparer.Ordinal), .. WizardState.DefaultExtensions(flow)];
         }
 
         if (value == NoExtensions)
@@ -238,7 +238,7 @@ public static class WizardStateUrl
             return new(StringComparer.Ordinal);
         }
 
-        return new(SplitList(value), StringComparer.Ordinal);
+        return [with(StringComparer.Ordinal), .. SplitList(value)];
     }
 
     /// <summary>A comma list. Empty entries are dropped; <see cref="WizardState.Normalize"/> drops unknown ids.</summary>

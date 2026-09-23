@@ -17,7 +17,7 @@ public static class TechSuggestions
         var recommended = new Dictionary<string, List<string>>(StringComparer.Ordinal);
         var related = new Dictionary<string, List<string>>(StringComparer.Ordinal);
 
-        void Note(Dictionary<string, List<string>> into, string extensionId, string because)
+        static void Note(Dictionary<string, List<string>> into, string extensionId, string because)
         {
             if (!into.TryGetValue(extensionId, out var list))
             {

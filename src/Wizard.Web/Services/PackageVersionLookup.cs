@@ -20,7 +20,7 @@ public sealed class PackageVersionLookup(HttpClient client)
     public async Task<IReadOnlyDictionary<string, string>> NewestAsync(IEnumerable<string> packageIds)
     {
         var wanted = packageIds.Distinct(StringComparer.OrdinalIgnoreCase).ToList();
-        using var cancel = new CancellationTokenSource(budget);
+        using var cancel = new CancelSource(budget);
         await Task.WhenAll(wanted.Where(_ => !found.ContainsKey(_)).Select(_ => Fetch(_, cancel.Token)));
 
         return wanted
@@ -28,7 +28,7 @@ public sealed class PackageVersionLookup(HttpClient client)
             .ToDictionary(_ => _, _ => found[_], StringComparer.OrdinalIgnoreCase);
     }
 
-    async Task Fetch(string packageId, CancellationToken cancel)
+    async Task Fetch(string packageId, Cancel cancel)
     {
         try
         {

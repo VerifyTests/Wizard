@@ -207,7 +207,7 @@ public class ScreenSnapshotTests
     [Test]
     public async Task NewNarrow()
     {
-        var page = await Open($"/new?step=tf&os=Linux&ide=Rider&cli=Cli", "#tf-XunitV3");
+        var page = await Open("/new?step=tf&os=Linux&ide=Rider&cli=Cli", "#tf-XunitV3");
         await page.SetViewportSizeAsync(375, 812);
         await VerifyScreen(page);
     }

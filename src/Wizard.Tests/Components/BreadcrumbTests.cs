@@ -1,4 +1,3 @@
-using Wizard.Tests.Generation;
 using Wizard.Web.Components;
 
 namespace Wizard.Tests.Components;

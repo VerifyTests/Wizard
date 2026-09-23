@@ -79,7 +79,12 @@ public class AddTests : WebTestContext
     public async Task TickingAnExistingExtensionUpdatesTheUrlAndIsRemembered()
     {
         var page = OpenAdd("add?step=have&tf=XunitV3");
-        await page.Find(".existing-item[data-id=SqlServer] input").ChangeAsync(new ChangeEventArgs {Value = true});
+        await page.Find(".existing-item[data-id=SqlServer] input")
+            .ChangeAsync(
+                new()
+                {
+                    Value = true
+                });
 
         await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3&have=SqlServer");
         await Assert.That(Written()).Contains((BrowserMemory.ExistingKey, "SqlServer"));

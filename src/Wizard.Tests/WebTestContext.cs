@@ -1,5 +1,3 @@
-using Wizard.Tests.Generation;
-
 namespace Wizard.Tests;
 
 /// <summary>bunit base context for component tests: loose JS interop (clipboard and downloads are

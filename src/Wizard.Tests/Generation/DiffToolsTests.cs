@@ -15,7 +15,7 @@ public class DiffToolsTests
         var expected = Definitions.Tools
             .Where(_ => !_.IsMdi && Supports(_, os))
             .Select(_ => $"{_.Tool} {_.Url}");
-        var actual = Wizard.Core.DiffTools.For(os).Select(_ => $"{_.Name} {_.Url}");
+        var actual = Core.DiffTools.For(os).Select(_ => $"{_.Name} {_.Url}");
         await Assert.That(actual).IsEquivalentTo(expected, TUnit.Assertions.Enums.CollectionOrdering.Matching);
     }
 

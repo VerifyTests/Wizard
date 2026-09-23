@@ -1,10 +1,3 @@
-using System.Globalization;
-using System.Text;
-using System.Text.Encodings.Web;
-using System.Text.Json;
-using System.Text.Json.Nodes;
-using Wizard.Core;
-
 namespace Wizard.VersionRefresh;
 
 /// <param name="Changes">Package id, old version, new version, in file order.</param>
@@ -59,7 +52,7 @@ public static class VersionRefresh
     };
 
     /// <param name="versionLists">Package id to the versions nuget.org lists; a missing id was not answered.</param>
-    public static RefreshResult Refresh(string json, IReadOnlyDictionary<string, IReadOnlyList<string>> versionLists, DateOnly today)
+    public static RefreshResult Refresh(string json, IReadOnlyDictionary<string, IReadOnlyList<string>> versionLists, Date today)
     {
         var document = JsonNode.Parse(json)!.AsObject();
         var packages = document["packages"]!.AsObject();

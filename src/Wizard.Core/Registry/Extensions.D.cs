@@ -795,12 +795,12 @@ public static partial class Extensions
             [
                 new(
                     "StrictJson",
-                    """"
+                    """
                     var document = ParseSample();
 
                     return Verify(document)
                         .UseStrictJson();
-                    """")
+                    """)
                 {
                     Comment =
                     [
@@ -1009,9 +1009,7 @@ public static partial class Extensions
             [
                 new(
                     "FormUsage",
-                    """
-                    return Verify(new SampleForm());
-                    """)
+                    "return Verify(new SampleForm());")
                 {
                     Comment =
                     [
@@ -1238,9 +1236,7 @@ public static partial class Extensions
             [
                 new(
                     "WindowUsage",
-                    """
-                    return Verify(new SampleWindow());
-                    """)
+                    "return Verify(new SampleWindow());")
                 {
                     Comment =
                     [

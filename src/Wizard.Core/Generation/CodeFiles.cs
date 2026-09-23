@@ -154,26 +154,26 @@ public static class CodeFiles
     /// <summary>The Expecto project: F# has no module initializers, so the tests share a lazy setup.</summary>
     public static string ExpectoTests(Plan plan) =>
         Banner(plan, "//") +
-        $$"""
+        $"""
         module Tests
 
         open System.Reflection
         open Expecto
         open VerifyTests
-        {{string.Join("\n", ExpectoOpens(plan))}}
+        {string.Join('\n', ExpectoOpens(plan))}
         open VerifyExpecto
 
         // F# has no module initializers, so each test forces this before verifying. It runs once.
         // Extension samples are C# only (plan D9), but every selected plugin is still enabled here.
         let initialize =
             lazy (
-        {{ExpectoInitialize(plan)}})
+        {ExpectoInitialize(plan)})
 
         // Verify serializes what FindPerson returns and compares it with Tests.findPerson.verified.txt.
-        {{plan.Framework.SampleTest}}
+        {plan.Framework.SampleTest}
 
         // Checks the solution follows Verify's conventions (.gitignore, .gitattributes, .editorconfig).
-        {{plan.Framework.VerifyChecksTest}}
+        {plan.Framework.VerifyChecksTest}
 
         """;
 

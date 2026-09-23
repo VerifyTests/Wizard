@@ -86,7 +86,12 @@ public class NewTests : WebTestContext
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
         await Assert.That(page.Find(".validation-error").TextContent).Contains("GitHub account");
 
-        await page.Find("#sponsorAccount").InputAsync(new ChangeEventArgs {Value = "acme"});
+        await page.Find("#sponsorAccount")
+            .InputAsync(
+            new()
+            {
+                Value = "acme"
+            });
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
         await Assert.That(CurrentUrl).EndsWith("&sponsor=Sponsor&account=acme");
     }
@@ -96,10 +101,18 @@ public class NewTests : WebTestContext
     public async Task SelectingAnExtensionUpdatesTheUrl()
     {
         var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
-        await page.Find(".extension-card[data-id=AngleSharp] input").ChangeAsync(new ChangeEventArgs {Value = true});
+        await page.Find(".extension-card[data-id=AngleSharp] input")
+            .ChangeAsync(
+            new()
+            {
+                Value = true
+            });
         await Assert.That(CurrentUrl).Contains("&ext=AngleSharp,DiffPlex");
 
-        await page.Find(".extension-card[data-id=DiffPlex] input").ChangeAsync(new ChangeEventArgs {Value = false});
+        await page.Find(".extension-card[data-id=DiffPlex] input")
+            .ChangeAsync(
+            new()
+            {Value = false});
         await Assert.That(CurrentUrl).Contains("&ext=AngleSharp");
     }
 
@@ -108,7 +121,10 @@ public class NewTests : WebTestContext
     public async Task DeselectingEverythingIsCarriedInTheUrl()
     {
         var page = Open("new?step=extensions&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
-        await page.Find(".extension-card[data-id=DiffPlex] input").ChangeAsync(new ChangeEventArgs {Value = false});
+        await page.Find(".extension-card[data-id=DiffPlex] input")
+            .ChangeAsync(
+                new()
+                    {Value = false});
         await Assert.That(CurrentUrl).Contains("&ext=none");
     }
 
@@ -145,7 +161,12 @@ public class NewTests : WebTestContext
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
         await Assert.That(page.Find(".interaction-notice[data-rule=activity-listener]").TextContent).Contains("ActivityListener");
 
-        await page.Find(".extension-card[data-id=OpenTelemetry] input").ChangeAsync(new ChangeEventArgs {Value = false});
+        await page.Find(".extension-card[data-id=OpenTelemetry] input")
+            .ChangeAsync(
+                new()
+                {
+                    Value = false
+                });
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
     }
 
@@ -163,7 +184,7 @@ public class NewTests : WebTestContext
     public async Task OutputUsesTheNewestVersionsOnNuGet()
     {
         var page = Open("new?step=output&os=Windows&ide=Rider&cli=Gui&tf=XunitV3&ci=None&ext=Http");
-        page.WaitForState(() => page.Find("[data-versions]").GetAttribute("data-versions") == "live");
+        await page.WaitForStateAsync(() => page.Find("[data-versions]").GetAttribute("data-versions") == "live");
 
         await Assert.That(page.Find(".versions").TextContent).IsEqualTo("Package versions are the newest stable releases on nuget.org.");
         await page.Find("#tab-Files").ClickAsync(new());
@@ -177,7 +198,7 @@ public class NewTests : WebTestContext
     {
         NuGet.Offline = true;
         var page = Open("new?step=output&os=Windows&ide=Rider&cli=Gui&tf=XunitV3&ci=None");
-        page.WaitForState(() => page.Find("[data-versions]").GetAttribute("data-versions") == "baked");
+        await page.WaitForStateAsync(() => page.Find("[data-versions]").GetAttribute("data-versions") == "baked");
         await Assert.That(page.Find(".versions").TextContent).StartsWith("nuget.org could not be reached");
     }
 
@@ -192,7 +213,11 @@ public class NewTests : WebTestContext
     public async Task RenamingTheSolutionRenamesTheFiles()
     {
         var page = Open("new?step=output&os=Linux&ide=Other&cli=Gui&tf=XunitV3&ci=None");
-        await page.Find("#solutionName").ChangeAsync(new ChangeEventArgs {Value = "Acme Tools!"});
+        await page.Find("#solutionName").ChangeAsync(
+            new()
+            {
+                Value = "Acme Tools!"
+            });
         await Assert.That(CurrentUrl).Contains("&name=AcmeTools");
 
         await page.Find("#tab-Files").ClickAsync(new());

@@ -1,5 +1,3 @@
-using Wizard.Tests.Generation;
-
 namespace Wizard.Tests.Model;
 
 public class SponsorRulesTests

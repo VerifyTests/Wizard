@@ -13,9 +13,9 @@ public class BrowserMemoryTests
 
         var restored = BrowserMemory.Seed(state, query, everything);
 
-        await Assert.That(restored).IsEqualTo(new Restored(Tech: true, Existing: true, Sponsor: true));
-        await Assert.That(state.Techs).IsEquivalentTo(new[] {"efcore"});
-        await Assert.That(state.ExistingExtensions).IsEquivalentTo(new[] {"SqlServer"});
+        await Assert.That(restored).IsEqualTo(new(Tech: true, Existing: true, Sponsor: true));
+        await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
+        await Assert.That(state.ExistingExtensions).IsEquivalentTo(["SqlServer"]);
         await Assert.That(state.Exemption).IsEqualTo(Exemption.SmallRevenue);
         // the remembered stack's recommendations are applied, as if each tech had just been chosen
         await Assert.That(state.Has("EntityFramework")).IsTrue();
@@ -31,8 +31,8 @@ public class BrowserMemoryTests
         var restored = BrowserMemory.Seed(state, query, everything);
 
         await Assert.That(restored.Any).IsFalse();
-        await Assert.That(state.Techs).IsEquivalentTo(new[] {"stj"});
-        await Assert.That(state.ExistingExtensions).IsEquivalentTo(new[] {"DiffPlex"});
+        await Assert.That(state.Techs).IsEquivalentTo(["stj"]);
+        await Assert.That(state.ExistingExtensions).IsEquivalentTo(["DiffPlex"]);
         await Assert.That(state.SponsorMode).IsEqualTo(SponsorMode.Ignore);
     }
 
@@ -45,8 +45,8 @@ public class BrowserMemoryTests
 
         BrowserMemory.Seed(state, query, everything);
 
-        await Assert.That(state.Techs).IsEquivalentTo(new[] {"efcore"});
-        await Assert.That(state.SelectedExtensions).IsEquivalentTo(new[] {"Http"});
+        await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
+        await Assert.That(state.SelectedExtensions).IsEquivalentTo(["Http"]);
     }
 
     /// <summary>Only answers to questions the flow asks are read, or written.</summary>
@@ -56,12 +56,12 @@ public class BrowserMemoryTests
         var added = WizardStateUrl.Parse(Flow.Add, "");
         BrowserMemory.Seed(added, "", everything);
         await Assert.That(added.Techs).IsEmpty();
-        await Assert.That(added.ExistingExtensions).IsEquivalentTo(new[] {"SqlServer"});
+        await Assert.That(added.ExistingExtensions).IsEquivalentTo(["SqlServer"]);
 
         var created = WizardStateUrl.Parse(Flow.New, "");
         BrowserMemory.Seed(created, "", everything);
         await Assert.That(created.ExistingExtensions).IsEmpty();
-        await Assert.That(created.Techs).IsEquivalentTo(new[] {"efcore"});
+        await Assert.That(created.Techs).IsEquivalentTo(["efcore"]);
 
         // what the new-project flow writes leaves the existing list alone
         var remembered = BrowserMemory.For(created);
@@ -75,8 +75,8 @@ public class BrowserMemoryTests
         var state = WizardStateUrl.Parse(Flow.AddByTech, "");
         BrowserMemory.Seed(state, "", new("nope,efcore", "Gone,SqlServer", "sponsor=Nonsense"));
 
-        await Assert.That(state.Techs).IsEquivalentTo(new[] {"efcore"});
-        await Assert.That(state.ExistingExtensions).IsEquivalentTo(new[] {"SqlServer"});
+        await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
+        await Assert.That(state.ExistingExtensions).IsEquivalentTo(["SqlServer"]);
         await Assert.That(state.SponsorMode).IsEqualTo(SponsorMode.NotChosen);
     }
 }

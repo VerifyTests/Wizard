@@ -1,6 +1,5 @@
 // System.Xml.Linq, which the test project's implicit usings bring in, also has an Extensions class.
 using Extensions = Wizard.Core.Extensions;
-using Wizard.Tests.Generation;
 
 namespace Wizard.Tests.Registry;
 
@@ -49,7 +48,7 @@ public class TechTests
     {
         var state = GeneratorTests.State();
         TechSuggestions.Choose(state, "efcore", true);
-        await Assert.That(state.Techs).IsEquivalentTo(new[] {"efcore"});
+        await Assert.That(state.Techs).IsEquivalentTo(["efcore"]);
         await Assert.That(state.Has("EntityFramework")).IsTrue();
         await Assert.That(state.Has("LocalDb")).IsTrue();
         // related, so listed but not selected

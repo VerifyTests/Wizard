@@ -1,6 +1,4 @@
 using System.Net.Http.Json;
-using System.Text.Json;
-using Wizard.Core;
 using Wizard.VersionRefresh;
 
 // Refreshes package-versions.json from nuget.org (plan 15.2). Run by refresh-versions.yml:
@@ -42,7 +40,7 @@ await Task.WhenAll(
         }
     }));
 
-var result = VersionRefresh.Refresh(json, lists, DateOnly.FromDateTime(DateTime.UtcNow));
+var result = VersionRefresh.Refresh(json, lists, Date.FromDateTime(DateTime.UtcNow));
 if (result.Changed)
 {
     await File.WriteAllTextAsync(path, result.Json);
