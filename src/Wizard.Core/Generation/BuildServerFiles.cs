@@ -63,10 +63,10 @@ public static class BuildServerFiles
                {name}:
                  runs-on: {image}
                  steps:
-                   - uses: actions/checkout@v4
+                   - uses: actions/checkout@v7
 
                    - name: Setup .NET
-                     uses: actions/setup-dotnet@v5
+                     uses: actions/setup-dotnet@v6
                      with:
                        global-json-file: global.json
 
@@ -91,7 +91,7 @@ public static class BuildServerFiles
                    # when the build fails makes the difference visible without re-running locally.
                    - name: Upload Test Results
                      if: failure()
-                     uses: actions/upload-artifact@v4
+                     uses: actions/upload-artifact@v7
                      with:
                        name: verify-test-results-{name}
                        path: |
