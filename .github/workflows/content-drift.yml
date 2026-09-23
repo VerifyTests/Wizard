@@ -1,0 +1,37 @@
+name: Verify content drift
+
+# Compares the wizard's copies of Verify's docs and samples with Verify's main branch (plan 17.5).
+# A failure means Verify moved on: bring the copy in src/Wizard.Core in line, then accept the snapshot.
+# It never blocks a deploy.
+on:
+  schedule:
+    - cron: '0 5 * * 1'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  drift:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup .NET
+        uses: actions/setup-dotnet@v5
+        with:
+          global-json-file: global.json
+
+      - name: Build test project
+        run: dotnet build src/Wizard.Tests --configuration Release
+
+      - name: Compare with Verify
+        run: dotnet run --project src/Wizard.Tests --configuration Release --no-build -- --no-ansi --progress off --treenode-filter "/*/*/ContentDriftTests/*"
+
+      - name: Upload received files
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: drift
+          path: '**/*.received.*'

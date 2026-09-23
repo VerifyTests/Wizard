@@ -28,6 +28,11 @@ dotnet run --project src/Wizard.Tests --configuration Release --no-build -- --tr
 dotnet run --project src/Wizard.Tests --configuration Release --no-build -- --treenode-filter '/*/*/GeneratedSolutionTests/*'
 ```
 
+`Content/ContentDriftTests` is also `[Explicit]` and run weekly by `content-drift.yml`. It checks that
+`Wizard.Core/Content/*.include.md` still equal Verify's originals, and snapshots the upstream files the
+wizard adapts rather than copies (ai-usage, the core samples) under `Content/Upstream`. When one fails,
+bring the wizard's copy in line with the upstream diff, then accept the snapshot.
+
 Building `Wizard.Tests` also publishes `Wizard.Web` into `src/Wizard.Tests/bin/<Configuration>/blazor-publish`
 (the `PublishBlazorForTests` target). `PublishedWizard` serves that output from Kestrel for the Playwright
 tests, with a `{*path}` fallback that mirrors GitHub Pages serving `404.html` for deep links.

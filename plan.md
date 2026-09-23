@@ -897,6 +897,12 @@ bunit: each step component (validation gates Next; choices bind), `Breadcrumb` (
 
 Diff each `Content/*.md` against `https://raw.githubusercontent.com/VerifyTests/Verify/main/docs/mdsource/<file>` and each extension's readme-derived sample against its repo, reporting drift as a failing test in a scheduled workflow only (never blocks deploy).
 
+As built (phase 5): `ContentDriftTests`, run each Monday by `content-drift.yml`.
+
+- The include files are verbatim copies, so each is compared with its original for equality.
+- `skill.md` and `context.md` are the two templates in `ai-usage.source.md` without the inline snapshot sections, and the core samples are adapted to the generated solution. These are not compared with the wizard's text. Instead the upstream file is snapshot as it was when the wizard's copy was last brought in line, so a failure shows exactly what changed upstream.
+- Extension samples are not compared with their readmes. The registry's samples are already corrected where the readmes are wrong (§21, A15), so a diff would always fail; the integration build (17.4) catches the API drift that matters.
+
 ---
 
 ## 18. CI and deployment
@@ -935,7 +941,7 @@ Do these after the site is live:
 
 Each phase ends with green tests and a deployable site. Estimated effort is relative.
 
-Status: Phase 0 done and deployed. Phase 1 done: flow A without the tech and extension steps. Phase 2 done: the registry, the interaction rules, the ordering solver, the extension and options steps. Phase 3 done: the tech stack step and its suggestions, flows B and C, `/add/{Id}` deep links, the browser's memory, and the add-flow download. Phase 4 done: the weekly refresh workflow and tool, and the live nuget.org lookup.
+Status: Phase 0 done and deployed. Phase 1 done: flow A without the tech and extension steps. Phase 2 done: the registry, the interaction rules, the ordering solver, the extension and options steps. Phase 3 done: the tech stack step and its suggestions, flows B and C, `/add/{Id}` deep links, the browser's memory, and the add-flow download. Phase 4 done: the weekly refresh workflow and tool, and the live nuget.org lookup. Phase 5 in this repo done: the content drift checks, readme and claude.md. The Verify repository changes (19) and pinning the site in the VerifyTests profile wait for approval.
 
 **Phase 0 – Scaffold (small).** Repo layout (4), props, `global.json`, `nuget.config`, empty `Wizard.Core`/`Web`/`Tests`, copied SponsorCheck plumbing (index.html, css, fonts, interop.js, `PublishedWizard`, `WebTestContext`, `ModuleInitializer`), Home page with three cards, `deploy.yml` deploying the placeholder to Pages. Verify the base href and 404 fallback work at `https://verifytests.github.io/Wizard/`.
 
