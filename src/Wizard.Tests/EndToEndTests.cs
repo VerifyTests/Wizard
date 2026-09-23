@@ -36,7 +36,7 @@ public class EndToEndTests
         await download.SaveAsAsync(path);
         try
         {
-            using var archive = ZipFile.OpenRead(path);
+            await using var archive = await ZipFile.OpenReadAsync(path);
             var entries = archive.Entries.Select(_ => _.FullName).ToList();
             await Assert.That(entries).Contains("VerifySample/src/VerifySample.Tests/ModuleInitializer.cs");
             await Assert.That(entries).Contains("VerifySample/azure-pipelines.yml");
@@ -129,10 +129,10 @@ public class EndToEndTests
             await download.SaveAsAsync(path);
             try
             {
-                using var archive = ZipFile.OpenRead(path);
+                await using var archive = await ZipFile.OpenReadAsync(path);
                 var initializer = archive.GetEntry("verify-additions/ModuleInitializer.cs");
                 await Assert.That(initializer).IsNotNull();
-                using var reader = new StreamReader(initializer!.Open());
+                using var reader = new StreamReader(await initializer!.OpenAsync());
                 await Assert.That(await reader.ReadToEndAsync()).Contains("VerifySqlServer.Initialize(recordCommands: false);");
                 await Assert.That(archive.GetEntry($"verify-additions/{AdditionGenerator.PackagesFragment}")).IsNotNull();
             }

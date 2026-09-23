@@ -2,12 +2,38 @@
 public class VersionTests
 {
     [Test]
-    [Arguments(new[] {"1.0.0", "1.2.0", "1.10.0", "1.9.9"}, "1.10.0")]
-    [Arguments(new[] {"1.0.0", "2.0.0-beta.1"}, "1.0.0")]
-    [Arguments(new[] {"1.0.0+build.5", "1.0.1-rc"}, "1.0.0+build.5")]
-    [Arguments(new[] {"153.0.8010.5200", "154.0.8037.57"}, "154.0.8037.57")]
-    [Arguments(new[] {"4.0.0.1", "4.0.0"}, "4.0.0.1")]
-    [Arguments(new[] {"1.0.0-alpha", "not a version"}, null)]
+    [Arguments(new[]
+    {
+        "1.0.0",
+        "1.2.0",
+        "1.10.0",
+        "1.9.9"
+    }, "1.10.0")]
+    [Arguments(new[]
+    {
+        "1.0.0",
+        "2.0.0-beta.1"
+    }, "1.0.0")]
+    [Arguments(new[]
+    {
+        "1.0.0+build.5",
+        "1.0.1-rc"
+    }, "1.0.0+build.5")]
+    [Arguments(new[]
+    {
+        "153.0.8010.5200",
+        "154.0.8037.57"
+    }, "154.0.8037.57")]
+    [Arguments(new[]
+    {
+        "4.0.0.1",
+        "4.0.0"
+    }, "4.0.0.1")]
+    [Arguments(new[]
+    {
+        "1.0.0-alpha",
+        "not a version"
+    }, null)]
     public async Task NewestStable(string[] versions, string? expected) =>
         await Assert.That(StableVersion.Newest(versions)).IsEqualTo(expected);
 
@@ -51,11 +77,13 @@ public class VersionTests
     [Test]
     public async Task RefreshWithNothingNewLeavesTheFileAsItWas()
     {
-        var result = VersionRefresh.Refresh(file, new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["Moq"] = ["4.0.0"],
-            ["Verify"] = ["33.1.1"]
-        }, new(2026, 9, 29));
+        var result = VersionRefresh.Refresh(
+            file,
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Moq"] = ["4.0.0"],
+                ["Verify"] = ["33.1.1"]
+            }, new(2026, 9, 29));
         await Assert.That(result.Changed).IsFalse();
         await Assert.That(result.Json).IsEqualTo(file);
     }
@@ -64,10 +92,12 @@ public class VersionTests
     [Test]
     public async Task RefreshKeepsWhatWasNotAnswered()
     {
-        var result = VersionRefresh.Refresh(file, new Dictionary<string, IReadOnlyList<string>>
-        {
-            ["Moq"] = ["4.1.0"]
-        }, new(2026, 9, 29));
+        var result = VersionRefresh.Refresh(
+            file,
+            new Dictionary<string, IReadOnlyList<string>>
+            {
+                ["Moq"] = ["4.1.0"]
+            }, new(2026, 9, 29));
         await Assert.That(result.Unanswered).IsEquivalentTo(["Verify"]);
         await Assert.That(result.Json).Contains("\"Verify\": \"33.1.1\"");
     }
@@ -91,7 +121,10 @@ public class VersionTests
     [Test]
     public async Task ALiveLookupDoesNotMoveAPinnedPackage()
     {
-        var versions = PackageVersions.Baked.With(new Dictionary<string, string> {["YoloDev.Expecto.TestSdk"] = "1.0.0"});
+        var versions = PackageVersions.Baked.With(new Dictionary<string, string>
+        {
+            ["YoloDev.Expecto.TestSdk"] = "1.0.0"
+        });
         await Assert.That(versions["YoloDev.Expecto.TestSdk"]).IsEqualTo(PackageVersions.Baked["YoloDev.Expecto.TestSdk"]);
     }
 

@@ -102,7 +102,7 @@ public class GeneratorTests
         var files = SolutionGenerator.Build(plan);
         var zip = ZipBuilder.Build(plan.SolutionName, files);
 
-        using var archive = new ZipArchive(new MemoryStream(zip));
+        await using var archive = new ZipArchive(new MemoryStream(zip));
         var entries = archive.Entries.Select(_ => _.FullName).ToList();
         await Assert.That(entries.Count).IsEqualTo(files.Count);
         await Assert.That(entries.All(_ => _.StartsWith("VerifySample/", StringComparison.Ordinal))).IsTrue();
@@ -310,7 +310,7 @@ public class GeneratorTests
     {
         var plan = PlanFor(Addition(Flow.Add, [], ["Http"]));
         await Assert.That(plan.ZipRoot).IsEqualTo("verify-additions");
-        using var archive = new ZipArchive(new MemoryStream(ZipBuilder.Build(plan.ZipRoot, SolutionGenerator.Build(plan))));
+        await using var archive = new ZipArchive(new MemoryStream(ZipBuilder.Build(plan.ZipRoot, SolutionGenerator.Build(plan))));
         await Assert.That(archive.Entries.All(_ => _.FullName.StartsWith("verify-additions/", StringComparison.Ordinal))).IsTrue();
     }
 
