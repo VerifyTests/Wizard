@@ -10,9 +10,9 @@ using Microsoft.AspNetCore.Components.WebAssembly.Http;
 /// </summary>
 public sealed class PackageVersionLookup(HttpClient client)
 {
-    static readonly TimeSpan budget = TimeSpan.FromSeconds(5);
+    static TimeSpan budget = TimeSpan.FromSeconds(5);
 
-    readonly Dictionary<string, string> found = new(StringComparer.OrdinalIgnoreCase);
+    Dictionary<string, string> found = new(StringComparer.OrdinalIgnoreCase);
 
     /// <returns>Package id to its newest stable version, for the ids that answered in time.</returns>
     public async Task<IReadOnlyDictionary<string, string>> NewestAsync(IEnumerable<string> packageIds)

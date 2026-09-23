@@ -188,11 +188,11 @@ public class GeneratorTests
                  {Render(files)}
                  ==== packages
 
-                 {string.Join("\n", plan.AllPackages)}
+                 {string.Join('\n', plan.AllPackages)}
 
                  ==== interactions
 
-                 {string.Join("\n", plan.Interactions.Select(_ => $"{_.Severity} {_.RuleId}: {_.Message}"))}
+                 {string.Join('\n', plan.Interactions.Select(_ => $"{_.Severity} {_.RuleId}: {_.Message}"))}
                  """)
             .UseParameters($"{plugin.Id}-{plugin.Depth}");
     }
@@ -232,7 +232,7 @@ public class GeneratorTests
                 $"""
                  ==== selected
 
-                 {string.Join("\n", plan.Plugins.Select(_ => _.Id))}
+                 {string.Join('\n', plan.Plugins.Select(_ => _.Id))}
 
                  ==== interactions
 
@@ -241,7 +241,7 @@ public class GeneratorTests
                  {Render(SolutionGenerator.Build(plan).Where(_ => _.Path.EndsWith("ModuleInitializer.cs", StringComparison.Ordinal)))}
                  ==== files
 
-                 {string.Join("\n", SolutionGenerator.Build(plan).Select(_ => _.Path))}
+                 {string.Join('\n', SolutionGenerator.Build(plan).Select(_ => _.Path))}
                  """)
             .UseParameters(combination.Name);
     }
@@ -259,7 +259,7 @@ public class GeneratorTests
     }
 
     // Keyed by name, so the test's display name is the name rather than the whole state.
-    static readonly Dictionary<string, Func<WizardState>> additions = new()
+    static Dictionary<string, Func<WizardState>> additions = new()
     {
         // The case the interaction rules were written for: EF Core added next to an existing SqlServer,
         // whose recording the project's own initializer now has to turn off.

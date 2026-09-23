@@ -126,7 +126,7 @@ public static class AiContentGenerator
             };
             if (plugin.Statements.Count > 0)
             {
-                facts.Add($"Enabled in `ModuleInitializer.cs` by `{string.Join(" ", plugin.Statements.Select(_ => _.Code))}`. Do not move that call after `VerifierSettings.InitializePlugins()`.");
+                facts.Add($"Enabled in `ModuleInitializer.cs` by `{string.Join(' ', plugin.Statements.Select(_ => _.Code))}`. Do not move that call after `VerifierSettings.InitializePlugins()`.");
             }
 
             if (plugin.Samples.Count > 0)

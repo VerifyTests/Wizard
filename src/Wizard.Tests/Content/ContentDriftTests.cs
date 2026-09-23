@@ -8,7 +8,7 @@ public class ContentDriftTests
 {
     const string raw = "https://raw.githubusercontent.com/VerifyTests/Verify/main/";
 
-    static readonly HttpClient client = new();
+    static HttpClient client = new();
 
     static async Task<string> Upstream(string path)
     {

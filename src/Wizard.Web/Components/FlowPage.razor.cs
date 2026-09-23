@@ -176,20 +176,20 @@ public partial class FlowPage : IDisposable
             _ => ""
         };
 
-    static readonly IReadOnlyList<Choice<Os>> osChoices =
+    static IReadOnlyList<Choice<Os>> osChoices =
     [
         new(Os.Windows, "Windows"),
         new(Os.MacOS, "MacOS"),
         new(Os.Linux, "Linux")
     ];
 
-    static readonly IReadOnlyList<Choice<CliPreference>> cliChoices =
+    static IReadOnlyList<Choice<CliPreference>> cliChoices =
     [
         new(CliPreference.Cli, "Prefer CLI", "dotnet add package, and Verify.Terminal for reviewing snapshots."),
         new(CliPreference.Gui, "Prefer GUI", "Package references to paste into project files.")
     ];
 
-    static readonly IReadOnlyList<Choice<TestFramework>> testFrameworkChoices =
+    static IReadOnlyList<Choice<TestFramework>> testFrameworkChoices =
     [
         new(TestFramework.XunitV3, "xUnit v3"),
         new(TestFramework.NUnit, "NUnit"),
@@ -199,7 +199,7 @@ public partial class FlowPage : IDisposable
         new(TestFramework.Expecto, "Expecto")
     ];
 
-    static readonly IReadOnlyList<Choice<BuildServer>> buildServerChoices =
+    static IReadOnlyList<Choice<BuildServer>> buildServerChoices =
     [
         new(BuildServer.GitHubActions, "GitHub Actions"),
         new(BuildServer.AzureDevOps, "Azure DevOps"),

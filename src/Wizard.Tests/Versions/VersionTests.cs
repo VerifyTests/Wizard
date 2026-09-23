@@ -27,7 +27,7 @@ public class VersionTests
 
         """;
 
-    static readonly Dictionary<string, IReadOnlyList<string>> newer = new()
+    static Dictionary<string, IReadOnlyList<string>> newer = new()
     {
         ["Moq"] = ["4.0.0", "4.1.0", "5.0.0-preview"],
         ["Verify"] = ["33.1.1"],

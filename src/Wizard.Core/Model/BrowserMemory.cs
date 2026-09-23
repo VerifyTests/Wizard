@@ -88,13 +88,13 @@ public static class BrowserMemory
         string? tech = null;
         if (AsksTech(state.Flow))
         {
-            tech = string.Join(",", Techs.All.Where(_ => state.Techs.Contains(_.Id)).Select(_ => _.Id));
+            tech = string.Join(',', Techs.All.Where(_ => state.Techs.Contains(_.Id)).Select(_ => _.Id));
         }
 
         string? existing = null;
         if (AsksExisting(state.Flow))
         {
-            existing = string.Join(",", Plugins.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id));
+            existing = string.Join(',', Plugins.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id));
         }
 
         return new(tech, existing, WizardStateUrl.SponsorQuery(state));

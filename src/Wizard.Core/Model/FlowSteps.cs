@@ -162,7 +162,7 @@ public static class FlowSteps
         return string.Join(", ", parts);
     }
 
-    static readonly IReadOnlyList<StepDefinition> newFlow =
+    static IReadOnlyList<StepDefinition> newFlow =
     [
         Os,
         Ide,
@@ -178,7 +178,7 @@ public static class FlowSteps
 
     // Adding to an existing project: the environment is already set up, so only the test framework is
     // asked, which decides the attributes in the generated tests (plan 7.2).
-    static readonly IReadOnlyList<StepDefinition> addFlow =
+    static IReadOnlyList<StepDefinition> addFlow =
     [
         TestFramework,
         Existing,
@@ -188,7 +188,7 @@ public static class FlowSteps
         Output
     ];
 
-    static readonly IReadOnlyList<StepDefinition> addByTechFlow =
+    static IReadOnlyList<StepDefinition> addByTechFlow =
     [
         TestFramework,
         Existing,

@@ -20,7 +20,5 @@ global using TUnit.Core;
 global using VerifyTests;
 global using VerifyTests.AngleSharp;
 global using Wizard.Tests;
-global using Wizard.Web;
-global using Wizard.Web.Components;
 global using Wizard.Web.Pages;
 global using static VerifyTUnit.Verifier;

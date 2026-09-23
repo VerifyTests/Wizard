@@ -1,7 +1,7 @@
 /// <summary>What the browser remembers, and when it applies (plan 8.2).</summary>
 public class BrowserMemoryTests
 {
-    static readonly Remembered everything = new("efcore", "SqlServer", "sponsor=Exempt&exempt=SmallRevenue&until=2027-09");
+    static Remembered everything = new("efcore", "SqlServer", "sponsor=Exempt&exempt=SmallRevenue&until=2027-09");
 
     [Test]
     public async Task RememberedAnswersFillInWhatTheUrlLeavesOut()

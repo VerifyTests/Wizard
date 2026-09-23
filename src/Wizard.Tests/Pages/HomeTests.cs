@@ -6,7 +6,7 @@ public class HomeTests : WebTestContext
         var cut = Render<Home>();
 
         var hrefs = cut.FindAll("a.entry-card").Select(_ => _.GetAttribute("href"));
-        await Assert.That(string.Join(" ", hrefs)).IsEqualTo("new add add/by-tech");
+        await Assert.That(string.Join(' ', hrefs)).IsEqualTo("new add add/by-tech");
     }
 
     /// <summary>"Forget them" clears every key the wizard keeps (plan 8.2).</summary>

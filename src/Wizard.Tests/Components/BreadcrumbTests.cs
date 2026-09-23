@@ -1,3 +1,5 @@
+using Wizard.Web.Components;
+
 public class BreadcrumbTests : WebTestContext
 {
     static WizardState MidFlow() =>

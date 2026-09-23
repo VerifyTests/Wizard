@@ -5,7 +5,7 @@ public static partial class Plugins
     /// gate of their own under the Papyrine prefix, so the build fails with SC021 until that owner is
     /// declared too, whichever render backend is chosen (plan A8).
     /// </summary>
-    static readonly SponsorOwner papyrine = new("Papyrine", "Papyrine", "Morph")
+    static SponsorOwner papyrine = new("Papyrine", "Papyrine", "Morph")
     {
         SponsorsPage = "https://github.com/sponsors/Papyrine",
         // Papyrine has no open source exemption, so a project exempt from Verify's fee on that ground
@@ -1184,7 +1184,7 @@ public static partial class Plugins
                     Members =
                     [
                         """
-                        static readonly Lazy<IDocumentStore> store = new(StartServer);
+                        static Lazy<IDocumentStore> store = new(StartServer);
 
                         // The embedded server is downloaded on first use and started against a temp directory,
                         // which is why the samples are skipped by default.

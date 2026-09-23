@@ -51,7 +51,7 @@ public class RavenDBTests
         await Verify(session);
     }
 
-    static readonly Lazy<IDocumentStore> store = new(StartServer);
+    static Lazy<IDocumentStore> store = new(StartServer);
 
     // The embedded server is downloaded on first use and started against a temp directory,
     // which is why the samples are skipped by default.

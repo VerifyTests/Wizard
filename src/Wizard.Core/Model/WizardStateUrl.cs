@@ -76,8 +76,8 @@ public static class WizardStateUrl
             Add(NameKey, state.SolutionName);
         }
 
-        Add(TechKey, string.Join(",", Techs.All.Where(_ => state.Techs.Contains(_.Id)).Select(_ => _.Id)));
-        Add(ExistingKey, string.Join(",", Plugins.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id)));
+        Add(TechKey, string.Join(',', Techs.All.Where(_ => state.Techs.Contains(_.Id)).Select(_ => _.Id)));
+        Add(ExistingKey, string.Join(',', Plugins.All.Where(_ => state.IsExisting(_.Id)).Select(_ => _.Id)));
 
         // Registry order, not insertion order, so the same selection is always the same link.
         var selected = Plugins.All
@@ -87,20 +87,20 @@ public static class WizardStateUrl
         if (!selected.SequenceEqual(WizardState.DefaultPlugins(state.Flow), StringComparer.Ordinal))
         {
             // A link that selects nothing still has to say so, or it would read as the default.
-            Add(PluginsKey, selected.Count == 0 ? NoPlugins : string.Join(",", selected));
+            Add(PluginsKey, selected.Count == 0 ? NoPlugins : string.Join(',', selected));
         }
 
-        Add(MinimalKey, string.Join(",", selected.Where(_ => state.DepthOf(_) == Depth.Minimal)));
-        Add(ChoicesKey, string.Join(",", state.Choices.OrderBy(_ => _.Key, StringComparer.Ordinal).Select(_ => $"{_.Key}:{_.Value}")));
+        Add(MinimalKey, string.Join(',', selected.Where(_ => state.DepthOf(_) == Depth.Minimal)));
+        Add(ChoicesKey, string.Join(',', state.Choices.OrderBy(_ => _.Key, StringComparer.Ordinal).Select(_ => $"{_.Key}:{_.Value}")));
 
         pairs.AddRange(SponsorPairs(state));
 
-        return string.Join("&", pairs.Select(_ => $"{_.Key}={Escape(_.Value)}"));
+        return string.Join('&', pairs.Select(_ => $"{_.Key}={Escape(_.Value)}"));
     }
 
     /// <summary>The maintenance fee declaration alone, as a query string, which is what the browser keeps.</summary>
     public static string SponsorQuery(WizardState state) =>
-        string.Join("&", SponsorPairs(state).Select(_ => $"{_.Key}={Escape(_.Value)}"));
+        string.Join('&', SponsorPairs(state).Select(_ => $"{_.Key}={Escape(_.Value)}"));
 
     static List<(string Key, string Value)> SponsorPairs(WizardState state)
     {

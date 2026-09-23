@@ -4,7 +4,7 @@
 /// </summary>
 public static class ZipBuilder
 {
-    static readonly DateTimeOffset timestamp = new(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
+    static DateTimeOffset timestamp = new(2020, 1, 1, 0, 0, 0, TimeSpan.Zero);
 
     public static byte[] Build(string rootFolder, IEnumerable<GeneratedFile> files)
     {

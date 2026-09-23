@@ -1,5 +1,3 @@
-
-
 // Refreshes package-versions.json from nuget.org (plan 15.2). Run by refresh-versions.yml:
 //   dotnet run --project src/Wizard.VersionRefresh -- <package-versions.json> <summary.md>
 // Writes the file only when a version moved. The summary is the pull request body. When running in
