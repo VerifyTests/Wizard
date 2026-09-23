@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>One selected plugin, with everything resolved that depends on the rest of the state.</summary>
 /// <param name="Statements">Its module initializer statements, after any rule replaced them.</param>
 public sealed record ResolvedPlugin(

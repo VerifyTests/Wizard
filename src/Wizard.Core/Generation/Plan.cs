@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The resolved view of a <see cref="WizardState"/> that every generator reads (plan 6.3): defaults
 /// filled in, the framework data looked up, and every package paired with the version to emit.

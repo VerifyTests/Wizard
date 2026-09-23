@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Resolves the parts of a <see cref="Plan"/> that depend on the whole selection (plan 6.3): which
 /// packages each plugin contributes, which of its samples are generated, which statements survive a

@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>Source files of the generated solution. Every file starts with a banner linking back to the wizard (plan 12.2).</summary>
 public static class CodeFiles
 {

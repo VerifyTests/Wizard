@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The file tree of the download: a whole solution for the new-project flow (plan 12.2), or the
 /// changes to merge into one for the add flows (plan 12.5).

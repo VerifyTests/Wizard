@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The files of the add flows (plan 12.5): not a solution, but the changes to merge into one, rooted in a
 /// folder named <c>verify-additions</c>. Every fragment says where it goes; the readme and CLAUDE.md

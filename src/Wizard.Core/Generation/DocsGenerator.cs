@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The guide (plan 12.3): shown on the output step, downloadable, and the readme.md of the zip.
 /// Section order follows the old docs/wiz pages (plan Appendix C), then adds what the zip contains.

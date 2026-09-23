@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>One block of the module initializer: a plugin's statements, or a rule's addition.</summary>
 /// <param name="Key">The plugin id the block belongs to, which is what ordering edges name.</param>
 public sealed record InitializeBlock(

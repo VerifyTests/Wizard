@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// Instructions for an AI coding assistant (plan 12.6): the AI tab and download, and the zip's
 /// CLAUDE.md and .github/copilot-instructions.md. Project facts come first, then Verify's context-file

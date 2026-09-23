@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// One test file per selected plugin (plan 12.2), holding its samples at the chosen depth. Every
 /// method has a comment block above it saying what it shows, so the file is readable on its own.

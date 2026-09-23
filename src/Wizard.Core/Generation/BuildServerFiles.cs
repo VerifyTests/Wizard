@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// One build definition per build server: build, run the tests, and publish any <c>*.received.*</c>
 /// files when they fail, using the steps from Verify's build-server docs (plan 12.2).

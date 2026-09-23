@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>
 /// The generated test project's <c>ModuleInitializer.cs</c> (plan 12.4). Every call carries a comment
 /// saying what it does and why it is where it is, so the file explains itself once the wizard is closed.

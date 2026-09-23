@@ -1,5 +1,3 @@
-namespace Wizard.Core;
-
 /// <summary>Solution-level and project files of the generated solution (plan 12.2).</summary>
 public static class ProjectFiles
 {
