@@ -163,7 +163,7 @@ public static class CodeFiles
 
     /// <summary>The Expecto project: F# has no module initializers, so the tests share a lazy setup.</summary>
     public static string ExpectoTests(Plan plan) =>
-        Banner(plan, "//") +
+        Banner(plan) +
         $"""
         module Tests
 

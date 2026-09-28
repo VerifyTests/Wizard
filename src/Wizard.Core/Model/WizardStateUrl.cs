@@ -178,7 +178,7 @@ public static class WizardStateUrl
     public static void ApplySponsorQuery(WizardState state, string query)
     {
         var values = ParseQuery(query);
-        ApplySponsor(state, _ => values.GetValueOrDefault(_));
+        ApplySponsor(state, values.GetValueOrDefault);
     }
 
     static void ApplySponsor(WizardState state, Func<string, string?> get)
@@ -239,7 +239,7 @@ public static class WizardStateUrl
 
         if (value == NoPlugins)
         {
-            return new(StringComparer.Ordinal);
+            return [with(StringComparer.Ordinal)];
         }
 
         return [with(StringComparer.Ordinal), .. SplitList(value)];
