@@ -43,7 +43,7 @@ public static partial class InteractionRules
         new(
             "image-comparer",
             "Image comparer",
-            "each registers a comparer for png and the other image plugins, and the last one registered wins.",
+            "each registers a comparer for png and the other image extensions, and the last one registered wins.",
             ["ImageHash", "ImageMagick", "ImageSharpCompare", "Phash"])
         {
             Conditions =

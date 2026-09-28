@@ -40,7 +40,7 @@ using DocumentFormat.OpenXml.Packaging;
 // bundled font folder and generate the .verified.png files on one canonical machine.
 // Note: Page counts differ per format: Word is one page per laid out page, PowerPoint one per
 // slide in p:sldIdLst order, and Excel follows the print layout rather than the sheet.
-// Note: pptx is verified the same way, by passing a stream with the plugin pptx or a
+// Note: pptx is verified the same way, by passing a stream with the extension pptx or a
 // PresentationDocument.
 // Note: UniqueForOSPlatform() is worth adding once rendering is on and the tests run on more than
 // one OS.

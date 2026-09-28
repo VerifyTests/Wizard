@@ -426,7 +426,7 @@ public static partial class Plugins
             ],
             Notes =
             [
-                "Snapshots use the `.il` plugin, which `Initialize()` registers as a text plugin.",
+                "Snapshots use the `.il` extension, which `Initialize()` registers as a text extension.",
                 "Since version 3.2 the IL is normalized by default; turning that off with `DontNormalizeIl()` re-orders every existing verified file once.",
                 "The types are split across two namespaces, `ICSharpCode.Decompiler.Metadata` for `PEFile` and `VerifyTests.ICSharpCode.Decompiler` for the rest.",
                 "The package targets net48 and net8.0, so a newer project resolves the net8.0 assets."

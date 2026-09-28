@@ -49,7 +49,7 @@ public class SylvanTests
         return VerifyFile("sample.xlsx");
     }
 
-    // Code that builds a workbook in memory has a stream rather than a file. The plugin
+    // Code that builds a workbook in memory has a stream rather than a file. The extension
     // passed to Verify is what picks the converter, so it has to be given explicitly.
     // Not run by default: needs a sample.xlsx of your own beside the test, copied to the output
     // directory.

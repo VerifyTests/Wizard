@@ -50,7 +50,7 @@ public class PdfPigTests
         return VerifyFile("sample.pdf", settings);
     }
 
-    // A pdf produced in the test is verified as a stream, with pdf as the plugin.
+    // A pdf produced in the test is verified as a stream, with pdf as the extension.
     // Not run by default: needs a sample.pdf in the test project, copied to the output directory.
     [Fact(Skip = "needs a sample.pdf in the test project, copied to the output directory.")]
     public Task PdfStream()

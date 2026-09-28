@@ -32,7 +32,7 @@ using Microsoft.CodeAnalysis.Text;
 // Note: The package ships an MSBuild targets file that takes *.received.cs and *.verified.cs out
 // of Compile and nests them, so a generated snapshot is never compiled into the test project. Do
 // not add a Compile Remove for them.
-// Note: The output plugin comes from the generated file's path: a .vb hint name produces a vb
+// Note: The output extension comes from the generated file's path: a .vb hint name produces a vb
 // target, anything else a cs one.
 // Note: An exception thrown by a generator is rethrown rather than snapshotted, singly or as an
 // AggregateException.

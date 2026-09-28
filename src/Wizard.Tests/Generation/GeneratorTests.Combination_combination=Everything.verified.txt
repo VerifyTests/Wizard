@@ -82,7 +82,7 @@ Conflict docx-converter [Aspose, OpenXml, Pandoc, Syncfusion]
 Aspose, OpenXml, Pandoc and Syncfusion cannot be used together: each registers a converter for the docx plugin, and the last one registered wins. Keep one of them.
 
 Conflict image-comparer [ImageHash, ImageMagick, ImageSharpCompare, Phash]
-ImageHash, ImageMagick, ImageSharpCompare and Phash cannot be used together: each registers a comparer for png and the other image plugins, and the last one registered wins. Keep one of them.
+ImageHash, ImageMagick, ImageSharpCompare and Phash cannot be used together: each registers a comparer for png and the other image extensions, and the last one registered wins. Keep one of them.
 
 Conflict pdf-converter [Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF, Syncfusion]
 Aspose, DocNet, ImageMagick, PDFium, PdfPig, QuestPDF and Syncfusion cannot be used together: each registers a converter for the pdf plugin, and the last one registered wins. Keep one of them.

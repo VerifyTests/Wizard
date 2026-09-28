@@ -502,7 +502,7 @@ public static partial class Plugins
                 "Rendering is compiled in on net10.0 only, because Morph targets net10.0.",
                 "Rendered pages depend on the installed fonts, so set `VerifyOpenXml.FontDirectory` to a bundled font folder and generate the `.verified.png` files on one canonical machine.",
                 "Page counts differ per format: Word is one page per laid out page, PowerPoint one per slide in `p:sldIdLst` order, and Excel follows the print layout rather than the sheet.",
-                "pptx is verified the same way, by passing a stream with the plugin `pptx` or a `PresentationDocument`.",
+                "pptx is verified the same way, by passing a stream with the extension `pptx` or a `PresentationDocument`.",
                 "`UniqueForOSPlatform()` is worth adding once rendering is on and the tests run on more than one OS."
             ]
         },
@@ -768,7 +768,7 @@ public static partial class Plugins
                     """)
                 {
                     SkipReason = "needs a sample.pdf in the test project, copied to the output directory.",
-                    Comment = ["A pdf produced in the test is verified as a stream, with pdf as the plugin."]
+                    Comment = ["A pdf produced in the test is verified as a stream, with pdf as the extension."]
                 },
                 new(
                     "ExcludePdf",

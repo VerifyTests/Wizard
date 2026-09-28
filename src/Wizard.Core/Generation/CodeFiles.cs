@@ -125,7 +125,7 @@ public static class CodeFiles
         Banner(plan) +
         """
         // Checks the solution follows Verify's conventions: .gitignore excludes received files, and
-        // .gitattributes and .editorconfig have settings for every verified text plugin in use.
+        // .gitattributes and .editorconfig have settings for every verified text extension in use.
 
         """ +
         plan.Framework.VerifyChecksTest + "\n";

@@ -347,7 +347,7 @@ public static partial class Plugins
             [
                 "One verification produces several targets: a text snapshot for the diagnostics, and one `.cs` or `.vb` per generated source, each named after its hint name.",
                 "The package ships an MSBuild targets file that takes `*.received.cs` and `*.verified.cs` out of `Compile` and nests them, so a generated snapshot is never compiled into the test project. Do not add a `Compile Remove` for them.",
-                "The output plugin comes from the generated file's path: a `.vb` hint name produces a `vb` target, anything else a `cs` one.",
+                "The output extension comes from the generated file's path: a `.vb` hint name produces a `vb` target, anything else a `cs` one.",
                 "An exception thrown by a generator is rethrown rather than snapshotted, singly or as an `AggregateException`.",
                 "`Microsoft.CodeAnalysis.CSharp` is pinned to the version the package was built against, so the generator compiles against the same Roslyn the driver runs.",
                 "Referencing `Microsoft.CodeAnalysis.CSharp` turns on the analyzer authoring rules. `RS1036` and `RS1041` both assume the assembly ships as a real analyzer, which this one never does: it is only constructed in process by `CSharpGeneratorDriver`. Both are in `NoWarn` for that reason. A generator you do ship belongs in its own `netstandard2.0` project with `EnforceExtendedAnalyzerRules`.",
@@ -548,7 +548,7 @@ public static partial class Plugins
                     SkipReason = "needs a sample.xlsx of your own beside the test, copied to the output directory.",
                     Comment =
                     [
-                        "Code that builds a workbook in memory has a stream rather than a file. The plugin",
+                        "Code that builds a workbook in memory has a stream rather than a file. The extension",
                         "passed to Verify is what picks the converter, so it has to be given explicitly."
                     ]
                 }

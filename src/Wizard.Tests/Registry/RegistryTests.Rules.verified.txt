@@ -70,7 +70,7 @@
     {
       Id: image-comparer,
       Label: Image comparer,
-      Reason: each registers a comparer for png and the other image plugins, and the last one registered wins.,
+      Reason: each registers a comparer for png and the other image extensions, and the last one registered wins.,
       Members: [
         ImageHash,
         ImageMagick,

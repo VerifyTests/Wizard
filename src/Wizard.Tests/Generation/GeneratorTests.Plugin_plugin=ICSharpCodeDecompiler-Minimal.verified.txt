@@ -25,7 +25,7 @@ using VerifyTests.ICSharpCode.Decompiler;
 
 // Verify.ICSharpCode.Decompiler: Verifies assemblies, types, methods and properties as decompiled IL, so a change in codegen is visible.
 // https://github.com/VerifyTests/Verify.ICSharpCode.Decompiler
-// Note: Snapshots use the .il plugin, which Initialize() registers as a text plugin.
+// Note: Snapshots use the .il extension, which Initialize() registers as a text extension.
 // Note: Since version 3.2 the IL is normalized by default; turning that off with DontNormalizeIl()
 // re-orders every existing verified file once.
 // Note: The types are split across two namespaces, ICSharpCode.Decompiler.Metadata for PEFile and
