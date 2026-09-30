@@ -12,9 +12,19 @@ public static class FlowSteps
 {
     public static readonly StepDefinition Os = new(
         "os",
-        "Operating system",
-        _ => _.Os?.Name(),
-        (state, _) => state.Os != null);
+        "Developer operating systems",
+        _ => Summary(_.OperatingSystems),
+        (state, _) => state.OperatingSystems.Count > 0);
+
+    static string? Summary(IReadOnlySet<Os> operatingSystems)
+    {
+        if (operatingSystems.Count == 0)
+        {
+            return null;
+        }
+
+        return DisplayNames.Join(operatingSystems);
+    }
 
     public static readonly StepDefinition Ide = new(
         "ide",

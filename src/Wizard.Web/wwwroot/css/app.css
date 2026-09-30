@@ -520,6 +520,17 @@ button {
     cursor: pointer;
 }
 
+.step-heading {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 1rem;
+}
+
+button.skip {
+    background: transparent;
+}
+
 button.primary {
     background: var(--primary);
     border-color: var(--primary);
@@ -988,8 +999,8 @@ pre.ai-markdown {
 /* "already using" step (plan 7.2 step 2) */
 .existing-list {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
-    gap: .3rem .75rem;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, 300px), 1fr));
+    gap: .4rem 1.5rem;
 }
 
 .existing-item {
@@ -999,6 +1010,11 @@ pre.ai-markdown {
     padding: .3rem .4rem;
     border-radius: 6px;
     cursor: pointer;
+}
+
+.existing-item span {
+    min-width: 0;
+    overflow-wrap: anywhere;
 }
 
 .existing-item.selected {

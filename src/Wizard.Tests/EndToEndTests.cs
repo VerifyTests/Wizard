@@ -9,11 +9,13 @@ public class EndToEndTests
     {
         var page = await ScreenSnapshotTests.Open("/", ".entry-cards");
         await page.ClickAsync("a.entry-card[href=new]");
-        foreach (var option in new[] {"#os-Linux", "#ide-Rider", "#cli-Gui", "#tf-NUnit", "#ci-AzureDevOps"})
-        {
-            await page.ClickAsync(option);
-            await page.ClickAsync("button.primary");
-        }
+        // The operating systems need Next, since several can be chosen; the first choice on each other step moves on by itself.
+        await page.ClickAsync("#os-Linux");
+        await page.ClickAsync("button.primary");
+        await page.ClickAsync("#ide-Rider");
+        await page.ClickAsync("#cli-Gui");
+        await page.ClickAsync("#tf-NUnit");
+        await page.ClickAsync("#ci-AzureDevOps");
 
         // The tech stack and the plugins are optional, and the options step starts on the defaults,
         // so all three are passed by moving on.
@@ -112,7 +114,6 @@ public class EndToEndTests
 
             await page.GotoAsync(wizard.Url("/add/EntityFramework"));
             await page.ClickAsync("#tf-NUnit");
-            await page.ClickAsync("button.primary");
 
             // the "already using" step, restored from the browser
             await page.WaitForSelectorAsync(".restored");

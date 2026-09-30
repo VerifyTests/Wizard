@@ -1,0 +1,29 @@
+@typeparam TValue where TValue : struct, Enum
+
+@* ChoiceCards for a question with several answers: each card toggles on its own. Ids follow the same
+   "{IdPrefix}-{member name}" scheme. *@
+<div class="mode-cards" role="group" aria-label="@Label">
+    @foreach (var option in Options)
+    {
+        var selected = Values.Contains(option.Value);
+        <button type="button"
+                id="@($"{IdPrefix}-{option.Value}")"
+                class="mode-card @(selected ? "selected" : "")"
+                aria-pressed="@(selected ? "true" : "false")"
+                @onclick="() => Toggled.InvokeAsync((option.Value, !selected))">
+            <strong>@option.Title</strong>
+            @if (option.Description.Length > 0)
+            {
+                <span>@option.Description</span>
+            }
+        </button>
+    }
+</div>
+
+@code {
+    [Parameter, EditorRequired] public IReadOnlyList<Choice<TValue>> Options { get; set; } = [];
+    [Parameter, EditorRequired] public IReadOnlySet<TValue> Values { get; set; } = new HashSet<TValue>();
+    [Parameter] public EventCallback<(TValue Value, bool Selected)> Toggled { get; set; }
+    [Parameter, EditorRequired] public string IdPrefix { get; set; } = "";
+    [Parameter, EditorRequired] public string Label { get; set; } = "";
+}

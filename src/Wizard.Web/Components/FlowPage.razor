@@ -8,32 +8,40 @@
         <Breadcrumb State="State" Steps="Steps" Today="today" StepSelected="GoTo" />
 
         <section class="step-body" data-step="@State.Step">
-            <h2>@Current.Title</h2>
+            <div class="step-heading">
+                <h2>@Current.Title</h2>
+                @* The optional steps have long lists, so Skip sits at the top where it needs no scroll. *@
+                @if (State.Step is "tech" or "plugins" &&
+                     NextStep is { } skipTo)
+                {
+                    <button type="button" class="skip" @onclick="() => Skip(skipTo.Id)">Skip</button>
+                }
+            </div>
 
             @switch (State.Step)
             {
                 case "os":
-                    <p class="hint">Decides which diff tools are listed, and whether DiffEngineTray is suggested.</p>
-                    <ChoiceCards TValue="Os" Options="osChoices" Value="State.Os" ValueChanged="_ => Set(wizard => wizard.Os = _)" IdPrefix="os" Label="Operating system" />
+                    <p class="hint">Every OS the team develops on, not the ones the tests or app deploy to. Decides which diff tools are listed, and whether DiffEngineTray is suggested.</p>
+                    <ToggleCards TValue="Os" Options="osChoices" Values="State.OperatingSystems" Toggled="_ => Set(wizard => wizard.SetOperatingSystem(_.Value, _.Selected))" IdPrefix="os" Label="Developer operating systems" />
                     break;
                 case "ide":
                     <p class="hint">Rider and ReSharper have a Verify plugin for accepting snapshots in the test runner.</p>
-                    <ChoiceCards TValue="Ide" Options="IdeChoices" Value="State.Ide" ValueChanged="_ => Set(wizard => wizard.Ide = _)" IdPrefix="ide" Label="IDE" />
+                    <ChoiceCards TValue="Ide" Options="IdeChoices" Value="State.Ide" ValueChanged="_ => SetAndAdvance(State.Ide == null, wizard => wizard.Ide = _)" IdPrefix="ide" Label="IDE" />
                     break;
                 case "cli":
                     <p class="hint">This will affect the approach to installing NuGet packages and snapshot management options.</p>
-                    <ChoiceCards TValue="CliPreference" Options="cliChoices" Value="State.Cli" ValueChanged="_ => Set(wizard => wizard.Cli = _)" IdPrefix="cli" Label="CLI or GUI" />
+                    <ChoiceCards TValue="CliPreference" Options="cliChoices" Value="State.Cli" ValueChanged="_ => SetAndAdvance(State.Cli == null, wizard => wizard.Cli = _)" IdPrefix="cli" Label="CLI or GUI" />
                     break;
                 case "tf":
                     @if (State.Flow != Flow.New)
                     {
                         <p class="hint">The test framework the project already uses. It decides the attributes on the generated tests.</p>
                     }
-                    <ChoiceCards TValue="TestFramework" Options="testFrameworkChoices" Value="State.TestFramework" ValueChanged="_ => Set(wizard => wizard.TestFramework = _)" IdPrefix="tf" Label="Test framework" />
+                    <ChoiceCards TValue="TestFramework" Options="testFrameworkChoices" Value="State.TestFramework" ValueChanged="_ => SetAndAdvance(State.TestFramework == null, wizard => wizard.TestFramework = _)" IdPrefix="tf" Label="Test framework" />
                     break;
                 case "ci":
                     <p class="hint">Generates a build definition that runs the tests and publishes any <code>*.received.*</code> files when they fail.</p>
-                    <ChoiceCards TValue="BuildServer" Options="buildServerChoices" Value="State.BuildServer" ValueChanged="_ => Set(wizard => wizard.BuildServer = _)" IdPrefix="ci" Label="Build server" />
+                    <ChoiceCards TValue="BuildServer" Options="buildServerChoices" Value="State.BuildServer" ValueChanged="_ => SetAndAdvance(State.BuildServer == null, wizard => wizard.BuildServer = _)" IdPrefix="ci" Label="Build server" />
                     break;
                 case "have":
                     <ExistingStep State="State" Restored="restored.Existing" Changed="Changed" />

@@ -12,7 +12,7 @@ public class GeneratorTests
         new()
         {
             Flow = Flow.New,
-            Os = os,
+            OperatingSystems = new HashSet<Os> {os},
             Ide = ide,
             Cli = cli,
             TestFramework = framework,
@@ -77,6 +77,15 @@ public class GeneratorTests
     [Arguments(Os.Linux, Ide.Other, CliPreference.Gui)]
     public Task GuideEnvironment(Os os, Ide ide, CliPreference cli) =>
         Verify(DocsGenerator.Build(PlanFor(State(os: os, ide: ide, cli: cli))), "md");
+
+    /// <summary>A team on several operating systems gets every one's diff tools, and DiffEngineTray when Windows is among them.</summary>
+    [Test]
+    public Task GuideSeveralOperatingSystems()
+    {
+        var state = State();
+        state.OperatingSystems = new HashSet<Os> {Os.Linux, Os.Windows};
+        return Verify(DocsGenerator.Build(PlanFor(state)), "md");
+    }
 
     [Test]
     [MatrixDataSource]

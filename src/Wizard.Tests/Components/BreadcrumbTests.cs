@@ -6,7 +6,7 @@ public class BreadcrumbTests : WebTestContext
         new()
         {
             Flow = Flow.New,
-            Os = Os.Linux,
+            OperatingSystems = new HashSet<Os> {Os.Linux},
             Ide = Ide.Rider,
             Cli = CliPreference.Gui,
             Step = "tf"

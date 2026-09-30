@@ -75,9 +75,20 @@ public static class DisplayNames
     /// IDEs offered per OS: the old wizard's list (Visual Studio and ReSharper only on Windows) plus
     /// VS Code everywhere, since the text-file-settings content has VS Code specific guidance.
     /// </summary>
-    public static IReadOnlyList<Ide> IdesFor(Os os)
+    /// <summary>
+    /// The chosen operating systems in declaration order, for display.
+    /// </summary>
+    public static string Join(IEnumerable<Os> operatingSystems) =>
+        string.Join(", ", operatingSystems.Order().Select(_ => _.Name()));
+
+    /// <remarks>
+    /// With several operating systems, an IDE any of them offers is offered, since each developer picks
+    /// their own. Nothing chosen yet rules nothing out.
+    /// </remarks>
+    public static IReadOnlyList<Ide> IdesFor(IReadOnlyCollection<Os> operatingSystems)
     {
-        if (os == Os.Windows)
+        if (operatingSystems.Count == 0 ||
+            operatingSystems.Contains(Os.Windows))
         {
             return [Ide.VisualStudio, Ide.VisualStudioWithReSharper, Ide.Rider, Ide.VsCode, Ide.Other];
         }

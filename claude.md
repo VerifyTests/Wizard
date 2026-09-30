@@ -5,9 +5,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 ## What this is
 
 The Verify getting-started wizard: a Blazor WebAssembly app deployed to https://verifytests.github.io/Wizard/
-by `.github/workflows/deploy.yml`. `plan.md` is the implementation plan and the record of every design
-decision; read the relevant section before changing behaviour, and update it when a decision changes.
-`plan-research/plugin-catalogue-*.md` holds the per-plugin research the registry is built from.
+by `.github/workflows/deploy.yml`.
 
 ## Build & test
 
@@ -38,7 +36,7 @@ Building `Wizard.Tests` also publishes `Wizard.Web` into `src/Wizard.Tests/bin/<
 tests, with a `{*path}` fallback that mirrors GitHub Pages serving `404.html` for deep links.
 
 The Playwright tests share one browser context, so each page from `PublishedWizard.NewPage()` gets an
-in-memory localStorage of its own: the wizard restores remembered answers on load (plan 8.2), and a shared
+in-memory localStorage of its own: the wizard restores remembered answers on load, and a shared
 storage would let parallel tests leak into each other. A test about remembering between visits uses
 `NewIsolatedPage()`, which has real storage in a context of its own, and closes that context when done.
 
@@ -48,13 +46,12 @@ storage would let parallel tests leak into each other. A test about remembering 
   generator tests stay fast. `GenerateWizardDefaults` in its csproj bakes the SDK version (from `global.json`)
   and the target framework (`GeneratedTargetFramework` in `src/Directory.Build.props`) into
   `WizardDefaults`. Generated solutions use those values.
-  - `Registry/Plugins.<A-D>.cs` hold one `PluginDefinition` per plugin, split by the catalogue
-    file each was researched from. `Registry/InteractionRules.Data.cs` holds the combinations. Read
-    `PluginDefinition.cs` before adding an entry: its xml docs are the contract, and `RegistryTests`
+  - `Registry/Plugins.<A-D>.cs` hold one `PluginDefinition` per plugin, split across four files.
+    `Registry/InteractionRules.Data.cs` holds the combinations. Read `PluginDefinition.cs` before adding an entry: its xml docs are the contract, and `RegistryTests`
     enforces most of it.
   - Every package id an entry names needs a version in `Versions/package-versions.json`, and it must be
-    one that exists on nuget.org. The catalogue records each repo's own `<Version>`, which is often the
-    next unreleased one. `src/Wizard.VersionRefresh` rewrites that file with the newest stable versions
+    one that exists on nuget.org; a repo's own `<Version>` is often the next unreleased one.
+    `src/Wizard.VersionRefresh` rewrites that file with the newest stable versions
     (`refresh-versions.yml` runs it weekly); run it locally rather than editing versions by hand:
     `dotnet run --project src/Wizard.VersionRefresh -- src/Wizard.Core/Versions/package-versions.json summary.md`.
   - Generator snapshots use `GeneratorTests.Versions`, with every package at 1.0.0, so a refresh never

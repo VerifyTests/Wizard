@@ -117,6 +117,17 @@ public partial class FlowPage : IDisposable
         return Changed();
     }
 
+    /// <summary>The first answer on a step moves on to the next one; changing an earlier answer stays put.</summary>
+    async Task SetAndAdvance(bool firstAnswer, Action<WizardState> change)
+    {
+        await Set(change);
+        if (firstAnswer &&
+            NextStep is { } next)
+        {
+            GoTo(next.Id);
+        }
+    }
+
     Task Changed()
     {
         State.Normalize();
@@ -161,6 +172,26 @@ public partial class FlowPage : IDisposable
         scrollToTop = true;
     }
 
+
+    /// <summary>Moves on with nothing chosen on the step. Clearing the techs also takes back the plugins they suggested.</summary>
+    async Task Skip(string nextId)
+    {
+        if (State.Step == "tech")
+        {
+            foreach (var tech in State.Techs.ToList())
+            {
+                TechSuggestions.Choose(State, tech, false);
+            }
+        }
+        else
+        {
+            State.SelectedPlugins = new HashSet<string>(StringComparer.Ordinal);
+        }
+
+        await Changed();
+        GoTo(nextId);
+    }
+
     // Moving between steps stays on the same page, so the browser keeps the scroll position of the
     // step just left, which after Next is usually its bottom.
     protected override async Task OnAfterRenderAsync(bool firstRender)
@@ -178,7 +209,7 @@ public partial class FlowPage : IDisposable
         Navigation.LocationChanged -= LocationChanged;
 
     IReadOnlyList<Choice<Ide>> IdeChoices =>
-        DisplayNames.IdesFor(State.Os ?? Os.Windows)
+        DisplayNames.IdesFor(State.OperatingSystems)
             .Select(_ => new Choice<Ide>(_, _.Name(), IdeDescription(_)))
             .ToList();
 

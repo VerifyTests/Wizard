@@ -5,7 +5,7 @@
 /// </summary>
 public sealed record Plan(
     WizardState State,
-    Os Os,
+    IReadOnlyList<Os> OperatingSystems,
     Ide Ide,
     CliPreference Cli,
     TestFrameworkInfo Framework,
@@ -207,10 +207,15 @@ public sealed record Plan(
     public static Plan Build(WizardState state, PackageVersions versions, Date today)
     {
         var framework = state.TestFramework ?? TestFramework.XunitV3;
-        var os = state.Os ?? Os.Windows;
+        IReadOnlyList<Os> operatingSystems = [Os.Windows];
+        if (state.OperatingSystems.Count > 0)
+        {
+            operatingSystems = state.OperatingSystems.Order().ToList();
+        }
+
         return new(
             state,
-            os,
+            operatingSystems,
             state.Ide ?? Ide.Rider,
             state.Cli ?? CliPreference.Cli,
             TestFrameworkInfo.For(framework),
@@ -223,7 +228,7 @@ public sealed record Plan(
             Interactions =
             [
                 .. InteractionRules.For(state)
-                    .Concat(PlanBuilder.Notices(state, os, framework))
+                    .Concat(PlanBuilder.Notices(state, framework))
                     .OrderByDescending(_ => _.Severity)
                     .ThenBy(_ => _.RuleId, StringComparer.Ordinal)
             ]

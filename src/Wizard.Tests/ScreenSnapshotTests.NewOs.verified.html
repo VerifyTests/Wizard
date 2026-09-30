@@ -30,7 +30,7 @@
             <a class="breadcrumb-flow" href="">New project</a>
             <ol>
               <li class="current" aria-current="step">
-                <span class="step-title">Operating system</span>
+                <span class="step-title">Developer operating systems</span>
               </li>
               <li class="future">
                 <span class="step-title">IDE</span>
@@ -62,16 +62,18 @@
             </ol>
           </nav>
           <section class="step-body" data-step="os">
-            <h2>Operating system</h2>
-            <p class="hint">Decides which diff tools are listed, and whether DiffEngineTray is suggested.</p>
-            <div class="mode-cards" role="radiogroup" aria-label="Operating system">
-              <button type="button" id="os-Windows" class="mode-card " role="radio" aria-checked="false">
+            <div class="step-heading">
+              <h2>Developer operating systems</h2>
+            </div>
+            <p class="hint">Every OS the team develops on, not the ones the tests or app deploy to. Decides which diff tools are listed, and whether DiffEngineTray is suggested.</p>
+            <div class="mode-cards" role="group" aria-label="Developer operating systems">
+              <button type="button" id="os-Windows" class="mode-card " aria-pressed="false">
                 <strong>Windows</strong>
               </button>
-              <button type="button" id="os-MacOS" class="mode-card " role="radio" aria-checked="false">
+              <button type="button" id="os-MacOS" class="mode-card " aria-pressed="false">
                 <strong>MacOS</strong>
               </button>
-              <button type="button" id="os-Linux" class="mode-card " role="radio" aria-checked="false">
+              <button type="button" id="os-Linux" class="mode-card " aria-pressed="false">
                 <strong>Linux</strong>
               </button>
             </div>

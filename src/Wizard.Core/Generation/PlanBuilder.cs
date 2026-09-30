@@ -124,7 +124,7 @@ public static class PlanBuilder
     /// external tool, a framework it does not support, or an explicit call because plugin discovery
     /// cannot find it. Kept out of <see cref="InteractionRules"/>, which holds only combinations.
     /// </summary>
-    public static IReadOnlyList<InteractionResult> Notices(WizardState state, Os os, TestFramework framework)
+    public static IReadOnlyList<InteractionResult> Notices(WizardState state, TestFramework framework)
     {
         var notices = new List<InteractionResult>();
         var selected = Plugins.Selected(state);

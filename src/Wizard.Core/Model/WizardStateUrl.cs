@@ -70,7 +70,7 @@ public static class WizardStateUrl
         }
 
         Add(StepKey, state.Step);
-        Add(OsKey, state.Os?.ToString());
+        Add(OsKey, string.Join(',', Enum.GetValues<Os>().Where(state.OperatingSystems.Contains)));
         Add(IdeKey, state.Ide?.ToString());
         Add(CliKey, state.Cli?.ToString());
         Add(TestFrameworkKey, state.TestFramework?.ToString());
@@ -153,7 +153,7 @@ public static class WizardStateUrl
         {
             Flow = flow,
             Step = Get(StepKey) ?? "",
-            Os = ParseEnum<Os>(Get(OsKey)),
+            OperatingSystems = new HashSet<Os>(SplitList(Get(OsKey)).Select(ParseEnum<Os>).OfType<Os>()),
             Ide = ParseEnum<Ide>(Get(IdeKey)),
             Cli = ParseEnum<CliPreference>(Get(CliKey)),
             TestFramework = ParseEnum<TestFramework>(Get(TestFrameworkKey)),
@@ -232,8 +232,7 @@ public static class WizardStateUrl
     /// </summary>
     static HashSet<string> ParsePlugins(string? value)
     {
-        if (value == null ||
-            value == NoPlugins)
+        if (value is null or NoPlugins)
         {
             return [with(StringComparer.Ordinal)];
         }

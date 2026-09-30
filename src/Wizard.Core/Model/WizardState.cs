@@ -8,7 +8,8 @@ public sealed record WizardState
 
     public Flow Flow { get; set; }
 
-    public Os? Os { get; set; }
+    /// <summary>The operating systems the team develops on; empty until answered.</summary>
+    public IReadOnlySet<Os> OperatingSystems { get; set; } = emptyOperatingSystems;
     public Ide? Ide { get; set; }
     public CliPreference? Cli { get; set; }
     public TestFramework? TestFramework { get; set; }
@@ -41,6 +42,22 @@ public sealed record WizardState
     public IReadOnlySet<string> Techs { get; set; } = emptySet;
 
     static IReadOnlySet<string> emptySet = new HashSet<string>(StringComparer.Ordinal);
+    static IReadOnlySet<Os> emptyOperatingSystems = new HashSet<Os>();
+
+    public void SetOperatingSystem(Os os, bool selected)
+    {
+        var set = new HashSet<Os>(OperatingSystems);
+        if (selected)
+        {
+            set.Add(os);
+        }
+        else
+        {
+            set.Remove(os);
+        }
+
+        OperatingSystems = set;
+    }
 
     /// <summary>Plugin id to depth. Missing means <see cref="Depth.Verbose"/> (plan D7).</summary>
     public IReadOnlyDictionary<string, Depth> Depths { get; set; } = emptyDepths;
@@ -135,9 +152,8 @@ public sealed record WizardState
     /// </summary>
     public void Normalize()
     {
-        if (Os != null &&
-            Ide != null &&
-            !DisplayNames.IdesFor(Os.Value).Contains(Ide.Value))
+        if (Ide != null &&
+            !DisplayNames.IdesFor(OperatingSystems).Contains(Ide.Value))
         {
             Ide = null;
         }
@@ -186,7 +202,7 @@ public sealed record WizardState
         }
 
         return Flow == other.Flow &&
-               Os == other.Os &&
+               OperatingSystems.SetEquals(other.OperatingSystems) &&
                Ide == other.Ide &&
                Cli == other.Cli &&
                TestFramework == other.TestFramework &&
@@ -221,7 +237,7 @@ public sealed record WizardState
     {
         var hash = new HashCode();
         hash.Add(Flow);
-        hash.Add(Os);
+        hash.Add(OperatingSystems.Count);
         hash.Add(Ide);
         hash.Add(Cli);
         hash.Add(TestFramework);
@@ -252,7 +268,7 @@ public sealed record WizardState
     {
         if (Flow != Flow.New)
         {
-            Os = null;
+            OperatingSystems = emptyOperatingSystems;
             Ide = null;
             Cli = null;
             BuildServer = null;
@@ -279,10 +295,16 @@ public sealed record WizardState
     public string? Unavailable(string pluginId)
     {
         var definition = Plugins.ById[pluginId];
-        if (Os is global::Os.MacOS or global::Os.Linux &&
+        if (OperatingSystems.Count > 0 &&
+            !OperatingSystems.Contains(Os.Windows) &&
             definition.Platform == Platform.WindowsOnly)
         {
-            return $"Only runs on Windows, and the operating system chosen is {Os.Value.Name()}.";
+            if (OperatingSystems.Count == 1)
+            {
+                return $"Only runs on Windows, and the operating system chosen is {OperatingSystems.Single().Name()}.";
+            }
+
+            return $"Only runs on Windows, and the operating systems chosen are {DisplayNames.Join(OperatingSystems)}.";
         }
 
         if (TestFramework is { } framework &&

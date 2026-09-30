@@ -67,7 +67,7 @@ public class WizardStateUrlTests
     public async Task QuestionsAFlowDoesNotAskAreDropped()
     {
         var added = WizardStateUrl.Parse(Flow.Add, "os=Windows&ci=None&tech=efcore&have=SqlServer&ext=SqlServer,Http");
-        await Assert.That(added.Os).IsNull();
+        await Assert.That(added.OperatingSystems).IsEmpty();
         await Assert.That(added.BuildServer).IsNull();
         await Assert.That(added.Techs).IsEmpty();
         // something the project already has cannot be added again
@@ -157,7 +157,7 @@ public class WizardStateUrlTests
     public async Task JunkParsesToDefaults(string query)
     {
         var state = WizardStateUrl.Parse(Flow.New, query);
-        await Assert.That(state.Os).IsNull();
+        await Assert.That(state.OperatingSystems).IsEmpty();
         await Assert.That(state.TestFramework).IsNull();
         await Assert.That(state.BuildServer).IsNull();
         await Assert.That(state.SponsorshipStart).IsNull();
@@ -169,7 +169,14 @@ public class WizardStateUrlTests
     public async Task FirstOccurrenceWins()
     {
         var state = WizardStateUrl.Parse(Flow.New, "os=Linux&os=Windows");
-        await Assert.That(state.Os).IsEqualTo(Os.Linux);
+        await Assert.That(state.OperatingSystems).IsEquivalentTo([Os.Linux]);
+    }
+
+    [Test]
+    public async Task SeveralOperatingSystemsRoundTripInDeclarationOrder()
+    {
+        var state = WizardStateUrl.Parse(Flow.New, "os=Linux,Windows,Nope");
+        await Assert.That(WizardStateUrl.ToRelativeUrl(state)).IsEqualTo("new?step=os&os=Windows,Linux");
     }
 
     [Test]

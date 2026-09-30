@@ -93,7 +93,7 @@ public class GeneratedSolutionTests
         var state = new WizardState
         {
             Flow = Flow.New,
-            Os = Os.Windows,
+            OperatingSystems = new HashSet<Os> {Os.Windows},
             Ide = Ide.Rider,
             Cli = CliPreference.Cli,
             TestFramework = framework,

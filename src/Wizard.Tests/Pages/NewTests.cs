@@ -35,12 +35,83 @@ public class NewTests : WebTestContext
     }
 
     [Test]
-    public async Task ChoosingAnOptionUpdatesTheUrl()
+    public async Task ChoosingAnOsTogglesIt()
     {
         var page = Open("new");
         await page.Find("#os-Linux").ClickAsync(new());
         await Assert.That(CurrentUrl).IsEqualTo("new?step=os&os=Linux");
+
+        await page.Find("#os-Windows").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=os&os=Windows,Linux");
+        await Assert.That(page.Find("#os-Windows").ClassList.Contains("selected")).IsTrue();
         await Assert.That(page.Find("#os-Linux").ClassList.Contains("selected")).IsTrue();
+
+        await page.Find("#os-Linux").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=os&os=Windows");
+    }
+
+    [Test]
+    public async Task ChoosingTheFirstIdeMovesOn()
+    {
+        var page = Open("new?step=ide&os=Windows");
+        await page.Find("#ide-Rider").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=cli&os=Windows&ide=Rider");
+    }
+
+    [Test]
+    public async Task ChangingTheIdeStaysOnTheStep()
+    {
+        var page = Open("new?step=ide&os=Windows&ide=Rider");
+        await page.Find("#ide-VisualStudio").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=ide&os=Windows&ide=VisualStudio");
+    }
+
+    [Test]
+    public async Task ChoosingTheFirstCliMovesOn()
+    {
+        var page = Open("new?step=cli&os=Windows&ide=Rider");
+        await page.Find("#cli-Gui").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=tf&os=Windows&ide=Rider&cli=Gui");
+    }
+
+    [Test]
+    public async Task ChangingTheCliStaysOnTheStep()
+    {
+        var page = Open("new?step=cli&os=Windows&ide=Rider&cli=Cli");
+        await page.Find("#cli-Gui").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=cli&os=Windows&ide=Rider&cli=Gui");
+    }
+
+    [Test]
+    public async Task ChoosingTheFirstTestFrameworkMovesOn()
+    {
+        var page = Open("new?step=tf&os=Windows&ide=Rider&cli=Cli");
+        await page.Find("#tf-NUnit").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=ci&os=Windows&ide=Rider&cli=Cli&tf=NUnit");
+    }
+
+    [Test]
+    public async Task ChangingTheTestFrameworkStaysOnTheStep()
+    {
+        var page = Open("new?step=tf&os=Windows&ide=Rider&cli=Cli&tf=XunitV3");
+        await page.Find("#tf-NUnit").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=tf&os=Windows&ide=Rider&cli=Cli&tf=NUnit");
+    }
+
+    [Test]
+    public async Task ChoosingTheFirstBuildServerMovesOn()
+    {
+        var page = Open("new?step=ci&os=Windows&ide=Rider&cli=Cli&tf=NUnit");
+        await page.Find("#ci-None").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=tech&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None");
+    }
+
+    [Test]
+    public async Task ChangingTheBuildServerStaysOnTheStep()
+    {
+        var page = Open("new?step=ci&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=GitHubActions");
+        await page.Find("#ci-None").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=ci&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None");
     }
 
     [Test]
@@ -49,11 +120,51 @@ public class NewTests : WebTestContext
         var page = Open("new");
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
 
+        // Several operating systems can be chosen, so that step needs Next.
         await page.Find("#os-Windows").ClickAsync(new());
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
-
         await page.Find("button.primary").ClickAsync(new());
-        await Assert.That(CurrentUrl).IsEqualTo("new?step=ide&os=Windows");
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
+
+        await page.Find("#ide-Rider").ClickAsync(new());
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
+
+        await page.Find("#cli-Cli").ClickAsync(new());
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
+
+        await page.Find("#tf-NUnit").ClickAsync(new());
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
+
+        // The tech stack is optional, so its Next is enabled from the start.
+        await page.Find("#ci-None").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=tech&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None");
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
+    }
+
+    [Test]
+    public async Task SkipOnTechClearsItAndWhatItSuggested()
+    {
+        var page = Open("new?step=tech&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None");
+        await page.Find("[data-tech=efcore]").ClickAsync(new());
+        await Assert.That(CurrentUrl).Contains("tech=efcore");
+
+        await page.Find("button.skip").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None");
+    }
+
+    [Test]
+    public async Task SkipOnPluginsClearsTheSelection()
+    {
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None&ext=SqlServer");
+        await page.Find("button.skip").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=NUnit&ci=None");
+    }
+
+    [Test]
+    public async Task OnlyOptionalStepsHaveSkip()
+    {
+        var page = Open("new?step=os");
+        await Assert.That(page.FindAll("button.skip")).IsEmpty();
     }
 
     [Test]
@@ -61,6 +172,9 @@ public class NewTests : WebTestContext
     {
         var page = Open("new?step=os&os=Windows&ide=VisualStudio");
         await page.Find("#os-Linux").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=os&os=Windows,Linux&ide=VisualStudio");
+
+        await page.Find("#os-Windows").ClickAsync(new());
         await Assert.That(CurrentUrl).IsEqualTo("new?step=os&os=Linux");
     }
 
