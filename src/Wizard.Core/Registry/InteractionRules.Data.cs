@@ -293,17 +293,6 @@ public static partial class InteractionRules
         },
         new()
         {
-            Id = "diffplex-default-comparer",
-            Severity = Severity.Info,
-            All = ["DiffPlex"],
-            Any = ["AngleSharp", "Bunit", "ImageMagick", "Quibble"],
-            Message =
-                "Verify.DiffPlex is the default comparer for text snapshots. The plugins selected here " +
-                "register comparers for specific plugins (html, json, svg), which take precedence over it.",
-            Notes = ["A per test `UseDiffPlex()` overrides those comparers again, for that test only."]
-        },
-        new()
-        {
             Id = "readable-expressions-priority",
             Severity = Severity.Info,
             All = ["EntityFramework", "ReadableExpressions"],

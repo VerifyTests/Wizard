@@ -24,23 +24,11 @@ public sealed record WizardState
     /// so the url and the generated output do not depend on insertion order. Collections are replaced
     /// rather than mutated, so <c>with { }</c> copies do not share them.
     /// </summary>
-    public IReadOnlySet<string> SelectedPlugins { get; set; } = new HashSet<string>(DefaultPlugins(Flow.New), StringComparer.Ordinal);
-
-    /// <summary>
-    /// In a new project Verify.DiffPlex is selected until it is deselected: an inline diff on a failed
-    /// text snapshot helps in any project, and the wizard has recommended it unconditionally since the
-    /// old pages. Adding to an existing project starts from nothing, because the project already has
-    /// whatever it had.
-    /// </summary>
-    public static IReadOnlyList<string> DefaultPlugins(Flow flow)
-    {
-        if (flow == Flow.New)
-        {
-            return [Plugins.DiffPlexId];
-        }
-
-        return [];
-    }
+    /// <remarks>
+    /// Starts empty in every flow. A new project used to start with Verify.DiffPlex selected, until
+    /// Verify showed a text diff in the failure message itself.
+    /// </remarks>
+    public IReadOnlySet<string> SelectedPlugins { get; set; } = new HashSet<string>(StringComparer.Ordinal);
 
     /// <summary>
     /// Plugins the project already has (plan 7.2 step 2). They are never generated, but they take

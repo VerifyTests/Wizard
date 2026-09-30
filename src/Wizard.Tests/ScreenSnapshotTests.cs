@@ -83,7 +83,7 @@ public class ScreenSnapshotTests
     [Test]
     public async Task NewPlugins()
     {
-        var page = await Open($"/new?step=plugins&{beforeOutput}", ".plugin-card[data-id=DiffPlex]");
+        var page = await Open($"/new?step=plugins&{beforeOutput}", ".plugin-card[data-id=AngleSharp]");
         await VerifyScreen(page, fullPage: false);
     }
 
@@ -92,7 +92,7 @@ public class ScreenSnapshotTests
     public async Task NewPluginsWithInteractions()
     {
         var page = await Open(
-            $"/new?step=plugins&{beforeOutput}&ext=DiffPlex,EntityFramework,SqlServer",
+            $"/new?step=plugins&{beforeOutput}&ext=EntityFramework,SqlServer",
             ".interaction-notice[data-rule=ef-sql-recording]");
         await VerifyScreen(page, fullPage: false);
     }
@@ -111,7 +111,7 @@ public class ScreenSnapshotTests
     public async Task NewOptions()
     {
         var page = await Open(
-            $"/new?step=options&{beforeOutput}&ext=DiffPlex,EntityFramework,SqlServer",
+            $"/new?step=options&{beforeOutput}&ext=EntityFramework,SqlServer",
             ".choice[data-choice=ef-sql-recording]");
         await VerifyScreen(page);
     }
@@ -126,7 +126,7 @@ public class ScreenSnapshotTests
     [Test]
     public async Task AddExisting()
     {
-        var page = await Open("/add?step=have&tf=XunitV3&have=DiffPlex,SqlServer", ".existing-item.selected");
+        var page = await Open("/add?step=have&tf=XunitV3&have=AngleSharp,SqlServer", ".existing-item.selected");
         await VerifyScreen(page, fullPage: false);
     }
 

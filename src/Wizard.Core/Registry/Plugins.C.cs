@@ -1116,7 +1116,7 @@ public static partial class Plugins
             [
                 "`VerifierSettings.UseStrictJson()` is mandatory and has to run first. `Initialize()` sets `Initialized` before it throws about strict json, so a failed call cannot be retried.",
                 "Strict json changes every snapshot in the project from Verify's relaxed format to real json, so it is not a drop in for an existing suite.",
-                "It registers a string comparer for `json`, so it takes precedence over Verify.DiffPlex for json snapshots. A per test `UseDiffPlex()` overrides it again.",
+                "It registers a string comparer for `json`, so a mismatched json snapshot shows Quibble's message rather than Verify's text diff.",
                 "An empty verified file is treated as `{}`.",
                 "Quibble is an F# library, so `FSharp.Core` arrives transitively.",
                 "There are no settings methods or per test toggles: the only configuration is the `UseStrictJson()` call."

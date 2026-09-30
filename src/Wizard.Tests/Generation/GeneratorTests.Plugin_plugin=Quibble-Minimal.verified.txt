@@ -37,8 +37,8 @@ public static class ModuleInitializer
 // Initialized before it throws about strict json, so a failed call cannot be retried.
 // Note: Strict json changes every snapshot in the project from Verify's relaxed format to real
 // json, so it is not a drop in for an existing suite.
-// Note: It registers a string comparer for json, so it takes precedence over Verify.DiffPlex for
-// json snapshots. A per test UseDiffPlex() overrides it again.
+// Note: It registers a string comparer for json, so a mismatched json snapshot shows Quibble's
+// message rather than Verify's text diff.
 // Note: An empty verified file is treated as {}.
 // Note: Quibble is an F# library, so FSharp.Core arrives transitively.
 // Note: There are no settings methods or per test toggles: the only configuration is the

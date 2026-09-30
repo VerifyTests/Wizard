@@ -18,12 +18,6 @@ public static partial class Plugins
     public static bool Contains(string id) =>
         ById.ContainsKey(id);
 
-    /// <summary>
-    /// Always pre-checked: an inline diff on a failed text snapshot is useful in every project, and the
-    /// old wizard's pages recommended it unconditionally.
-    /// </summary>
-    public const string DiffPlexId = "DiffPlex";
-
     /// <summary>The selected plugins in registry order, ignoring ids the registry does not have.</summary>
     public static IReadOnlyList<PluginDefinition> Selected(WizardState state) =>
         [.. All.Where(_ => state.Has(_.Id))];

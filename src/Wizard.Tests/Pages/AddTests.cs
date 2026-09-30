@@ -101,10 +101,10 @@ public class AddTests : WebTestContext
     [Test]
     public async Task RememberedAnswersAreRestored()
     {
-        Remember(BrowserMemory.ExistingKey, "SqlServer,DiffPlex");
+        Remember(BrowserMemory.ExistingKey, "SqlServer,AngleSharp");
         var page = OpenAdd("add?step=have&tf=XunitV3");
 
-        await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3&have=DiffPlex,SqlServer");
+        await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3&have=AngleSharp,SqlServer");
         await Assert.That(page.Find(".restored").TextContent).IsEqualTo("Restored from this browser.");
     }
 

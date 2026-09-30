@@ -1271,66 +1271,6 @@ public static partial class Plugins
         },
         new()
         {
-            Id = "DiffPlex",
-            DisplayName = "Verify.DiffPlex",
-            RepoUrl = "https://github.com/VerifyTests/Verify.DiffPlex",
-            Description = "Shows an inline diff in the failure message of a text snapshot, instead of both files in full.",
-            Category = PluginCategory.DeveloperExperience,
-            Packages = [new("Verify.DiffPlex")],
-            PluginType = "VerifyDiffPlex",
-            Phase = InitializePhase.Comparers,
-            Initialize =
-            [
-                new(
-                    "VerifyDiffPlex.Initialize(OutputType.{diffplex-output});",
-                    "Verify.DiffPlex: when a text snapshot does not match, the failure message shows an inline",
-                    "diff instead of the whole received and verified text.",
-                    "OutputType.Compact prints only the changed lines, with a line of context either side.",
-                    "Alternatives: OutputType.Full, OutputType.Minimal.")
-            ],
-            InitializeUsings = ["VerifyTests.DiffPlex"],
-            Usings = ["VerifyTests.DiffPlex"],
-            Choices =
-            [
-                new(
-                    "diffplex-output",
-                    "Failure message detail",
-                    "How much of the text a failed comparison prints.",
-                    [
-                        new("Compact", "Compact", "Only changed lines, with one line of context and its line number."),
-                        new("Full", "Full", "The whole received text, with + and - markers on the changed lines."),
-                        new("Minimal", "Minimal", "Only the changed lines.")
-                    ])
-            ],
-            MinimalSamples =
-            [
-                new(
-                    "PerTestOutput",
-                    """
-                    var target = "The text";
-                    return Verify(target)
-                        .UseDiffPlex(OutputType.Full);
-                    """)
-                {
-                    Comment =
-                    [
-                        "The module initializer sets the mode for every test. UseDiffPlex overrides it for one,",
-                        "which is useful when a single snapshot is easier to read in full."
-                    ],
-                    // Verifying a string writes it verbatim, so the snapshot is known and can ship.
-                    // Verify.DiffPlex is selected by default, and a download whose first test run fails
-                    // is a poor way to meet a tool.
-                    VerifiedOutput = "The text"
-                }
-            ],
-            Notes =
-            [
-                "This changes only the failure message; what is written to a `.verified.` file is unaffected.",
-                "It is the default comparer for text. A plugin that registers a comparer for a specific file extension, such as html or json, takes precedence for that extension."
-            ]
-        },
-        new()
-        {
             Id = "DocNet",
             DisplayName = "Verify.DocNet",
             RepoUrl = "https://github.com/VerifyTests/Verify.DocNet",
