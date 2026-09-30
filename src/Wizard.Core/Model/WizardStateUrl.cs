@@ -227,7 +227,7 @@ public static class WizardStateUrl
 
     /// <summary>
     /// An absent key means nothing is selected. <see cref="NoPlugins"/> is still read, because it is
-    /// how links wrote "nothing selected" while a new project started with Verify.DiffPlex selected,
+    /// how links wrote "nothing selected" while a new project started with a plugin selected,
     /// and one of those links should still mean what it meant.
     /// </summary>
     static HashSet<string> ParsePlugins(string? value)
