@@ -1,7 +1,6 @@
 ﻿[
   AngleSharp: related by ASP.NET Core,
   AspNetCore: recommended by ASP.NET Core,
-  DiffPlex: recommended by every project,
   EntityFramework: recommended by Entity Framework Core,
   Http: recommended by ASP.NET Core,
   LocalDb: recommended by Entity Framework Core,

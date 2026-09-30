@@ -92,5 +92,5 @@ public static class Techs
     /// Plugins no tech suggests: they are useful whatever the stack, so they are listed under
     /// "Everything else" rather than tied to one (plan 9.2).
     /// </summary>
-    public static IReadOnlyList<string> NotSuggestedByTech { get; } = [Plugins.DiffPlexId, "Terminal"];
+    public static IReadOnlyList<string> NotSuggestedByTech { get; } = ["Terminal"];
 }

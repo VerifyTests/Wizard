@@ -8,7 +8,7 @@ public static class TechSuggestions
     /// <summary>
     /// The plugins the stack suggests, in registry order. A Windows-only plugin is left out when
     /// the chosen OS is not Windows, since it cannot be selected there.
-    /// Verify.DiffPlex is recommended in every new project, and Verify.Terminal is listed alongside it.
+    /// Verify.Terminal is listed as related in every new project.
     /// </summary>
     public static IReadOnlyList<Suggestion> For(WizardState state)
     {
@@ -40,7 +40,6 @@ public static class TechSuggestions
 
         if (state.Flow == Flow.New)
         {
-            Note(recommended, Plugins.DiffPlexId, "every project");
             Note(related, "Terminal", "every project");
         }
 

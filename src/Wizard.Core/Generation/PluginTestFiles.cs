@@ -6,29 +6,14 @@
 /// </summary>
 public static class PluginTestFiles
 {
-    public static IEnumerable<GeneratedFile> For(Plan plan, bool windows)
-    {
-        foreach (var plugin in plan.PluginsIn(windows).Where(_ => _.Samples.Count > 0))
-        {
-            yield return new($"Plugins/{plugin.TestClass}.cs", Build(plan, plugin));
-
-            // With inline snapshots a known snapshot is a literal in the sample instead.
-            if (plan.Inline)
-            {
-                continue;
-            }
-
-            // A sample whose snapshot is known ships it, so it passes on the first run. Verified text
-            // files are UTF-8 with a BOM and no trailing newline.
-            foreach (var sample in plugin.Samples.Where(_ => _.VerifiedOutput != null))
-            {
-                yield return new(
-                    $"Plugins/{plugin.TestClass}.{sample.Name}.verified.txt",
-                    sample.VerifiedOutput!,
-                    Bom: true);
-            }
-        }
-    }
+    /// <remarks>
+    /// No plugin sample ships a verified file (plan D6): what a plugin writes depends on its version
+    /// and the machine, so each writes a received file on its first run instead.
+    /// </remarks>
+    public static IEnumerable<GeneratedFile> For(Plan plan, bool windows) =>
+        plan.PluginsIn(windows)
+            .Where(_ => _.Samples.Count > 0)
+            .Select(_ => new GeneratedFile($"Plugins/{_.TestClass}.cs", Build(plan, _)));
 
     static string Build(Plan plan, ResolvedPlugin plugin)
     {
@@ -73,7 +58,7 @@ public static class PluginTestFiles
             }
 
             first = false;
-            AppendSample(builder, framework, sample, plan.Inline);
+            AppendSample(builder, framework, sample);
         }
 
         foreach (var member in plugin.Samples.SelectMany(_ => _.Members))
@@ -86,7 +71,7 @@ public static class PluginTestFiles
         return builder.ToString();
     }
 
-    static void AppendSample(StringBuilder builder, TestFrameworkInfo framework, Sample sample, bool inline)
+    static void AppendSample(StringBuilder builder, TestFrameworkInfo framework, Sample sample)
     {
         foreach (var line in sample.Comment)
         {
@@ -124,14 +109,7 @@ public static class PluginTestFiles
 
         var signature = sample.Async ? "async Task" : "Task";
         builder.Append($"    {visibility} {signature} {sample.Name}()\n    {{\n");
-        var body = sample.Body;
-        if (inline &&
-            sample.VerifiedOutput is { } verified)
-        {
-            body = InlineSnapshots.AddSnapshot(body, verified);
-        }
-
-        builder.Append(ModuleInitializerGenerator.Indent(body, "        "));
+        builder.Append(ModuleInitializerGenerator.Indent(sample.Body, "        "));
         builder.Append("    }\n");
     }
 

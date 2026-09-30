@@ -68,7 +68,7 @@
               <li class="done">
                 <button type="button" class="step-link" data-step="plugins">
                   <span class="step-title">Plugins</span>
-                  <span class="step-value">DiffPlex</span>
+                  <span class="step-value">None</span>
                 </button>
               </li>
               <li class="done">
@@ -121,7 +121,7 @@
                   <li>Package management: Prefer CLI</li>
                   <li>Test framework: xUnit v3</li>
                   <li>Build server: GitHub Actions</li>
-                  <li>Plugins: DiffPlex (verbose)</li>
+                  <li>Plugins: none</li>
                   <li>Maintenance fee: Exempt: OpenSource</li>
                   <li>.NET: net10.0 (SDK 10.0.401)</li>
                   <li>Package versions: the newest stable release of each on nuget.org when this was generated</li>
@@ -133,7 +133,6 @@
                   <code>Directory.Packages.props</code>, and project files reference packages without a version.</p>
                 <pre><code>dotnet add package Verify.XunitV3
 dotnet add package xunit.v3
-dotnet add package Verify.DiffPlex
 </code></pre>
                 <p>With Central Package Management enabled,
                   <code>dotnet add package</code>
@@ -407,39 +406,6 @@ indent_style = space
   }
 }
 </code>4</pre>
-                <h2 id="plugins">Plugins</h2>
-                <p>Each plugin below teaches Verify about one kind of value: how to serialize it, how to compare two of them, or how to turn it into something readable. They are independent; removing one changes nothing else.</p>
-                <h3 id="verify.diffplex">Verify.DiffPlex</h3>
-                <p>Shows an inline diff in the failure message of a text snapshot, instead of both files in full. (<a href="https://github.com/VerifyTests/Verify.DiffPlex">repository</a>)</p>
-                <p>Package:
-                  <code>Verify.DiffPlex</code>
-                  1.1.0.</p>
-                <p>Enabled by:</p>
-                <pre><code class="language-json">{
-  "test": {
-    "runner": "Microsoft.Testing.Platform"
-  }
-}
-</code>5</pre>
-                <p>
-                  <code>Plugins/DiffPlexTests.cs</code>
-                  in the download shows every documented API:</p>
-                <p>
-                  <strong>PerTestOutput</strong>
-                  — The module initializer sets the mode for every test. UseDiffPlex overrides it for one, which is useful when a single snapshot is easier to read in full.</p>
-                <pre><code class="language-json">{
-  "test": {
-    "runner": "Microsoft.Testing.Platform"
-  }
-}
-</code>6</pre>
-                <p>Notes:</p>
-                <ul>
-                  <li>This changes only the failure message; what is written to a
-                    <code>.verified.</code>
-                    file is unaffected.</li>
-                  <li>It is the default comparer for text. A plugin that registers a comparer for a specific file extension, such as html or json, takes precedence for that extension.</li>
-                </ul>
                 <h2 id="initialization">Initialization</h2>
                 <p>Verify is configured once, before any test runs, in a
                   <a href="https://learn.microsoft.com/en-us/dotnet/csharp/language-reference/attributes/general#moduleinitializer-attribute">module initializer</a>. The solution's
@@ -449,14 +415,14 @@ indent_style = space
     "runner": "Microsoft.Testing.Platform"
   }
 }
-</code>7</pre>
+</code>5</pre>
                 <h2 id="sample-test">Sample Test</h2>
                 <pre><code class="language-json">{
   "test": {
     "runner": "Microsoft.Testing.Platform"
   }
 }
-</code>8</pre>
+</code>6</pre>
                 <p>
                   <code>ClassBeingTested.FindPerson()</code>
                   lives in the
@@ -468,7 +434,7 @@ indent_style = space
     "runner": "Microsoft.Testing.Platform"
   }
 }
-</code>9</pre>
+</code>7</pre>
                 <h2 id="diff-tool">Diff Tool</h2>
                 <p>Verify supports many
                   <a href="https://github.com/VerifyTests/DiffEngine/blob/main/docs/diff-tool.md#supported-tools">Diff Tools</a>
@@ -536,10 +502,12 @@ indent_style = space
                   condition to upload any
                   <code>*.received.*</code>
                   files if the build fails.</p>
-                <pre><code class="language-xml">&lt;PropertyGroup&gt;
-  &lt;OutputType&gt;Exe&lt;/OutputType&gt;
-&lt;/PropertyGroup&gt;
-</code>0</pre>
+                <pre><code class="language-json">{
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
+</code>8</pre>
                 <p>The solution's
                   <code>.github/workflows/build.yml</code>
                   builds, runs the tests, and includes this step.</p>
@@ -550,10 +518,12 @@ indent_style = space
                   at the tier matching their size. Individuals, non-revenue open source projects and small organizations are exempt.</p>
                 <p>Every Verify package checks at build time that the build declares its status, with a property in
                   <code>Directory.Build.props</code>. The solution's declaration:</p>
-                <pre><code class="language-xml">&lt;PropertyGroup&gt;
-  &lt;OutputType&gt;Exe&lt;/OutputType&gt;
-&lt;/PropertyGroup&gt;
-</code>1</pre>
+                <pre><code class="language-json">{
+  "test": {
+    "runner": "Microsoft.Testing.Platform"
+  }
+}
+</code>9</pre>
                 <p>Expected build outcome: The build passes and logs the exemption's criteria as an SC031 message, not a warning, so builds with warnings as errors pass too. It passes through the end of 2027-09 (UTC); after that it fails with SC049 until the claim is renewed.</p>
                 <p>The
                   <a href="https://simoncropp.github.io/SponsorCheck/package/Verify">SponsorCheck setup wizard for Verify</a>
@@ -563,7 +533,7 @@ indent_style = space
                 <pre><code class="language-xml">&lt;PropertyGroup&gt;
   &lt;OutputType&gt;Exe&lt;/OutputType&gt;
 &lt;/PropertyGroup&gt;
-</code>2</pre>
+</code>0</pre>
                 <p>The test project is also an executable, so
                   <code>dotnet run --project src/VerifySample.Tests</code>
                   runs the tests directly.</p>

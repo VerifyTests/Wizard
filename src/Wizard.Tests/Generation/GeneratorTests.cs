@@ -91,8 +91,8 @@ public class GeneratorTests
             .UseParameters(framework);
 
     /// <summary>
-    /// Inline snapshots (plan 12.8): the initializer switch, the core and DiffPlex samples carrying
-    /// their snapshots as literals, no verified files, and the guide and AI text that go with them.
+    /// Inline snapshots (plan 12.8): the initializer switch, the core sample carrying its snapshot as
+    /// a literal, no verified files, and the guide and AI text that go with them.
     /// </summary>
     [Test]
     [Arguments(TestFramework.XunitV3)]
@@ -112,10 +112,6 @@ public class GeneratorTests
                  """)
             .UseParameters(framework);
     }
-
-    [Test]
-    public Task InlineAddition() =>
-        Verify(Render(SolutionGenerator.Build(PlanFor(Addition(Flow.Add, [], ["DiffPlex"]) with {InlineSnapshots = true}))));
 
     /// <summary>Visual Studio without ReSharper, and no build server, drop the JetBrains settings and the build definition.</summary>
     [Test]
@@ -239,10 +235,10 @@ public class GeneratorTests
     /// <summary>The combinations the interaction rules exist for (plan 17.1).</summary>
     public static IEnumerable<Func<(string Name, string[] Ids)>> Combinations()
     {
-        yield return () => ("EfAndSql", ["DiffPlex", "EntityFramework", "SqlServer"]);
-        yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
+        yield return () => ("EfAndSql", ["EntityFramework", "SqlServer"]);
+        yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit"]);
         yield return () => ("Recording", ["EntityFramework", "Http", "MicrosoftLogging", "SqlServer"]);
-        yield return () => ("Windows", ["DiffPlex", "WinForms", "Xaml"]);
+        yield return () => ("Windows", ["WinForms", "Xaml"]);
         yield return () => ("Everything", [.. Plugins.All.Select(_ => _.Id)]);
     }
 
@@ -290,7 +286,7 @@ public class GeneratorTests
     {
         // The case the interaction rules were written for: EF Core added next to an existing SqlServer,
         // whose recording the project's own initializer now has to turn off.
-        ["EfNextToExistingSql"] = () => Addition(Flow.Add, ["DiffPlex", "SqlServer"], ["EntityFramework"]),
+        ["EfNextToExistingSql"] = () => Addition(Flow.Add, ["SqlServer"], ["EntityFramework"]),
         // An existing plugin plugin discovery never found, which the project may never have enabled.
         ["ExistingUndiscovered"] = () => Addition(Flow.Add, ["AngleSharp"], ["Bunit"]),
         // A package with a maintenance fee check of its own, into a project whose Verify declaration
@@ -306,7 +302,7 @@ public class GeneratorTests
         ["Expecto"] = () => Addition(Flow.Add, [], ["Http", "EntityFramework"], TestFramework.Expecto),
         ["ByTech"] = () =>
         {
-            var state = Addition(Flow.AddByTech, ["DiffPlex"], []);
+            var state = Addition(Flow.AddByTech, [], []);
             TechSuggestions.Choose(state, "aspnetcore", true);
             return state;
         }

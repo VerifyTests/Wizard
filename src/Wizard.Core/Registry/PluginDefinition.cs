@@ -308,13 +308,6 @@ public sealed record Sample(string Name, string Body)
 
     /// <summary>Extra members the body needs, emitted after the method.</summary>
     public IReadOnlyList<string> Members { get; init; } = [];
-
-    /// <summary>
-    /// The snapshot this sample produces, when it is known exactly and does not depend on the package
-    /// version or the machine. Shipping it means the sample passes on the first run instead of writing
-    /// a received file; most samples cannot (plan D6), and the guide explains what to do with those.
-    /// </summary>
-    public string? VerifiedOutput { get; init; }
 }
 
 /// <param name="Path">Relative to the project the file belongs to.</param>
