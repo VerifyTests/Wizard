@@ -3,7 +3,7 @@
 /// Verify's usages/*NugetUsage projects; sample and VerifyChecks code match the snippets in the Verify
 /// repo, which the old docs/wiz pages rendered.
 /// </summary>
-/// <param name="Packages">Test project packages, in the order the Verify docs list them. Verify.DiffPlex is added separately.</param>
+/// <param name="Packages">Test project packages, in the order the Verify docs list them.</param>
 /// <param name="Properties">Test project properties that switch on Microsoft.Testing.Platform.</param>
 /// <param name="UsesTestingPlatform">False for Fixie, which has no MTP runner and keeps VSTest (plan D10).</param>
 /// <param name="SampleVerifiedFile">The name of the core sample's snapshot, which is shipped (plan D6).</param>

@@ -241,19 +241,6 @@
       RetiredBy: U25
     },
     {
-      Id: diffplex-default-comparer,
-      All: [
-        DiffPlex
-      ],
-      Any: [
-        AngleSharp,
-        Bunit,
-        ImageMagick,
-        Quibble
-      ],
-      AnyCount: 1
-    },
-    {
       Id: readable-expressions-priority,
       All: [
         EntityFramework,

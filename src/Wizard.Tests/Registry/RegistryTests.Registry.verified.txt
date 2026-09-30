@@ -328,28 +328,6 @@
     ]
   },
   {
-    Id: DiffPlex,
-    DisplayName: Verify.DiffPlex,
-    Platform: CrossPlatform,
-    Packages: [
-      Verify.DiffPlex
-    ],
-    PluginType: VerifyDiffPlex,
-    DiscoveredByInitializePlugins: true,
-    Initialize: [
-      VerifyDiffPlex.Initialize(OutputType.{diffplex-output});
-    ],
-    Usings: [
-      VerifyTests.DiffPlex
-    ],
-    Choices: [
-      diffplex-output
-    ],
-    Minimal: [
-      PerTestOutput
-    ]
-  },
-  {
     Id: DocNet,
     DisplayName: Verify.DocNet,
     Category: Documents,

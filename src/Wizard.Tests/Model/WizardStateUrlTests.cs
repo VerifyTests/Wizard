@@ -35,9 +35,9 @@ public class WizardStateUrlTests
         yield return () => GeneratorTests.WithPlugins(GeneratorTests.State(), "EntityFramework", "SqlServer");
         yield return () =>
         {
-            var state = GeneratorTests.WithPlugins(GeneratorTests.State(), "AngleSharp", "DiffPlex");
+            var state = GeneratorTests.WithPlugins(GeneratorTests.State(), "AngleSharp", "EntityFramework");
             state.SetDepth("AngleSharp", Depth.Minimal);
-            state.SetChoice("diffplex-output", "Full");
+            state.SetChoice("ef-sql-format", "false");
             return state;
         };
         yield return () => GeneratorTests.State() with
@@ -47,13 +47,13 @@ public class WizardStateUrlTests
         yield return () => GeneratorTests.Addition(Flow.Add, ["SqlServer"], ["EntityFramework"]);
         yield return () =>
         {
-            var state = GeneratorTests.Addition(Flow.AddByTech, ["DiffPlex"], ["Http"]);
+            var state = GeneratorTests.Addition(Flow.AddByTech, ["AngleSharp"], ["Http"]);
             state.Techs = new HashSet<string>(["http", "aspnetcore"], StringComparer.Ordinal);
             return state;
         };
     }
 
-    /// <summary>The add flows start from nothing, rather than from Verify.DiffPlex (plan 7.2).</summary>
+    /// <summary>The add flows start from nothing (plan 7.2).</summary>
     [Test]
     public async Task AddFlowsStartWithNothingSelected()
     {
@@ -77,29 +77,48 @@ public class WizardStateUrlTests
         await Assert.That(created.ExistingPlugins).IsEmpty();
     }
 
-    /// <summary>
-    /// An absent ext key means the default selection, not an empty one, so a link made before the
-    /// plugin step existed still generates what it used to.
-    /// </summary>
+    /// <summary>A new project starts from nothing too, and a link that selects nothing has no ext key.</summary>
     [Test]
-    public async Task AbsentPluginsMeansTheDefault()
+    public async Task NewProjectStartsWithNothingSelected()
     {
         var state = WizardStateUrl.Parse(Flow.New, "os=Windows");
-        await Assert.That(state.SelectedPlugins).IsEquivalentTo(WizardState.DefaultPlugins(Flow.New));
+        await Assert.That(state.SelectedPlugins).IsEmpty();
+        await Assert.That(WizardStateUrl.ToQuery(state)).DoesNotContain("ext=");
     }
 
+    /// <summary>
+    /// Links wrote ext=none while a new project started with Verify.DiffPlex selected. It still reads
+    /// as nothing selected, and is not written any more.
+    /// </summary>
     [Test]
     public async Task NoneMeansNothingSelected()
     {
         var state = WizardStateUrl.Parse(Flow.New, $"os=Windows&ext={WizardStateUrl.NoPlugins}");
         await Assert.That(state.SelectedPlugins).IsEmpty();
+        await Assert.That(WizardStateUrl.ToQuery(state)).DoesNotContain("ext=");
+    }
+
+    /// <summary>
+    /// DiffPlex was a plugin until Verify showed a text diff itself, so older links carry it in ext,
+    /// min, opt and have. All of it is dropped, and the rest of the link still applies.
+    /// </summary>
+    [Test]
+    public async Task RemovedDiffPlexIsDropped()
+    {
+        var state = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,Http&min=DiffPlex&opt=diffplex-output:Full");
+        await Assert.That(state.SelectedPlugins).IsEquivalentTo(["Http"]);
+        await Assert.That(state.Depths).IsEmpty();
+        await Assert.That(state.Choices).IsEmpty();
+
+        var added = WizardStateUrl.Parse(Flow.Add, "have=DiffPlex,SqlServer");
+        await Assert.That(added.ExistingPlugins).IsEquivalentTo(["SqlServer"]);
     }
 
     [Test]
     public async Task UnknownPluginsAndStaleOptionsAreDropped()
     {
-        var state = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,NotAPlugin&min=NotAPlugin&opt=nope:1");
-        await Assert.That(state.SelectedPlugins).IsEquivalentTo(["DiffPlex"]);
+        var state = WizardStateUrl.Parse(Flow.New, "ext=Http,NotAPlugin&min=NotAPlugin&opt=nope:1");
+        await Assert.That(state.SelectedPlugins).IsEquivalentTo(["Http"]);
         await Assert.That(state.Depths).IsEmpty();
         await Assert.That(state.Choices).IsEmpty();
     }
@@ -108,8 +127,8 @@ public class WizardStateUrlTests
     [Test]
     public async Task PluginOrderIsTheRegistryOrder()
     {
-        var one = WizardStateUrl.Parse(Flow.New, "ext=SqlServer,DiffPlex");
-        var other = WizardStateUrl.Parse(Flow.New, "ext=DiffPlex,SqlServer");
+        var one = WizardStateUrl.Parse(Flow.New, "ext=SqlServer,Http");
+        var other = WizardStateUrl.Parse(Flow.New, "ext=Http,SqlServer");
         await Assert.That(WizardStateUrl.ToQuery(one)).IsEqualTo(WizardStateUrl.ToQuery(other));
     }
 

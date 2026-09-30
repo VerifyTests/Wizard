@@ -103,32 +103,21 @@ public class NewTests : WebTestContext
             {
                 Value = true
             });
-        await Assert.That(CurrentUrl).Contains("&ext=AngleSharp,DiffPlex");
+        await Assert.That(CurrentUrl).Contains("&ext=AngleSharp");
 
-        await page.Find(".plugin-card[data-id=DiffPlex] input")
+        // Nothing selected is the default, so the url drops the key rather than saying so.
+        await page.Find(".plugin-card[data-id=AngleSharp] input")
             .ChangeAsync(
             new()
             {Value = false});
-        await Assert.That(CurrentUrl).Contains("&ext=AngleSharp");
-    }
-
-    /// <summary>Nothing selected is a real answer, and the url has to say so, not read as the default.</summary>
-    [Test]
-    public async Task DeselectingEverythingIsCarriedInTheUrl()
-    {
-        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
-        await page.Find(".plugin-card[data-id=DiffPlex] input")
-            .ChangeAsync(
-                new()
-                    {Value = false});
-        await Assert.That(CurrentUrl).Contains("&ext=none");
+        await Assert.That(CurrentUrl).DoesNotContain("ext=");
     }
 
     /// <summary>A Windows-only plugin is greyed out on another OS, says why, and is dropped from the url.</summary>
     [Test]
     public async Task WindowsOnlyPluginsAreUnavailableOffWindows()
     {
-        var page = Open("new?step=plugins&os=Linux&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=DiffPlex,WinForms");
+        var page = Open("new?step=plugins&os=Linux&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Http,WinForms");
         await Assert.That(CurrentUrl).DoesNotContain("WinForms");
 
         var card = page.Find(".plugin-card[data-id=WinForms]");
@@ -141,7 +130,7 @@ public class NewTests : WebTestContext
     [Test]
     public async Task PluginsTheFrameworkCannotRunAreUnavailable()
     {
-        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=TUnit&ci=None&ext=DiffPlex,Avalonia");
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=TUnit&ci=None&ext=Http,Avalonia");
         await Assert.That(CurrentUrl).DoesNotContain("Avalonia");
 
         var card = page.Find(".plugin-card[data-id=Avalonia]");

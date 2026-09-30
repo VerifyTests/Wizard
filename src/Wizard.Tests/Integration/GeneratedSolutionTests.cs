@@ -24,16 +24,10 @@ public class GeneratedSolutionTests
         var received = Directory.EnumerateFiles(directory, "*.received.*", SearchOption.AllDirectories).ToList();
         await Assert.That(received).IsEmpty();
 
-        // An undiscovered test is not a failure, so count them: the core sample, the conventions check,
-        // and every plugin sample that ships its snapshot. The default selection is Verify.DiffPlex,
-        // whose sample verifies a literal string, so a first run of the download is green. With
-        // inline snapshots the same samples pass, carrying their snapshots as literals.
-        var expected = 2 + Plan
-            .Build(state, PackageVersions.Baked, Date.FromDateTime(DateTime.UtcNow))
-            .Plugins
-            .SelectMany(_ => _.Samples)
-            .Count(_ => _.VerifiedOutput != null);
-        await Assert.That(PassedCount(output)).IsEqualTo(expected).Because(output);
+        // An undiscovered test is not a failure, so count them: the core sample, whose snapshot ships
+        // (plan D6), and the conventions check. With inline snapshots the core sample passes too,
+        // carrying its snapshot as a literal.
+        await Assert.That(PassedCount(output)).IsEqualTo(2).Because(output);
     }
 
     /// <summary>
@@ -81,12 +75,12 @@ public class GeneratedSolutionTests
 
     public static IEnumerable<Func<(string Name, string[] Ids)>> Combinations()
     {
-        yield return () => ("EfAndSql", ["DiffPlex", "EntityFramework", "SqlServer"]);
-        yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit", "DiffPlex"]);
+        yield return () => ("EfAndSql", ["EntityFramework", "SqlServer"]);
+        yield return () => ("BunitAndAngleSharp", ["AngleSharp", "Bunit"]);
         // Blazor's Render initializes the plugin from its static constructor, which throws once any
         // verification has run, so the core sample and a Blazor test in one assembly is the case to
         // prove (plan A2).
-        yield return () => ("BlazorAndCore", ["AngleSharp", "Blazor", "DiffPlex"]);
+        yield return () => ("BlazorAndCore", ["AngleSharp", "Blazor"]);
         // Both define PagesToInclude and SkipPdfNormalization in the VerifyTests namespace (plan A6).
         yield return () => ("QuestPdfAndPdfPig", ["PdfPig", "QuestPDF"]);
         // Verify.Flurl is built against an older Verify.Http than the one pinned here (plan A11).

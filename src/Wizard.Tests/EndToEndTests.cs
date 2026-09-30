@@ -15,13 +15,13 @@ public class EndToEndTests
             await page.ClickAsync("button.primary");
         }
 
-        // The tech stack is optional, the plugin step starts on the default selection, and the
-        // options step on the defaults, so all three are passed by moving on.
+        // The tech stack and the plugins are optional, and the options step starts on the defaults,
+        // so all three are passed by moving on.
         await page.WaitForSelectorAsync(".tech-group");
         await page.ClickAsync("button.primary");
-        await page.WaitForSelectorAsync(".plugin-card[data-id=DiffPlex]");
+        await page.WaitForSelectorAsync(".plugin-card[data-id=AngleSharp]");
         await page.ClickAsync("button.primary");
-        await page.WaitForSelectorAsync(".depth-row[data-id=DiffPlex]");
+        await page.WaitForSelectorAsync(".choice[data-choice=inline]");
         await page.ClickAsync("button.primary");
 
         await page.ClickAsync("#sponsor-Exempt");
@@ -57,7 +57,7 @@ public class EndToEndTests
         await Assert.That(second.Url).IsEqualTo(first.Url);
         await Assert.That(await second.InputValueAsync("#solutionName")).IsEqualTo("Acme");
         var values = await second.Locator(".breadcrumb .step-value").AllTextContentsAsync();
-        await Assert.That(string.Join(" | ", values)).IsEqualTo("MacOS | JetBrains Rider | Prefer CLI | Expecto | No build server | None | DiffPlex | Defaults | Private arrangement");
+        await Assert.That(string.Join(" | ", values)).IsEqualTo("MacOS | JetBrains Rider | Prefer CLI | Expecto | No build server | None | None | Defaults | Private arrangement");
     }
 
     /// <summary>
@@ -84,15 +84,15 @@ public class EndToEndTests
     public async Task OptionsAreCarriedInTheUrl()
     {
         var page = await ScreenSnapshotTests.Open(
-            "/new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=DiffPlex",
-            ".depth-row[data-id=DiffPlex]");
+            "/new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=EntityFramework",
+            ".depth-row[data-id=EntityFramework]");
 
-        await page.ClickAsync(".depth-row[data-id=DiffPlex] .depth-option:text-is('Minimal')");
-        await page.ClickAsync(".choice[data-choice=diffplex-output] label:has-text('Full') input");
+        await page.ClickAsync(".depth-row[data-id=EntityFramework] .depth-option:text-is('Minimal')");
+        await page.ClickAsync(".choice[data-choice=ef-sql-format] label:has-text('Write it verbatim') input");
 
         // The wizard replaces the history entry rather than navigating, so there is no load to wait for.
         await page.WaitForFunctionAsync(
-            "() => location.search.includes('min=DiffPlex') && location.search.includes('opt=diffplex-output:Full')");
+            "() => location.search.includes('min=EntityFramework') && location.search.includes('opt=ef-sql-format:false')");
     }
 
     /// <summary>
@@ -189,12 +189,12 @@ public class EndToEndTests
     [Test]
     public async Task NextStartsTheNextStepAtTheTop()
     {
-        var page = await ScreenSnapshotTests.Open("/new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions", ".plugin-card[data-id=DiffPlex]");
+        var page = await ScreenSnapshotTests.Open("/new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=GitHubActions", ".plugin-card[data-id=AngleSharp]");
         await page.EvaluateAsync("() => window.scrollTo(0, document.body.scrollHeight)");
         await Assert.That(await page.EvaluateAsync<double>("() => window.scrollY")).IsGreaterThan(0);
 
         await page.ClickAsync("button.primary");
-        await page.WaitForSelectorAsync(".depth-row[data-id=DiffPlex]");
+        await page.WaitForSelectorAsync(".choice[data-choice=inline]");
         await page.WaitForFunctionAsync("() => window.scrollY === 0");
     }
 }

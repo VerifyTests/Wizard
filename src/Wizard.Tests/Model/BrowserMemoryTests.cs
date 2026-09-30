@@ -23,14 +23,14 @@ public class BrowserMemoryTests
     [Test]
     public async Task TheUrlWins()
     {
-        const string query = "tf=XunitV3&tech=stj&have=DiffPlex&sponsor=Ignore";
+        const string query = "tf=XunitV3&tech=stj&have=AngleSharp&sponsor=Ignore";
         var state = WizardStateUrl.Parse(Flow.AddByTech, query);
 
         var restored = BrowserMemory.Seed(state, query, everything);
 
         await Assert.That(restored.Any).IsFalse();
         await Assert.That(state.Techs).IsEquivalentTo(["stj"]);
-        await Assert.That(state.ExistingPlugins).IsEquivalentTo(["DiffPlex"]);
+        await Assert.That(state.ExistingPlugins).IsEquivalentTo(["AngleSharp"]);
         await Assert.That(state.SponsorMode).IsEqualTo(SponsorMode.Ignore);
     }
 

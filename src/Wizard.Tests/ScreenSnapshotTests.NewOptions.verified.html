@@ -68,7 +68,7 @@
               <li class="done">
                 <button type="button" class="step-link" data-step="plugins">
                   <span class="step-title">Plugins</span>
-                  <span class="step-value">DiffPlex, EntityFramework, SqlServer</span>
+                  <span class="step-value">EntityFramework, SqlServer</span>
                 </button>
               </li>
               <li class="current" aria-current="step">
@@ -115,14 +115,6 @@
               Verbose generates a commented test for every documented API, so the unwanted ones can be deleted.         Minimal generates the enable call and the most common usage only.
             </p>
             <div class="depth-rows">
-              <div class="depth-row" data-id="DiffPlex">
-                <span class="depth-name">Verify.DiffPlex</span>
-                <span class="depth-toggle">
-                  <button type="button" class="depth-option selected" aria-pressed="true">Verbose</button>
-                  <button type="button" class="depth-option " aria-pressed="false">Minimal</button>
-                </span>
-                <span class="depth-count">1 samples at verbose, 1 at minimal</span>
-              </div>
               <div class="depth-row" data-id="EntityFramework">
                 <span class="depth-name">Verify.EntityFramework (EF Core)</span>
                 <span class="depth-toggle">
@@ -141,31 +133,6 @@
               </div>
             </div>
             <h3>Choices the selection raised</h3>
-            <fieldset class="choice" data-choice="diffplex-output">
-              <legend>Verify.DiffPlex: Failure message detail</legend>
-              <p class="hint">How much of the text a failed comparison prints.</p>
-              <label class="choice-option selected">
-                <input type="radio" name="diffplex-output">
-                <span>
-                  <strong>Compact</strong>
-                  <span class="choice-hint">Only changed lines, with one line of context and its line number.</span>
-                </span>
-              </label>
-              <label class="choice-option ">
-                <input type="radio" name="diffplex-output">
-                <span>
-                  <strong>Full</strong>
-                  <span class="choice-hint">The whole received text, with + and - markers on the changed lines.</span>
-                </span>
-              </label>
-              <label class="choice-option ">
-                <input type="radio" name="diffplex-output">
-                <span>
-                  <strong>Minimal</strong>
-                  <span class="choice-hint">Only the changed lines.</span>
-                </span>
-              </label>
-            </fieldset>
             <fieldset class="choice" data-choice="ef-sql-format">
               <legend>Verify.EntityFramework (EF Core): SQL formatting</legend>
               <p class="hint">Verify reformats SQL Server SQL before writing it, so a snapshot reads the same however EF emitted it.</p>

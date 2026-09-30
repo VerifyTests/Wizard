@@ -77,7 +77,7 @@ Companion research files (raw per-plugin catalogue produced while researching th
   - Core looks for a type named `VerifyTests.` plus the assembly name without dots. The match is case-sensitive, and an assembly without that type is skipped silently (`Verify\src\Verify\VerifierSettings_PluginConvention.cs:171-176, 202-208`).
   - As a result it never initializes **Verify.AngleSharp** (its class is `VerifyAngleSharpDiffing`), **Verify.QuestPDF** (`VerifyQuestPdf`) or **Verify.Blazor** (an internal class in the global namespace).
   - Plugins are enumerated in file-system order (`:34`), so when two plugins register for the same thing, the winner can differ between operating systems.
-- Some `Initialize` methods take parameters that matter: `VerifyDiffPlex.Initialize(OutputType)`, `VerifySqlServer.Initialize(recordCommands)`, `VerifyEntityFramework.Initialize(model, recordCommands)`, `VerifyNServiceBus.Initialize(captureLogs)` (no effect in practice, see 11.2), `VerifyBunit.Initialize(excludeComponent)`, `VerifyImageSharp.Initialize(ssimThreshold)`, `VerifyPDFium.Initialize(dpi)`, `VerifyPlaywright.Initialize(installPlaywright)`, `VerifySerilog.Initialize(custom)`, `VerifyEmailPreviewServices.Initialize(apiKey)`, `VerifyAngleSharpDiffing.Initialize(action)`.
+- Some `Initialize` methods take parameters that matter: `VerifySqlServer.Initialize(recordCommands)`, `VerifyEntityFramework.Initialize(model, recordCommands)`, `VerifyNServiceBus.Initialize(captureLogs)` (no effect in practice, see 11.2), `VerifyBunit.Initialize(excludeComponent)`, `VerifyImageSharp.Initialize(ssimThreshold)`, `VerifyPDFium.Initialize(dpi)`, `VerifyPlaywright.Initialize(installPlaywright)`, `VerifySerilog.Initialize(custom)`, `VerifyEmailPreviewServices.Initialize(apiKey)`, `VerifyAngleSharpDiffing.Initialize(action)`.
 - Several groups are mutually exclusive because they register a converter or comparer for the same file extension (pdf, xlsx, docx, pptx, csv, png/jpg, html, json) or install the same global listener (Activity listeners, 26-char ULID scrub windows).
 - The documented interaction the requester cited: Verify.EntityFramework and Verify.SqlServer both record every EF command (`ef` and `sql`), and `VerifySqlServer.Initialize(recordCommands: false)` **must** run before `VerifierSettings.InitializePlugins()`.
 
@@ -92,7 +92,7 @@ Numbered so they can be referenced. Each is a choice the requester did not spell
 - **D3. NuGet versions: baked plus live refresh.** A `package-versions.json` in `Wizard.Core` holds the last known stable version of every package the wizard can emit. A weekly GitHub Actions workflow refreshes it from nuget.org and opens a pull request. At runtime the app also queries nuget.org (same flat-container endpoint SponsorCheck already uses from the browser) and uses the newest **non-prerelease** version when the query succeeds; the baked value is the offline fallback. "Stable" means no `-` prerelease label. If a package has no stable version (none currently), fall back to newest prerelease and say so in the output.
 - **D4. Explicit `Initialize` calls, then `InitializePlugins`.** The generated `ModuleInitializer` calls each selected plugin's `Initialize` explicitly, in an order computed from the interaction rules, each with a verbose comment, and then calls `VerifierSettings.InitializePlugins()` (which skips already-initialized plugins) with a comment explaining that it picks up plugins added later. Explicit calls are needed anyway for parameters and ordering; making them universal keeps the output predictable and self-documenting. They are also needed for correctness, because `InitializePlugins()` never initializes Verify.AngleSharp, Verify.QuestPDF or Verify.Blazor (1.3).
 - **D5. Windows-only plugins go in a second test project.** WinForms and Xaml need `net10.0-windows` (`UseWindowsForms`/`UseWPF`), Phash targets `net8.0-windows`. Putting them in the main test project would make the whole solution Windows-only. The zip therefore contains `<Name>.Tests` (cross-platform) and, when needed, `<Name>.Tests.Windows`. Each project has its own `ModuleInitializer`.
-- **D6. Verified files are not included in the zip**, except where the exact output is known: the core sample (`Sample.Test.verified.txt`, from the Verify repository) and any plugin sample that sets `VerifiedOutput`, which today is Verify.DiffPlex's, because it verifies a literal string and DiffPlex is selected by default. A download whose first `dotnet test` fails is a poor way to meet a tool, so the default one passes. Plugin sample outputs depend on package versions and machine state; shipping wrong `.verified.` files is worse than shipping none. The README and AI content explain that the first run produces `.received.` files and how to accept them.
+- **D6. Verified files are not included in the zip**, except where the exact output is known: the core sample (`Sample.Test.verified.txt`, from the Verify repository), and no plugin sample's. (Verify.DiffPlex's sample shipped one, through a `VerifiedOutput` field, while DiffPlex was selected by default; it was removed with the plugin, because Verify now shows a text diff in the failure message itself.) A download whose first `dotnet test` fails is a poor way to meet a tool, so the default one passes. Plugin sample outputs depend on package versions and machine state; shipping wrong `.verified.` files is worse than shipping none. The README and AI content explain that the first run produces `.received.` files and how to accept them.
 - **D7. "Verbose" vs "minimal" is per plugin** and defaults to **verbose**, because the requester asked to bias toward more content that users can delete. Minimal = the enable call plus the one or two most common usages. Verbose = minimal plus every documented API in the catalogue's "Verbose / edge-case APIs" list, each as its own commented test method.
 - **D8. Sponsor step interprets `<Verify_SponsorshipStart>One Month From Now</Verify_SponsorshipStart>`** from the request as "emit a real date". The wizard emits `Verify_SponsorshipStart` = **today (UTC, `yyyy-MM-dd`)** when the user says the sponsorship is new, because the bundled sponsor list is frozen at pack time and a future date fails with SC028. The user can edit the date. The alternative reading (a date one month ahead) is rejected by the verifier, so it is not offered. See section 14.
 - **D9. Expecto (F#) is supported for the core sample only.** Plugin usage samples are C#; for Expecto the docs show them as C# with a note, the F# test project configures Verify in a `lazy` value in `Tests.fs` that every test forces before verifying, and plugin tests are not generated into the fsproj. A custom `main` is not possible there: with `EnableExpectoTestingPlatformIntegration` the SDK generates the entry point (FS0433), and F# has no module initializers. This is a scoping decision, not a limitation of Verify. The F# initializer is generated from the same ordered call list as the C# one, so a selected plugin is enabled either way; a call needing one of the C# helper methods the generator emits, such as EntityFramework's `GetDbModel()`, is replaced by a comment saying plugin discovery enables that plugin with its defaults instead.
@@ -205,7 +205,7 @@ D:\Code\VerifyTests\Wizard\
       wwwroot/
         index.html, css/app.css, fonts/, js/interop.js, favicon.svg, fixtures/
     Wizard.Tests/
-      Wizard.Tests.csproj            TUnit + Verify.TUnit + Verify.DiffPlex + bunit + Verify.Bunit + Verify.AngleSharp + Microsoft.Playwright + Verify.Playwright + DiffEngine
+      Wizard.Tests.csproj            TUnit + Verify.TUnit + bunit + Verify.Bunit + Verify.AngleSharp + Microsoft.Playwright + Verify.Playwright + DiffEngine
       Generation/*Tests.cs           snapshot tests of every generator
       Registry/*Tests.cs             registry invariants
       Components/*Tests.cs           bunit
@@ -242,7 +242,7 @@ Start from `SponsorCheck.Web.csproj` and change:
 
 ### 5.2 Directory.Packages.props (this repository)
 
-`ManagePackageVersionsCentrally=true`, `CentralPackageTransitivePinningEnabled=true`. Packages: `Microsoft.AspNetCore.Components.WebAssembly`, `Markdig`, `ProjectDefaults`, `Polyfill`, `TUnit`, `Verify`, `Verify.TUnit`, `Verify.DiffPlex`, `Verify.AngleSharp`, `bunit`, `Verify.Bunit`, `Microsoft.Playwright`, `Verify.Playwright`, `DiffEngine`, `MarkdownSnippets.MsBuild` (for readme generation), `System.Text.Json`. Take initial versions from `SponsorCheck/src/Directory.Packages.props` (all current as of this plan: Verify 33.1.0, Verify.DiffPlex 3.3.1, Verify.AngleSharp 5.1.2, bunit 2.11.3, Verify.Bunit 14.0.0, Microsoft.Playwright 1.62.0, Verify.Playwright 3.1.1, DiffEngine 20.3.1, TUnit 1.68.17, Microsoft.AspNetCore.Components.WebAssembly 10.0.12).
+`ManagePackageVersionsCentrally=true`, `CentralPackageTransitivePinningEnabled=true`. Packages: `Microsoft.AspNetCore.Components.WebAssembly`, `Markdig`, `ProjectDefaults`, `Polyfill`, `TUnit`, `Verify`, `Verify.TUnit`, `Verify.AngleSharp`, `bunit`, `Verify.Bunit`, `Microsoft.Playwright`, `Verify.Playwright`, `DiffEngine`, `MarkdownSnippets.MsBuild` (for readme generation), `System.Text.Json`. Take initial versions from `SponsorCheck/src/Directory.Packages.props` (all current as of this plan: Verify 33.1.0, Verify.AngleSharp 5.1.2, bunit 2.11.3, Verify.Bunit 14.0.0, Microsoft.Playwright 1.62.0, Verify.Playwright 3.1.1, DiffEngine 20.3.1, TUnit 1.68.17, Microsoft.AspNetCore.Components.WebAssembly 10.0.12).
 
 Note: `DiffEngine` is referenced by the **tests** so a registry test can assert the wizard's static diff-tool list matches `DiffEngine.Definitions.Tools` (section 17.2). Do not reference DiffEngine from `Wizard.Core` (it uses `Process` and is not meant for WASM).
 
@@ -287,7 +287,7 @@ sealed class WizardState
     HashSet<string> ExistingPlugins            // Plugin ids already in the user's project (Add flows)
     HashSet<string> SelectedPlugins            // Plugin ids to add / include
     Dictionary<string, Depth> Depths              // per selected plugin; default Verbose
-    Dictionary<string, string> Choices            // per-plugin or per-rule choices, e.g. "ef-sql-recording" => "keep-ef"; "diffplex-output" => "Compact"; "systemjson-strict" => "false"
+    Dictionary<string, string> Choices            // per-plugin or per-rule choices, e.g. "ef-sql-recording" => "keep-ef"; "systemjson-strict" => "false"
     // sponsor
     SponsorMode SponsorMode
     string SponsorAccount
@@ -321,8 +321,8 @@ Every flow is a linear list of steps; each step is a Razor component bound to `W
 4. **Test framework** (xUnit v3, NUnit, TUnit, MSTest, Fixie, Expecto). Names only: the notes that were planned here (MTP, F#, `[UsesVerify]`) added nothing to the choice, and the guide covers each.
 5. **Build server** (GitHub Actions, Azure DevOps, AppVeyor, none).
 6. **Tech stack** (optional, multi-select chips grouped by category; persisted). Skippable with "I just want the basics". Selecting tech pre-checks plugins on the next step.
-7. **Plugins** (multi-select cards grouped by category; suggested ones pre-checked and shown first under "Suggested for your stack", the rest under "Everything else"). Verify.DiffPlex is pre-checked always. Cards show badges: Windows only, licence required, external tool required, needs running service, beta, net10 only. Interaction notices appear inline as soon as two interacting plugins are both checked (section 11).
-8. **Options**: always shown. Snapshot storage, Files (default) or Inline (12.8), then per selected plugin, a Minimal/Verbose toggle (default Verbose), plus any rule choices (EF/SqlServer recording owner, DiffPlex output type, SystemJson strict JSON, Bunit exclude component, image comparer tolerance, PDFium dpi, HeadlessBrowsers driver, EF Core vs EF6, Serilog custom configuration stub). One compact form.
+7. **Plugins** (multi-select cards grouped by category; suggested ones pre-checked and shown first under "Suggested for your stack", the rest under "Everything else"). Nothing is pre-checked without a tech that suggests it (Verify.DiffPlex used to be, until Verify showed a text diff in the failure message itself). Cards show badges: Windows only, licence required, external tool required, needs running service, beta, net10 only. Interaction notices appear inline as soon as two interacting plugins are both checked (section 11).
+8. **Options**: always shown. Snapshot storage, Files (default) or Inline (12.8), then per selected plugin, a Minimal/Verbose toggle (default Verbose), plus any rule choices (EF/SqlServer recording owner, SystemJson strict JSON, Bunit exclude component, image comparer tolerance, PDFium dpi, HeadlessBrowsers driver, EF Core vs EF6, Serilog custom configuration stub). One compact form.
 9. **Sponsor** (section 14).
 10. **Output** (section 12): rendered docs, three download/copy actions, file list.
 
@@ -330,7 +330,7 @@ Every flow is a linear list of steps; each step is a Razor component bound to `W
 
 1. **Test framework** (needed to generate tests and the correct LocalDb package).
 2. **Already using** (optional): multi-select of plugins already in the project. Pre-filled from `localStorage`. Everything checked here is excluded from step 3's pick list (shown greyed as "already in your project") and participates in interaction rules with a "Existing" role so the side effects of adding a new plugin next to an existing one are listed.
-3. **Plugins to add** (same card grid as A7, without tech pre-selection; deep-link id pre-checked). Nothing is selected by default: Verify.DiffPlex, pre-checked for a new project, is not assumed for an existing one. An existing plugin's card is shown ticked and locked. When a rule the new selection triggers changes how an existing plugin has to be initialized (EntityFramework added next to an existing SqlServer turns SqlServer's recording off), the generated `ModuleInitializer.cs` carries that existing call too, with a comment saying to replace the project's own; an existing plugin that plugin discovery cannot find (A1) raises an `existing-not-discovered` warning, because a project relying on `InitializePlugins()` alone never enabled it.
+3. **Plugins to add** (same card grid as A7, without tech pre-selection; deep-link id pre-checked). Nothing is selected by default, as in a new project. An existing plugin's card is shown ticked and locked. When a rule the new selection triggers changes how an existing plugin has to be initialized (EntityFramework added next to an existing SqlServer turns SqlServer's recording off), the generated `ModuleInitializer.cs` carries that existing call too, with a comment saying to replace the project's own; an existing plugin that plugin discovery cannot find (A1) raises an `existing-not-discovered` warning, because a project relying on `InitializePlugins()` alone never enabled it.
 4. **Options** (as A8).
 5. **Sponsor**: always shown, with **No change** as the first and default option, because an existing project already declares its status; a remembered declaration pre-fills it. The output has a `Directory.Build.props` fragment only when a mode is chosen, or when an added package brings another owner's fee check (A8), whose block is emitted even when Verify's is left alone.
 6. **Output**: docs with "Change to make" sections (PackageVersion/PackageReference lines, ModuleInitializer merge instructions, new test files), a zip of just the new/changed files, and AI markdown that instructs an assistant to perform the merge.
@@ -345,7 +345,7 @@ Identical to flow B with a **Tech stack** step inserted before "Plugins to add",
 
 `Components/Breadcrumb.razor`, a vertical list rendered in `MainLayout`'s left column (`min-width: 240px`), one row per step in the current flow:
 
-- Completed step: step title in muted text, chosen value(s) in normal text (`Windows`, `Rider`, `xUnit v3`, `GitHub Actions`, `3 techs`, `EntityFramework, SqlServer, DiffPlex`, `Verbose ×3`, `Sponsor: acme`), clickable (navigates to that step; later steps keep their values, which is what makes the URL sharable mid-flow).
+- Completed step: step title in muted text, chosen value(s) in normal text (`Windows`, `Rider`, `xUnit v3`, `GitHub Actions`, `3 techs`, `EntityFramework, SqlServer`, `Verbose ×3`, `Sponsor: acme`), clickable (navigates to that step; later steps keep their values, which is what makes the URL sharable mid-flow).
 - Current step: highlighted, not clickable.
 - Future step: muted title only, not clickable (gated by validation of the current step, as SponsorCheck's `Stepper`).
 - Top row: the flow name ("New project", "Add plugins", "Add by tech stack") linking to Home.
@@ -380,10 +380,10 @@ Query keys (short, stable, documented in `WizardStateUrl.cs`):
 | `ci` | `BuildServer` name | `GitHubActions` |
 | `name` | solution name | `VerifySample` |
 | `tech` | comma list of tech ids | `efcore,sqlserver,aspnetcore` |
-| `have` | comma list of existing plugin ids | `DiffPlex,Http` |
-| `ext` | comma list of selected plugin ids, in registry order. Absent means the default selection, `DiffPlex`, so a link made before a plugin existed still means what it meant; the literal `none` means nothing is selected | `EntityFramework,SqlServer` |
+| `have` | comma list of existing plugin ids | `SqlServer,Http` |
+| `ext` | comma list of selected plugin ids, in registry order. Absent means nothing is selected. The literal `none` is still read as nothing selected, because links wrote it while a new project started with Verify.DiffPlex selected; it is no longer written. Unknown ids, DiffPlex's included, are dropped | `EntityFramework,SqlServer` |
 | `min` | comma list of plugin ids set to Minimal (absence = Verbose) | `SqlServer` |
-| `opt` | comma list of `key:value` choices | `ef-sql-recording:keep-ef,diffplex-output:Compact` |
+| `opt` | comma list of `key:value` choices | `ef-sql-recording:keep-ef,ef-sql-format:false` |
 | `sponsor` | mode | `Sponsor`, `Exempt`, `Private`, `Ignore` |
 | `account` | GitHub account | `acme` |
 | `start` | `yyyy-MM-dd` | `2026-09-22` |
@@ -430,7 +430,7 @@ sealed record PluginDefinition(
     IReadOnlyList<string> Tags,                  // tech ids (section 10) this plugin serves
     IReadOnlyList<PackageRequirement> Packages,  // NuGet packages to reference; may depend on TestFramework (LocalDb) or a choice (EF Core vs Classic)
     InitializeShape Initialize,                  // see below
-    IReadOnlyList<string> Usings,                // namespaces the generated tests need (e.g. VerifyTestsAspose, VerifyTests.DiffPlex, VerifyTests.Http)
+    IReadOnlyList<string> Usings,                // namespaces the generated tests need (e.g. VerifyTestsAspose, VerifyTests.Http)
     IReadOnlyList<ProjectRequirement> ProjectRequirements,   // csproj properties/items: UseWPF, UseWindowsForms, FrameworkReference Microsoft.AspNetCore.App, Sdk Web, CopyToOutputDirectory fixtures, InternalsVisibleTo
     IReadOnlyList<ExternalRequirement> ExternalRequirements, // Ghostscript, Pandoc, SQL LocalDB, Cosmos emulator, RavenDB embedded, browser install, licence key + env var name, API key
     Platform Platform,                           // CrossPlatform | WindowsOnly
@@ -451,7 +451,7 @@ sealed record PluginDefinition(
 - `None` (Terminal: a dotnet tool, not a library),
 - `NoOp` (Wolverine, ParametersHashing – emitted as a comment only),
 - `Static(call)` e.g. `VerifyHttp.Initialize()`,
-- `StaticWithParameters(template, parameters)` e.g. `VerifyDiffPlex.Initialize(OutputType.{diffplex-output})`, `VerifySqlServer.Initialize(recordCommands: {bool})`, `VerifyEntityFramework.Initialize(GetDbModel(), recordCommands: {bool})` with a preamble (the `GetDbModel()` helper),
+- `StaticWithParameters(template, parameters)` e.g. `VerifySqlServer.Initialize(recordCommands: {bool})`, `VerifyEntityFramework.Initialize(GetDbModel(), recordCommands: {bool})` with a preamble (the `GetDbModel()` helper),
 - `Custom(generator)` for three plugins:
   - LocalDb: `LocalDbTestBase<TheDbContext>.Initialize()` after `InitializePlugins`.
   - Quibble: `VerifierSettings.UseStrictJson()` before `VerifyQuibble.Initialize()`.
@@ -488,7 +488,7 @@ Plugin usings go in each test file, never in global usings. The three browser na
 
 ### 9.2 Registry invariants (tests)
 
-- Ids unique; every `Tags` entry exists in `Techs.All`; every `ExclusiveGroups` id exists in `InteractionRules.Groups`; every package id has a version in `package-versions.json`; every fixture referenced by a sample exists in `wwwroot/fixtures`; every plugin appears in at least one tech suggestion or is in the explicit `NotSuggestedByTech` list (DiffPlex, Terminal, ParametersHashing, Assertions, Quibble are universal/niche and appear under "Everything else" only).
+- Ids unique; every `Tags` entry exists in `Techs.All`; every `ExclusiveGroups` id exists in `InteractionRules.Groups`; every package id has a version in `package-versions.json`; every fixture referenced by a sample exists in `wwwroot/fixtures`; every plugin appears in at least one tech suggestion or is in the explicit `NotSuggestedByTech` list (Terminal, ParametersHashing, Assertions, Quibble are universal/niche and appear under "Everything else" only).
 - Snapshot of the whole registry as JSON (`Registry.verified.txt`) so any change is reviewed.
 - `DiscoveredByInitializePlugins` matches core's naming rule (`VerifyTests.` + assembly name without dots, case-sensitive) for the shipped assembly. Every `RetiredBy` names an id from section 22.
 
@@ -548,7 +548,7 @@ Plugin usings go in each test file, never in global usings. The three browser na
 | Testing | Assertion libraries inside snapshots (`assertions`) | Assertions | |
 | Testing | Long parameterised test names (`longnames`) | ParametersHashing | |
 
-Universal: `DiffPlex` is always recommended; `Terminal` is recommended when CLI preference is Cli (new flow) and always listed. Windows-only plugins (LocalDb, Xaml, WinForms, Phash) are not suggested when the chosen OS is MacOS or Linux; on the plugin step they are greyed out, cannot be selected, and say why on hover, and the `windows-only` notice is gone with them.
+Universal: `Terminal` is listed as related in every new project. Nothing is recommended without a tech (Verify.DiffPlex was, until Verify showed a text diff in the failure message itself). Windows-only plugins (LocalDb, Xaml, WinForms, Phash) are not suggested when the chosen OS is MacOS or Linux; on the plugin step they are greyed out, cannot be selected, and say why on hover, and the `windows-only` notice is gone with them.
 
 The tech step renders groups as headed chip sets; the plugin step shows "Suggested for your stack" first (recommended checked, related unchecked but listed with a "related" tag), then "Everything else" grouped by `PluginCategory`.
 
@@ -607,7 +607,6 @@ ImageMagick appears in two groups.
 | `rendering-needs-comparer` | any of Avalonia, WinForms, Xaml, Playwright, Puppeteer, Selenium, DocNet, PDFium, QuestPDF, Aspose, Syncfusion, OpenXml, ImageMagick, ImageSharp without an `image-comparer` choice (not EmailPreviewServices: its snapshots are `webp`, so `UseSsimForPng` has no effect) | Info | default to `VerifierSettings.UseSsimForPng(threshold)` with per-plugin recommended threshold (DocNet 0.95, SponsorCheck-style 0.7 for browser screenshots, default 0.98) and a comment |
 | `recording-bus` | two or more of EntityFramework, SqlServer, Http, Diagnostics, OpenTelemetry, MicrosoftLogging, Serilog, ZeroLog, NServiceBus | Info | explain that all land in the same snapshot keyed `ef`/`sql`/`httpCall`/`activity`/`log`, and show `Recording.IgnoreNames(...)`. Serilog, ZeroLog and MicrosoftLogging all use `log`, so `IgnoreNames` cannot separate them. The logging plugins call `Recording.Add`, which throws outside a recording, so samples call `Recording.Start()` before anything logs and the guide warns about logging during host startup (retired by U13) |
 | `logger-takeover` | Serilog, ZeroLog | Warning | `Initialize` replaces the global logger; let the plugin own it. For ZeroLog, an existing configuration only works with `AppendingStrategy.Synchronous`: the default asynchronous appender loses the recording context and captures nothing (retired by U11, U18) |
-| `diffplex-default-comparer` | DiffPlex with AngleSharp, Bunit, Quibble, ImageMagick | Info | DiffPlex is the default string comparer; plugin-specific comparers for html/json/svg take precedence, except that a per-test `UseDiffPlex()` overrides them for that test |
 | `readable-expressions-priority` | ReadableExpressions + EntityFramework | Info | converter inserted at index 0; expression trees inside EF snapshots render as C# |
 | `plugin-not-discovered` | AngleSharp, QuestPDF or Blazor listed as existing (Add flows) | Warning | `InitializePlugins()` never initialized these (1.3); the Add output tells users to add the explicit call even though the package is already referenced (retired by C2, U1, U2) |
 | `settings-method-ambiguity` | two or more of DocNet, PdfPig, QuestPDF, Syncfusion, PDFium, Aspose | Info | each defines `PagesToInclude(int)` and/or `SkipPdfNormalization()` as extension methods (Aspose in `VerifyTestsAspose`, the rest in `VerifyTests`), so the fluent call is a CS0121 compile error even without a runtime conflict (QuestPDF + PdfPig is a suggested pair); samples use the static form, e.g. `PdfPigSettings.PagesToInclude(settings, 2)`, with a comment (retired by C4) |
@@ -681,7 +680,7 @@ Every generated code file starts with a comment banner: generated by the Verify 
 Section order mirrors today's terminal page, then adds plugin sections. All the static texts come from Appendix A. Headings use third-person phrasing (Verify's `mdsnippets` content validation forbids "you"; keep the same voice for consistency).
 
 1. Title + "Generated by the Verify wizard" + the choices as a bullet list + the wizard link.
-2. **Add NuGet packages** – CLI: `dotnet add package …` lines (test framework + Verify adapter + each plugin package + Verify.DiffPlex); GUI: a `Directory.Packages.props` + `PackageReference` block. Both variants mention CPM.
+2. **Add NuGet packages** – CLI: `dotnet add package …` lines (test framework + Verify adapter + each plugin package); GUI: a `Directory.Packages.props` + `PackageReference` block. Both variants mention CPM.
 3. **Microsoft.Testing.Platform** (not for Fixie) + test project settings per framework (`OutputType Exe`, `EnableNUnitRunner`, `EnableMSTestRunner`, `EnableExpectoTestingPlatformIntegration`) + `global.json` runner.
 4. **Implicit usings**.
 5. **Conventions**: source control includes/excludes, text file settings, EditorConfig, conventions check.
@@ -704,7 +703,7 @@ Template (C#; Expecto gets an F# equivalent in `main`):
 ```cs
 // Generated by the Verify wizard: <url>
 // Everything in this file runs once when the test assembly loads. Delete what is not needed.
-using VerifyTests.DiffPlex;   // only the usings the selected plugins need
+using VerifyTests.Http;   // only the usings the selected plugins need
 
 public static class ModuleInitializer
 {
@@ -712,10 +711,6 @@ public static class ModuleInitializer
     public static void Initialize()
     {
         // ---- comparers (must be registered before converters that emit images) ----
-        // Verify.DiffPlex: shows an inline diff of text snapshots in the failure message instead of the full received and verified text.
-        // OutputType.Compact prints only changed lines with one line of context. Alternatives: Full, Minimal.
-        VerifyDiffPlex.Initialize(OutputType.Compact);
-
         // Verify's built in SSIM comparer for png. Rendering differs slightly between operating systems and font stacks;
         // 0.95 tolerates that while still failing on real layout changes. Remove if png snapshots must be byte exact.
         VerifierSettings.UseSsimForPng(0.95);
@@ -753,7 +748,7 @@ public static class ModuleInitializer
 }
 ```
 
-Rules: every call has a comment; comments quote the readme where the catalogue has a quote; parameters come from `Choices`; verbose depth adds commented-out alternatives (`// VerifyDiffPlex.Initialize(OutputType.Full);`). Licence keys are read from environment variables with a throw-if-missing message copied from the plugin's own tests. For MSTest add `[assembly: UsesVerify]` in a separate `AssemblyInfo.cs`. For Fixie the `TestProject` convention file is emitted (Appendix C). Plugin usings are per test file (9.1). When `settings-method-ambiguity` applies, the affected calls use the static form.
+Rules: every call has a comment; comments quote the readme where the catalogue has a quote; parameters come from `Choices`; verbose depth adds commented-out alternatives (`// VerifierSettings.Inline(maxLines: 30);`). Licence keys are read from environment variables with a throw-if-missing message copied from the plugin's own tests. For MSTest add `[assembly: UsesVerify]` in a separate `AssemblyInfo.cs`. For Fixie the `TestProject` convention file is emitted (Appendix C). Plugin usings are per test file (9.1). When `settings-method-ambiguity` applies, the affected calls use the static form.
 
 ### 12.5 Zip layout – Add flows
 
@@ -881,7 +876,7 @@ As built (phase 4): the output appears straight away with the baked versions and
 
 ### 17.1 Generator snapshot tests (fast, always run)
 
-For a matrix of `WizardState`s (each test framework with core only; each framework with DiffPlex + Http; the EF + SqlServer + LocalDb combination with each `ef-sql-recording` choice; every plugin alone at Minimal and at Verbose; the "everything cross-platform and licence-free" set; the Windows set; each sponsor mode; each build server; Add flow with existing DiffPlex + adding EF; Add flow with existing SqlServer + adding EF), verify: the guide markdown, the AI markdown, the `ModuleInitializer.cs`, the csproj files, `Directory.Packages.props`, the file list of the zip. Use `VerifierSettings.UseStrictJson` off (default), `Verify.DiffPlex`, and `UniqueForRuntime` is not needed. Freeze `today` via an injected `DateOnly`.
+For a matrix of `WizardState`s (each test framework with core only; each framework with Http; the EF + SqlServer + LocalDb combination with each `ef-sql-recording` choice; every plugin alone at Minimal and at Verbose; the "everything cross-platform and licence-free" set; the Windows set; each sponsor mode; each build server; Add flow with existing SqlServer + adding EF; Add flow with existing SqlServer + adding EF), verify: the guide markdown, the AI markdown, the `ModuleInitializer.cs`, the csproj files, `Directory.Packages.props`, the file list of the zip. Use `VerifierSettings.UseStrictJson` off (default), `Verify.DiffPlex`, and `UniqueForRuntime` is not needed. Freeze `today` via an injected `DateOnly`.
 
 ### 17.2 Registry tests
 
@@ -893,7 +888,7 @@ bunit: each step component (validation gates Next; choices bind), `Breadcrumb` (
 
 ### 17.4 Integration: the zip compiles and the tests run (opt-in, CI)
 
-`Integration/GeneratedSolutionTests.cs`, marked `[Explicit]` and run by `integration.yml` (`--treenode-filter`): for a curated set of states, generate the solution, extract to a temp directory, run `dotnet build` and then the framework's test command with `DiffEngine_Disabled=true`, and assert the build succeeds and the only failures are Verify "New" snapshot failures (the core sample passes because its verified file is shipped). Matrix: ubuntu for the cross-platform set (every framework; plugins: DiffPlex, Http, AspNetCore, SystemJson, NewtonsoftJson, Yaml, NodaTime, Ulid, MailMessage, SendGrid, CsvHelper, Sep, ClosedXml, OpenXml, PdfPig, PDFium, QuestPDF, ImageSharp, ImageHash, AngleSharp, Bunit, Blazor, Moq, NSubstitute, FakeItEasy, Mockly, MassTransit, NServiceBus, Wolverine, Brighter, MicrosoftLogging, Serilog, ZeroLog, OpenTelemetry, Diagnostics, SourceGenerators, ICSharpCodeDecompiler, ReadableExpressions, ParametersHashing, Assertions, Quibble, Flurl, Playwright with browser install); windows for the Windows set (WinForms, Xaml, Phash, LocalDb + EntityFramework + SqlServer with SqlLocalDB available on `windows-latest`). Excluded from CI: Aspose, Syncfusion, EmailPreviewServices (licences), Cosmos (emulator), RavenDB (server download; try it, drop if flaky), ImageMagick pdf (Ghostscript install is possible via choco on Windows: include), Pandoc (choco/apt install is possible: include), Avalonia (needs a display? Avalonia headless works without one: include). This test is the guarantee behind "working bits" and behind the weekly version bump. Per plugin the assertion is that `dotnet build` succeeds: the samples are copied from readmes, which drift, and only the compiler notices. Running them is not asserted per plugin, because most need a database, a browser or a licence; the core solution, which ships its one verified file, is what asserts a passing run. The combination cases (A16) assert the build too, because that is where a wrong ordering or a method two packages both define shows up. These combinations run in addition to the per-plugin set:
+`Integration/GeneratedSolutionTests.cs`, marked `[Explicit]` and run by `integration.yml` (`--treenode-filter`): for a curated set of states, generate the solution, extract to a temp directory, run `dotnet build` and then the framework's test command with `DiffEngine_Disabled=true`, and assert the build succeeds and the only failures are Verify "New" snapshot failures (the core sample passes because its verified file is shipped). Matrix: ubuntu for the cross-platform set (every framework; plugins: Http, AspNetCore, SystemJson, NewtonsoftJson, Yaml, NodaTime, Ulid, MailMessage, SendGrid, CsvHelper, Sep, ClosedXml, OpenXml, PdfPig, PDFium, QuestPDF, ImageSharp, ImageHash, AngleSharp, Bunit, Blazor, Moq, NSubstitute, FakeItEasy, Mockly, MassTransit, NServiceBus, Wolverine, Brighter, MicrosoftLogging, Serilog, ZeroLog, OpenTelemetry, Diagnostics, SourceGenerators, ICSharpCodeDecompiler, ReadableExpressions, ParametersHashing, Assertions, Quibble, Flurl, Playwright with browser install); windows for the Windows set (WinForms, Xaml, Phash, LocalDb + EntityFramework + SqlServer with SqlLocalDB available on `windows-latest`). Excluded from CI: Aspose, Syncfusion, EmailPreviewServices (licences), Cosmos (emulator), RavenDB (server download; try it, drop if flaky), ImageMagick pdf (Ghostscript install is possible via choco on Windows: include), Pandoc (choco/apt install is possible: include), Avalonia (needs a display? Avalonia headless works without one: include). This test is the guarantee behind "working bits" and behind the weekly version bump. Per plugin the assertion is that `dotnet build` succeeds: the samples are copied from readmes, which drift, and only the compiler notices. Running them is not asserted per plugin, because most need a database, a browser or a licence; the core solution, which ships its one verified file, is what asserts a passing run. The combination cases (A16) assert the build too, because that is where a wrong ordering or a method two packages both define shows up. These combinations run in addition to the per-plugin set:
 - Blazor with the core sample in one project, with the order forced so `Sample` runs first (Blazor's `Custom` shape, 9.1).
 - QuestPDF + PdfPig with verbose samples (`settings-method-ambiguity`).
 - Pandoc with `Papyrine_*` properties (14).
@@ -1189,7 +1184,6 @@ Summary of every selectable plugin. Versions are the repo `Directory.Build.props
 | Cosmos | Verify.Cosmos | 3.0.0 | `VerifyCosmos.Initialize()` | Data | needs Cosmos emulator; tests skipped by default | A |
 | CsvHelper | Verify.CsvHelper | 0.2.0 | `VerifyCsvHelper.Initialize()` | Data; csv-scrubber group | `IgnoreCsvColumns`, `ScrubCsvColumns`, `TranslateCsvColumn(s)` | A |
 | Diagnostics | Verify.Diagnostics | 1.0.0 | `VerifyDiagnostics.Initialize()` | Observability; activity-listener group | `Recording.Start()`; readme's `RecordingActivityListener` does not exist | A |
-| DiffPlex | Verify.DiffPlex | 3.3.1 | `VerifyDiffPlex.Initialize(OutputType)` | DeveloperExperience | always suggested; `using VerifyTests.DiffPlex` | A |
 | DocNet | Verify.DocNet | 3.6.0 | `VerifyDocNet.Initialize()` | Documents; pdf group | native pdfium; `UseSsimForPng(0.95)`; `PagesToInclude`, `SinglePage`, `PageDimensions`, `PreserveTransparency` | A |
 | EmailPreviewServices | Verify.EmailPreviewServices | 1.0.0 | `VerifyEmailPreviewServices.Initialize(apiKey?)` | Email | paid API key (`EmailPreviewServicesApiKey`); slow; tests explicit; snapshots are webp | A |
 | EntityFramework | Verify.EntityFramework (+ Microsoft.EntityFrameworkCore.SqlServer for the sample) | 15.4.1 | `VerifyEntityFramework.Initialize(model, recordCommands)` | Data | `EnableRecording()`, `Recording.Start()`, ChangeTracker, queryable → `.sql`, `IgnoreNavigationProperties`, descriptive aliases/parameters, `ReplayRecentMigrations`; EF+SqlServer rule | A |

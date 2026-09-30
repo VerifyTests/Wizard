@@ -19,7 +19,10 @@ public static class WizardStateUrl
     public const string ExistingKey = "have";
     public const string InlineKey = "inline";
 
-    /// <summary>The <see cref="PluginsKey"/> value meaning "nothing at all", as opposed to "unset".</summary>
+    /// <summary>
+    /// The <see cref="PluginsKey"/> value older links used for "nothing at all", when an absent key
+    /// meant a default selection. Only read now: an absent key means nothing.
+    /// </summary>
     public const string NoPlugins = "none";
 
     public const string SponsorKey = "sponsor";
@@ -85,11 +88,7 @@ public static class WizardStateUrl
             .Where(_ => state.Has(_.Id))
             .Select(_ => _.Id)
             .ToList();
-        if (!selected.SequenceEqual(WizardState.DefaultPlugins(state.Flow), StringComparer.Ordinal))
-        {
-            // A link that selects nothing still has to say so, or it would read as the default.
-            Add(PluginsKey, selected.Count == 0 ? NoPlugins : string.Join(',', selected));
-        }
+        Add(PluginsKey, string.Join(',', selected));
 
         Add(MinimalKey, string.Join(',', selected.Where(_ => state.DepthOf(_) == Depth.Minimal)));
         Add(ChoicesKey, string.Join(',', state.Choices.OrderBy(_ => _.Key, StringComparer.Ordinal).Select(_ => $"{_.Key}:{_.Value}")));
@@ -161,7 +160,7 @@ public static class WizardStateUrl
             BuildServer = ParseEnum<BuildServer>(Get(BuildServerKey)),
             SolutionName = Get(NameKey) ?? WizardState.DefaultSolutionName,
             InlineSnapshots = Get(InlineKey) == "true",
-            SelectedPlugins = ParsePlugins(flow, Get(PluginsKey)),
+            SelectedPlugins = ParsePlugins(Get(PluginsKey)),
             ExistingPlugins = new HashSet<string>(SplitList(Get(ExistingKey)), StringComparer.Ordinal),
             Techs = new HashSet<string>(SplitList(Get(TechKey)), StringComparer.Ordinal),
             Choices = ParseChoices(Get(ChoicesKey)),
@@ -227,17 +226,14 @@ public static class WizardStateUrl
             .Replace("%3A", ":");
 
     /// <summary>
-    /// An absent key means the default selection, so a link made before a plugin existed still
-    /// means what it meant. <see cref="NoPlugins"/> is how "nothing selected" is written.
+    /// An absent key means nothing is selected. <see cref="NoPlugins"/> is still read, because it is
+    /// how links wrote "nothing selected" while a new project started with Verify.DiffPlex selected,
+    /// and one of those links should still mean what it meant.
     /// </summary>
-    static HashSet<string> ParsePlugins(Flow flow, string? value)
+    static HashSet<string> ParsePlugins(string? value)
     {
-        if (value == null)
-        {
-            return [with(StringComparer.Ordinal), .. WizardState.DefaultPlugins(flow)];
-        }
-
-        if (value == NoPlugins)
+        if (value == null ||
+            value == NoPlugins)
         {
             return [with(StringComparer.Ordinal)];
         }
