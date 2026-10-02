@@ -97,20 +97,16 @@
                 Where approved snapshots are kept. See
                 <a href="https://github.com/VerifyTests/Verify/blob/main/docs/inline-snapshots.md" target="_blank" rel="noopener">inline snapshots</a>.
               </p>
-              <label class="choice-option selected">
-                <input type="radio" name="inline" value="files">
-                <span>
+              <div class="mode-cards" role="radiogroup" aria-label="Snapshot storage">
+                <button type="button" id="storage-files" class="mode-card selected" role="radio" aria-checked="true">
                   <strong>Files</strong>
-                  <span class="choice-hint">Each snapshot is a .verified. file next to the test.</span>
-                </span>
-              </label>
-              <label class="choice-option ">
-                <input type="radio" name="inline" value="inline">
-                <span>
+                  <span>Each snapshot is a .verified. file next to the test.</span>
+                </button>
+                <button type="button" id="storage-inline" class="mode-card " role="radio" aria-checked="false">
                   <strong>Inline</strong>
-                  <span class="choice-hint">Text snapshots are a .Snapshot(...) literal in the test source. Images, documents and parameterised tests still use files.</span>
-                </span>
-              </label>
+                  <span>Text snapshots are a .Snapshot(...) literal in the test source. Images, documents and parameterised tests still use files.</span>
+                </button>
+              </div>
             </fieldset>
             <h3>Plugin samples</h3>
             <p class="hint">

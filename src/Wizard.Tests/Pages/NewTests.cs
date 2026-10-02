@@ -279,13 +279,22 @@ public class NewTests : WebTestContext
         await Assert.That(page.FindAll(".depth-row").Count).IsEqualTo(0);
     }
 
-    /// <summary>Choosing inline snapshots puts the answer in the url.</summary>
+    /// <summary>With nothing else on the step, choosing the storage moves on.</summary>
     [Test]
-    public async Task InlineSnapshotsGoInTheUrl()
+    public async Task StorageAloneMovesOn()
     {
-        var page = Open("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=none");
-        await page.Find("fieldset[data-choice=inline] input[value=inline]").ChangeAsync(new());
-        await Assert.That(CurrentUrl).Contains("inline=true");
+        var page = Open("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None");
+        await page.Find("#storage-inline").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=sponsor&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&inline=true");
+    }
+
+    /// <summary>With plugin samples on the step too, choosing the storage stays, so they are not skipped.</summary>
+    [Test]
+    public async Task StorageWithOtherOptionsStays()
+    {
+        var page = Open("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Http");
+        await page.Find("#storage-inline").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("new?step=options&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Http&inline=true");
     }
 
     /// <summary>The output uses nuget.org's newest versions once they arrive (plan 15.3).</summary>
