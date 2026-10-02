@@ -35,6 +35,14 @@ public class AddTests : WebTestContext
         await Assert.That(string.Join(" | ", steps)).IsEqualTo("Test framework | Already using | Plugins | Options | Maintenance fee | Result");
     }
 
+    [Test]
+    public async Task SkipOnAlreadyUsingClearsItAndMovesOn()
+    {
+        var page = OpenAdd("add?step=have&tf=NUnit&have=SqlServer");
+        await page.Find("button.skip").ClickAsync(new());
+        await Assert.That(CurrentUrl).IsEqualTo("add?step=plugins&tf=NUnit");
+    }
+
     /// <summary>A plugin readme links to /add/{Id}, which starts with that one selected (plan D11).</summary>
     [Test]
     public async Task DeepLinkSelectsThePlugin()
