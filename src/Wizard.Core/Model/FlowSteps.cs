@@ -147,7 +147,7 @@ public static class FlowSteps
         var parts = new List<string>();
         if (state.InlineSnapshots)
         {
-            parts.Add("inline");
+            parts.Add("Inline");
         }
 
         if (minimal > 0)

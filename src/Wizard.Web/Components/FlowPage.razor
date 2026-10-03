@@ -11,7 +11,7 @@
             <div class="step-heading">
                 <h2>@Current.Title</h2>
                 @* The optional steps have long lists, so Skip sits at the top where it needs no scroll. *@
-                @if (State.Step is "tech" or "plugins" &&
+                @if (State.Step is "have" or "tech" or "plugins" &&
                      NextStep is { } skipTo)
                 {
                     <button type="button" class="skip" @onclick="() => Skip(skipTo.Id)">Skip</button>
@@ -53,7 +53,7 @@
                     <PluginsStep State="State" Changed="Changed" />
                     break;
                 case "options":
-                    <OptionsStep State="State" Changed="Changed" />
+                    <OptionsStep State="State" Changed="Changed" Advance="() => GoTo(NextStep!.Id)" />
                     break;
                 case "sponsor":
                     <SponsorStep State="State" Today="today" Restored="restored.Sponsor" Changed="Changed" />

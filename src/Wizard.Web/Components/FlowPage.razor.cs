@@ -176,16 +176,21 @@ public partial class FlowPage : IDisposable
     /// <summary>Moves on with nothing chosen on the step. Clearing the techs also takes back the plugins they suggested.</summary>
     async Task Skip(string nextId)
     {
-        if (State.Step == "tech")
+        switch (State.Step)
         {
-            foreach (var tech in State.Techs.ToList())
-            {
-                TechSuggestions.Choose(State, tech, false);
-            }
-        }
-        else
-        {
-            State.SelectedPlugins = new HashSet<string>(StringComparer.Ordinal);
+            case "have":
+                State.ExistingPlugins = new HashSet<string>(StringComparer.Ordinal);
+                break;
+            case "tech":
+                foreach (var tech in State.Techs.ToList())
+                {
+                    TechSuggestions.Choose(State, tech, false);
+                }
+
+                break;
+            default:
+                State.SelectedPlugins = new HashSet<string>(StringComparer.Ordinal);
+                break;
         }
 
         await Changed();
