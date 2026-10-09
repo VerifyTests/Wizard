@@ -256,8 +256,7 @@
         DocNet,
         PDFium,
         PdfPig,
-        QuestPDF,
-        Syncfusion
+        QuestPDF
       ],
       AnyCount: 2,
       RetiredBy: C4

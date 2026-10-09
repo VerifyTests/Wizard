@@ -703,10 +703,8 @@ public static partial class Plugins
                 new(
                     "FirstPageOnly",
                     """
-                    var settings = new VerifySettings();
-                    VerifySyncfusionSettings.PagesToInclude(settings, 1);
-
-                    return VerifyFile("sample.pdf", settings);
+                    return VerifyFile("sample.pdf")
+                        .PagesToInclude(1);
                     """)
                 {
                     SkipReason = "needs a sample.pdf of your own beside the test, and a SyncfusionLicense environment variable.",
@@ -714,8 +712,8 @@ public static partial class Plugins
                     [
                         "Rendering every page of a long document is slow and commits a lot of binary. This keeps",
                         "the first page only; a full document binary target is unaffected.",
-                        "The static form is used because six packages define PagesToInclude as an extension method",
-                        "in the VerifyTests namespace, so the instance call is ambiguous once two are referenced."
+                        "PagesToInclude is a setting of Verify itself, and it counts the sheets of a workbook and",
+                        "the slides of a presentation as pages too."
                     ]
                 },
                 new(
@@ -740,12 +738,12 @@ public static partial class Plugins
             [
                 "A licence key is required. The samples read it from the `SyncfusionLicense` environment variable; without one every rendered page is watermarked.",
                 "The package carries an open source maintenance fee and an EULA, so `PackageRequireLicenseAcceptance` is set and the fee applies to every organization using it.",
-                "Each verification writes numbered targets: `#00` for the document info and `#01` onward for the rendered pages or slides.",
-                "`PagesToInclude` and `PdfPngDevice` are in the source but not in the readme.",
+                "Each verification writes an info file with the document properties and the text of each page, and a png per page, sheet or slide named `#page_0001` onward.",
+                "What is verified is chosen with Verify's own settings: `PagesToInclude`, `PageText(PageTextPlacement.None)` and `ExcludeDerivedTargets(\"png\")`, on one verification or on `VerifierSettings` for every test.",
+                "`PdfPngDevice` is in the source but not in the readme.",
                 "`VerifierSettings.ExcludeTargets(\"xlsx\")` applies the binary exclusion to every test instead of one.",
                 "Rendered png differs slightly between machines; the plugin's own tests call `VerifierSettings.UseSsimForPng(.7)` to tolerate it.",
-                "Sample documents need `<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>` in the test project.",
-                "`PagesToInclude` and `SkipPdfNormalization` are defined by six packages in the `VerifyTests` namespace, so the samples call the static form to avoid CS0121 (plan A6, retired by C4)."
+                "Sample documents need `<CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>` in the test project."
             ]
         },
         new()

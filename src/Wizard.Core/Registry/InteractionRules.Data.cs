@@ -304,13 +304,13 @@ public static partial class InteractionRules
         {
             Id = "settings-method-ambiguity",
             Severity = Severity.Warning,
-            Any = ["Aspose", "DocNet", "PDFium", "PdfPig", "QuestPDF", "Syncfusion"],
+            Any = ["Aspose", "DocNet", "PDFium", "PdfPig", "QuestPDF"],
             AnyCount = 2,
             Message =
-                "These packages each define PagesToInclude and SkipPdfNormalization as extension methods " +
-                "in the VerifyTests namespace. With two of them referenced, calling one fails to compile " +
-                "with CS0121, ambiguous call, even though nothing conflicts at run time.",
-            Notes = ["The generated samples call the static form instead, for example `PdfPigSettings.PagesToInclude(settings, 2)`."],
+                "These packages each define SkipPdfNormalization as an extension method. With two of " +
+                "them referenced, calling it fails to compile with CS0121, ambiguous call, even though " +
+                "nothing conflicts at run time.",
+            Notes = ["The generated samples call the static form instead, for example `PdfPigSettings.SkipPdfNormalization(settings)`."],
             RetiredBy = "C4"
         },
         new()

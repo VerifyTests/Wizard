@@ -544,10 +544,10 @@ public static partial class Plugins
                     Comment = ["A pdf already in memory or coming from a producer is verified as a stream instead."]
                 },
                 new(
-                    "ExcludePdfDocument",
+                    "ExcludePdf",
                     """
                     return VerifyFile("sample.pdf")
-                        .ExcludePdfDocument();
+                        .ExcludeTargets("pdf");
                     """)
                 {
                     SkipReason = "needs a sample.pdf in the test project, copied to the output directory.",
@@ -578,7 +578,9 @@ public static partial class Plugins
                 "`VerifyPDFium.Initialize(dpi: 150)` in the module initializer, before `InitializePlugins()`, changes the render resolution. The default 96 dpi renders an A4 page at 794 x 1123.",
                 "Renders are byte identical for a given Morph.PDFium version on every machine and OS, and no image library is added.",
                 "Each verification emits an info txt, a pdf and one png per page, so the snapshot count grows quickly for a long document.",
-                "`ExcludePdfDocument()` and `SkipPdfNormalization()` exist only in the fluent form here; the other pdf plugins also ship `VerifySettings` overloads.",
+                "`VerifierSettings.PageText(PageTextPlacement.None)` leaves the text out and `VerifierSettings.ExcludeDerivedTargets(\"png\")` leaves the page renders out, for every test; both can also be set on one verification.",
+                "`StripPdfEmbeddedFonts()` removes the embedded font programs from the `.verified.pdf`, for a producer that embeds the machine's fonts.",
+                "`SkipPdfNormalization()` and `StripPdfEmbeddedFonts()` exist only in the fluent form here; the other pdf plugins also ship `VerifySettings` overloads.",
                 "`SkipPdfNormalization` is defined in the `VerifyTests` namespace by several pdf plugins, so referencing two of them makes the fluent call ambiguous (CS0121).",
                 "The package targets net10.0 only, and the native PDFium binaries arrive with Morph.PDFium for Windows, Linux and macOS."
             ]
@@ -743,9 +745,8 @@ public static partial class Plugins
                 new(
                     "Pdf",
                     """
-                    var settings = new VerifySettings();
-                    PdfPigSettings.PagesToInclude(settings, 2);
-                    return VerifyFile("sample.pdf", settings);
+                    return VerifyFile("sample.pdf")
+                        .PagesToInclude(2);
                     """)
                 {
                     SkipReason = "needs a sample.pdf in the test project, copied to the output directory.",
@@ -754,8 +755,7 @@ public static partial class Plugins
                         "A pdf writes an info file with the document information, page count, page sizes and the",
                         "extracted text, plus a normalized .verified.pdf.",
                         "PagesToInclude trims the info file to the first pages, so a long document stays readable.",
-                        "It is called in its static form because several pdf plugins define the same plugin",
-                        "method in the VerifyTests namespace, and the fluent call is then ambiguous (CS0121)."
+                        "It is a setting of Verify itself, shared by every paged document plugin."
                     ]
                 }
             ],
@@ -797,7 +797,8 @@ public static partial class Plugins
                     [
                         "Snapshots the bytes as produced, skipping the pass that neutralizes the trailer /ID, the",
                         "/CreationDate and /ModDate, and the XMP dates. Only safe for a deterministic producer.",
-                        "The static form again, for the same ambiguity reason as PagesToInclude."
+                        "It is called in its static form because several pdf plugins define the same method in",
+                        "the VerifyTests namespace, and the fluent call is then ambiguous (CS0121)."
                     ]
                 }
             ],
@@ -805,7 +806,8 @@ public static partial class Plugins
             [
                 "The samples read `sample.pdf` from the output directory. Add the file to the test project with a `None Update` item and `CopyToOutputDirectory=PreserveNewest`.",
                 "`PagesToInclude` trims only the info and text output. The `.verified.pdf` is always the whole document, because PdfPig has no in-place page splitter.",
-                "`PagesToInclude` and `SkipPdfNormalization` are defined in the `VerifyTests` namespace by several pdf plugins, so the fluent call fails to compile with CS0121 when two are referenced. The samples use the static form.",
+                "`SkipPdfNormalization` is defined in the `VerifyTests` namespace by several pdf plugins, so the fluent call fails to compile with CS0121 when two are referenced. The sample uses the static form.",
+                "`VerifierSettings.PageText(PageTextPlacement.None)` leaves the extracted text out of the info file.",
                 "`PdfPigSettings.PdfPigParsingOptions(settings, options)` passes PdfPig `ParsingOptions`, for a password protected or malformed pdf. It is not in the readme.",
                 "PdfPig is fully managed, so there is no native dependency and nothing to install.",
                 "This extracts text and does not render, so there are no png targets. Verify.PDFium is the rendering alternative."
@@ -941,7 +943,7 @@ public static partial class Plugins
                     "for a type named after the assembly, VerifyQuestPDF, so it never finds this one.")
             ],
             InitializeUsings = ["QuestPDF.Infrastructure"],
-            Usings = ["QuestPDF.Fluent", "QuestPDF.Helpers", "QuestPDF.Infrastructure", "VerifyQuestPDF"],
+            Usings = ["QuestPDF.Fluent", "QuestPDF.Helpers", "QuestPDF.Infrastructure"],
             MinimalSamples =
             [
                 new(
@@ -984,33 +986,29 @@ public static partial class Plugins
                     "PagesToInclude",
                     """
                     var document = GenerateDocument();
-                    var settings = new VerifySettings();
-                    QuestPDFSettings.PagesToInclude(settings, 1);
-                    return Verify(document, settings);
+                    return Verify(document)
+                        .PagesToInclude(1);
                     """)
                 {
                     Comment =
                     [
                         "Renders only the first pages, which keeps the png count down for a long report. The pdf",
                         "target is unaffected and always holds the whole document.",
-                        "The static form is used because several pdf plugins define PagesToInclude in the",
-                        "VerifyTests namespace, and the fluent call is then ambiguous (CS0121)."
+                        "PagesToInclude is a setting of Verify itself, shared by every paged document plugin."
                     ]
                 },
                 new(
                     "PagesToIncludeDynamic",
                     """
                     var document = GenerateDocument();
-                    var settings = new VerifySettings();
-                    ShouldIncludePage include = pageNumber => pageNumber % 2 == 1;
-                    QuestPDFSettings.PagesToInclude(settings, include);
-                    return Verify(document, settings);
+                    return Verify(document)
+                        .PagesToInclude(_ => _ % 2 == 1);
                     """)
                 {
                     Comment =
                     [
                         "The delegate overload picks pages by number, for a report where only some pages matter.",
-                        "ShouldIncludePage lives in the VerifyQuestPDF namespace, not in VerifyTests."
+                        "The number is one based, and a page file keeps the number its page has in the document."
                     ]
                 },
                 new(
@@ -1033,10 +1031,11 @@ public static partial class Plugins
                 "The plugin class is named `VerifyQuestPdf` and discovery looks for `VerifyQuestPDF`, so `InitializePlugins()` alone never enables it and the explicit call is required.",
                 "`QuestPDF.Settings.License` has to be set before any document is generated.",
                 "Pages are rasterized through Skia, so they vary with the OS and the installed fonts. Pair them with `VerifierSettings.UseSsimForPng()` or an image comparer.",
-                "`PagesToInclude` trims only the png pages; the `.verified.pdf` is always the whole document.",
+                "`PagesToInclude` trims only the png pages, which are named `#page_0001` onward; the `.verified.pdf` is always the whole document.",
+                "`VerifierSettings.ExcludeDerivedTargets(\"png\")` leaves the page images out for every test.",
                 "`Metadata` is left out of the info snapshot when the document sets no metadata members.",
                 "It registers a file converter on `IDocument` rather than a `pdf` stream converter, so the pdf it emits is what another pdf plugin would then process.",
-                "`PagesToInclude` and `SkipPdfNormalization` are defined in the `VerifyTests` namespace by several pdf plugins, so the samples call the static form."
+                "`SkipPdfNormalization` is defined in the `VerifyTests` namespace by several pdf plugins, so with two of them referenced it has to be called in its static form."
             ]
         },
         new()

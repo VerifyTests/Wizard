@@ -33,17 +33,18 @@ public static class ModuleInitializer
 // variable; without one every rendered page is watermarked.
 // Note: The package carries an open source maintenance fee and an EULA, so
 // PackageRequireLicenseAcceptance is set and the fee applies to every organization using it.
-// Note: Each verification writes numbered targets: #00 for the document info and #01 onward for
-// the rendered pages or slides.
-// Note: PagesToInclude and PdfPngDevice are in the source but not in the readme.
+// Note: Each verification writes an info file with the document properties and the text of each
+// page, and a png per page, sheet or slide named #page_0001 onward.
+// Note: What is verified is chosen with Verify's own settings: PagesToInclude,
+// PageText(PageTextPlacement.None) and ExcludeDerivedTargets("png"), on one verification or on
+// VerifierSettings for every test.
+// Note: PdfPngDevice is in the source but not in the readme.
 // Note: VerifierSettings.ExcludeTargets("xlsx") applies the binary exclusion to every test instead
 // of one.
 // Note: Rendered png differs slightly between machines; the plugin's own tests call
 // VerifierSettings.UseSsimForPng(.7) to tolerate it.
 // Note: Sample documents need <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory> in the
 // test project.
-// Note: PagesToInclude and SkipPdfNormalization are defined by six packages in the VerifyTests
-// namespace, so the samples call the static form to avoid CS0121 (plan A6, retired by C4).
 public class SyncfusionTests
 {
     // A pdf is verified as an info object holding its metadata plus one rendered png per page,

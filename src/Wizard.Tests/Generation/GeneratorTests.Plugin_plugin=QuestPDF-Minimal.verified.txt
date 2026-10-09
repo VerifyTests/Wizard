@@ -34,7 +34,6 @@ public static class ModuleInitializer
 using QuestPDF.Fluent;
 using QuestPDF.Helpers;
 using QuestPDF.Infrastructure;
-using VerifyQuestPDF;
 
 // Verify.QuestPDF: Verifies a QuestPDF IDocument: a metadata and settings snapshot, a deterministic pdf, and a png per page.
 // https://github.com/VerifyTests/Verify.QuestPDF
@@ -43,12 +42,14 @@ using VerifyQuestPDF;
 // Note: QuestPDF.Settings.License has to be set before any document is generated.
 // Note: Pages are rasterized through Skia, so they vary with the OS and the installed fonts. Pair
 // them with VerifierSettings.UseSsimForPng() or an image comparer.
-// Note: PagesToInclude trims only the png pages; the .verified.pdf is always the whole document.
+// Note: PagesToInclude trims only the png pages, which are named #page_0001 onward; the
+// .verified.pdf is always the whole document.
+// Note: VerifierSettings.ExcludeDerivedTargets("png") leaves the page images out for every test.
 // Note: Metadata is left out of the info snapshot when the document sets no metadata members.
 // Note: It registers a file converter on IDocument rather than a pdf stream converter, so the pdf
 // it emits is what another pdf plugin would then process.
-// Note: PagesToInclude and SkipPdfNormalization are defined in the VerifyTests namespace by
-// several pdf plugins, so the samples call the static form.
+// Note: SkipPdfNormalization is defined in the VerifyTests namespace by several pdf plugins, so
+// with two of them referenced it has to be called in its static form.
 public class QuestPDFTests
 {
     // An IDocument is verified directly: QuestPDF generates the pdf, and the snapshot is the

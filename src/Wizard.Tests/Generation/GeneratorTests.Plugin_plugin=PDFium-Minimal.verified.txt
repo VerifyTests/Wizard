@@ -30,7 +30,12 @@ public static class ModuleInitializer
 // no image library is added.
 // Note: Each verification emits an info txt, a pdf and one png per page, so the snapshot count
 // grows quickly for a long document.
-// Note: ExcludePdfDocument() and SkipPdfNormalization() exist only in the fluent form here; the
+// Note: VerifierSettings.PageText(PageTextPlacement.None) leaves the text out and
+// VerifierSettings.ExcludeDerivedTargets("png") leaves the page renders out, for every test; both
+// can also be set on one verification.
+// Note: StripPdfEmbeddedFonts() removes the embedded font programs from the .verified.pdf, for a
+// producer that embeds the machine's fonts.
+// Note: SkipPdfNormalization() and StripPdfEmbeddedFonts() exist only in the fluent form here; the
 // other pdf plugins also ship VerifySettings overloads.
 // Note: SkipPdfNormalization is defined in the VerifyTests namespace by several pdf plugins, so
 // referencing two of them makes the fluent call ambiguous (CS0121).

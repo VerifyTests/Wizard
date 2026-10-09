@@ -164,8 +164,8 @@ Syncfusion needs A Syncfusion licence: Syncfusion File Formats is commercial. Th
 Warning png-converter [ImageMagick, ImageSharp]
 Both register a converter for png. The last one registered wins, so png snapshots are re-encoded by one library or the other, which changes the bytes.
 
-Warning settings-method-ambiguity [Aspose, DocNet, PDFium, PdfPig, QuestPDF, Syncfusion]
-These packages each define PagesToInclude and SkipPdfNormalization as extension methods in the VerifyTests namespace. With two of them referenced, calling one fails to compile with CS0121, ambiguous call, even though nothing conflicts at run time.
+Warning settings-method-ambiguity [Aspose, DocNet, PDFium, PdfPig, QuestPDF]
+These packages each define SkipPdfNormalization as an extension method. With two of them referenced, calling it fails to compile with CS0121, ambiguous call, even though nothing conflicts at run time.
 
 Warning shared-log-name [MicrosoftLogging, Serilog, ZeroLog]
 Every logging plugin records under the name log, so their entries interleave in one list and cannot be told apart or ignored separately.

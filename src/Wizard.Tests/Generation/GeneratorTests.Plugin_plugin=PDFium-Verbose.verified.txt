@@ -30,7 +30,12 @@ public static class ModuleInitializer
 // no image library is added.
 // Note: Each verification emits an info txt, a pdf and one png per page, so the snapshot count
 // grows quickly for a long document.
-// Note: ExcludePdfDocument() and SkipPdfNormalization() exist only in the fluent form here; the
+// Note: VerifierSettings.PageText(PageTextPlacement.None) leaves the text out and
+// VerifierSettings.ExcludeDerivedTargets("png") leaves the page renders out, for every test; both
+// can also be set on one verification.
+// Note: StripPdfEmbeddedFonts() removes the embedded font programs from the .verified.pdf, for a
+// producer that embeds the machine's fonts.
+// Note: SkipPdfNormalization() and StripPdfEmbeddedFonts() exist only in the fluent form here; the
 // other pdf plugins also ship VerifySettings overloads.
 // Note: SkipPdfNormalization is defined in the VerifyTests namespace by several pdf plugins, so
 // referencing two of them makes the fluent call ambiguous (CS0121).
@@ -59,10 +64,10 @@ public class PDFiumTests
     // system fonts. This drops the .verified.pdf and keeps the info file and the page renders.
     // Not run by default: needs a sample.pdf in the test project, copied to the output directory.
     [Fact(Skip = "needs a sample.pdf in the test project, copied to the output directory.")]
-    public Task ExcludePdfDocument()
+    public Task ExcludePdf()
     {
         return VerifyFile("sample.pdf")
-            .ExcludePdfDocument();
+            .ExcludeTargets("pdf");
     }
 
     // Snapshots the bytes exactly as produced. Only worth it for a genuinely deterministic

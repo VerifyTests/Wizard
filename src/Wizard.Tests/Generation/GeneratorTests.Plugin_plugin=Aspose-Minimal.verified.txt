@@ -29,8 +29,12 @@ using VerifyTestsAspose;
 // use: Aspose.Pdf.License, Aspose.Cells.License, Aspose.Words.License and Aspose.Slides.License.
 // Note: The settings methods live in the VerifyTestsAspose namespace rather than VerifyTests, so
 // the using above is needed.
-// Note: One verification writes several files: metadata as text, a png per page or slide, and the
-// deterministic binary document.
+// Note: One verification writes several files: an info file with the document properties and the
+// text of each page, a png per page, sheet or slide named #page_0001 onward, and the deterministic
+// binary document.
+// Note: What is verified is chosen with Verify's own settings: PagesToInclude,
+// PageText(PageTextPlacement.None) and ExcludeDerivedTargets("png"), on one verification or on
+// VerifierSettings for every test.
 // Note: VerifierSettings.ExcludeTargets("xlsx") applies the same exclusion to every test instead
 // of one.
 // Note: The file based samples need sample.pdf and sample.xlsx in the test project, copied to the

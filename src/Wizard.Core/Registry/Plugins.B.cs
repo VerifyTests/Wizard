@@ -715,7 +715,7 @@ public static partial class Plugins
                 "Neither `RegisterComparers()` nor `RegisterPdfToPngConverter()` sets `Initialized`, so `InitializePlugins()` would still call `Initialize()` afterwards. That is why `Initialize()` is emitted first.",
                 "With the pdf-only role, delete the `RegisterComparers` line: the image comparers then come from another plugin.",
                 "The per test settings live in the `VerifyTestsImageMagick` namespace, not in `VerifyTests`.",
-                "`PagesToInclude` and `SkipPdfNormalization` are also defined by the other pdf plugins, so with two of them referenced the fluent call is an ambiguous-call compile error.",
+                "`SkipPdfNormalization` is also defined by the other pdf plugins, so with two of them referenced the fluent call is an ambiguous-call compile error.",
                 "Rendering a pdf shells out to Ghostscript; svg, png, webp and tiff do not need it.",
                 "`ImageMagickPdfPassword(\"password\")` opens a password protected pdf.",
                 "The broadest target framework span of the plugins here: net48 through net10.0."

@@ -46,8 +46,8 @@ using VerifyTestsImageMagick;
 // Note: With the pdf-only role, delete the RegisterComparers line: the image comparers then come
 // from another plugin.
 // Note: The per test settings live in the VerifyTestsImageMagick namespace, not in VerifyTests.
-// Note: PagesToInclude and SkipPdfNormalization are also defined by the other pdf plugins, so with
-// two of them referenced the fluent call is an ambiguous-call compile error.
+// Note: SkipPdfNormalization is also defined by the other pdf plugins, so with two of them
+// referenced the fluent call is an ambiguous-call compile error.
 // Note: Rendering a pdf shells out to Ghostscript; svg, png, webp and tiff do not need it.
 // Note: ImageMagickPdfPassword("password") opens a password protected pdf.
 // Note: The broadest target framework span of the plugins here: net48 through net10.0.

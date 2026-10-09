@@ -81,7 +81,7 @@ public class GeneratedSolutionTests
         // verification has run, so the core sample and a Blazor test in one assembly is the case to
         // prove (plan A2).
         yield return () => ("BlazorAndCore", ["AngleSharp", "Blazor"]);
-        // Both define PagesToInclude and SkipPdfNormalization in the VerifyTests namespace (plan A6).
+        // Both define SkipPdfNormalization in the VerifyTests namespace (plan A6).
         yield return () => ("QuestPdfAndPdfPig", ["PdfPig", "QuestPDF"]);
         // Verify.Flurl is built against an older Verify.Http than the one pinned here (plan A11).
         yield return () => ("FlurlAndHttp", ["Flurl", "Http"]);

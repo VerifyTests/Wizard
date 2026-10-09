@@ -998,7 +998,7 @@
     ],
     Verbose: [
       PdfStream,
-      ExcludePdfDocument,
+      ExcludePdf,
       SkipPdfNormalization
     ]
   },
@@ -1162,8 +1162,7 @@
     Usings: [
       QuestPDF.Fluent,
       QuestPDF.Helpers,
-      QuestPDF.Infrastructure,
-      VerifyQuestPDF
+      QuestPDF.Infrastructure
     ],
     ExclusiveGroups: [
       pdf-converter

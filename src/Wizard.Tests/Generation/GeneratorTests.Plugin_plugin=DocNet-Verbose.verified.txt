@@ -26,10 +26,13 @@ public static class ModuleInitializer
 // VerifierSettings.UseSsimForPng(0.95) is the recommended comparison for these snapshots.
 // Note: The rendering is done by native pdfium binaries that arrive with the package, one per
 // runtime identifier.
-// Note: PagesToInclude(count) and SkipPdfNormalization() exist but are not in the readme; toggling
-// normalization rewrites existing verified pdfs once.
-// Note: With a second pdf plugin referenced, PagesToInclude and SkipPdfNormalization are ambiguous
-// at compile time and have to be called in their static form.
+// Note: PagesToInclude is a setting of Verify itself and takes a count or a delegate. A page file
+// is named by its one based number, #page_0001 onward, and the .verified.pdf is always the whole
+// document.
+// Note: VerifierSettings.PageText(PageTextPlacement.None) leaves the text out and
+// VerifierSettings.ExcludeDerivedTargets("png") leaves the page images out.
+// Note: Toggling SkipPdfNormalization() rewrites existing verified pdfs once. With a second pdf
+// plugin referenced it is ambiguous at compile time and has to be called in its static form.
 // Note: The samples need a sample.pdf in the test project, copied to the output directory.
 public class DocNetTests
 {
@@ -42,15 +45,15 @@ public class DocNetTests
         return VerifyFile("sample.pdf");
     }
 
-    // Rendering one page of a long document keeps a test fast and its diff small. The index is
-    // zero based, and the metadata still reports the full page count.
+    // Rendering one page of a long document keeps a test fast and its diff small. The page
+    // number is one based, and the info file still reports the full page count.
     // Not run by default: needs a sample.pdf in the test project, copied to the output directory.
     [Fact(Skip = "needs a sample.pdf in the test project, copied to the output directory.")]
     public Task FirstPage()
     {
         var stream = File.OpenRead("sample.pdf");
         return Verify(stream, "pdf")
-            .SinglePage(0);
+            .PagesToInclude(_ => _ == 1);
     }
 
     // The render size is fixed here rather than taken from the page, which is what makes the png

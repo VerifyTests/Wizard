@@ -291,17 +291,16 @@ public static partial class Plugins
                 new(
                     "PagesToInclude",
                     """
-                    var settings = new VerifySettings();
-                    VerifyAsposeSettings.PagesToInclude(settings, 1);
-                    return VerifyFile("sample.pdf", settings);
+                    return VerifyFile("sample.pdf")
+                        .PagesToInclude(1);
                     """)
                 {
                     Comment =
                     [
-                        "Rendering every page of a long document is slow and makes a noisy diff. This caps the png",
-                        "snapshots at the first pages; the binary and metadata targets are unaffected.",
-                        "The static form is used because several document plugins define PagesToInclude as an",
-                        "extension method, and referencing two of them makes the fluent call ambiguous."
+                        "Rendering every page of a long document is slow and makes a noisy diff. This keeps the",
+                        "png and the text of the first pages only; the binary document is unaffected.",
+                        "PagesToInclude is a setting of Verify itself, shared by every paged document plugin, and",
+                        "it counts the sheets of a workbook and the slides of a presentation as pages too."
                     ],
                     SkipReason = "needs an Aspose licence in the AsposeLicense environment variable, and a sample.pdf copied to the test output directory."
                 },
@@ -324,7 +323,8 @@ public static partial class Plugins
             [
                 "The licence is applied in code before the first verification, once per Aspose product in use: `Aspose.Pdf.License`, `Aspose.Cells.License`, `Aspose.Words.License` and `Aspose.Slides.License`.",
                 "The settings methods live in the `VerifyTestsAspose` namespace rather than `VerifyTests`, so the using above is needed.",
-                "One verification writes several files: metadata as text, a png per page or slide, and the deterministic binary document.",
+                "One verification writes several files: an info file with the document properties and the text of each page, a png per page, sheet or slide named `#page_0001` onward, and the deterministic binary document.",
+                "What is verified is chosen with Verify's own settings: `PagesToInclude`, `PageText(PageTextPlacement.None)` and `ExcludeDerivedTargets(\"png\")`, on one verification or on `VerifierSettings` for every test.",
                 "`VerifierSettings.ExcludeTargets(\"xlsx\")` applies the same exclusion to every test instead of one.",
                 "The file based samples need `sample.pdf` and `sample.xlsx` in the test project, copied to the output directory."
             ]
@@ -1302,13 +1302,13 @@ public static partial class Plugins
                     """
                     var stream = File.OpenRead("sample.pdf");
                     return Verify(stream, "pdf")
-                        .SinglePage(0);
+                        .PagesToInclude(_ => _ == 1);
                     """)
                 {
                     Comment =
                     [
-                        "Rendering one page of a long document keeps a test fast and its diff small. The index is",
-                        "zero based, and the metadata still reports the full page count."
+                        "Rendering one page of a long document keeps a test fast and its diff small. The page",
+                        "number is one based, and the info file still reports the full page count."
                     ],
                     SkipReason = "needs a sample.pdf in the test project, copied to the output directory."
                 },
@@ -1345,8 +1345,9 @@ public static partial class Plugins
             [
                 "pdfium renders slightly differently on each operating system, so `VerifierSettings.UseSsimForPng(0.95)` is the recommended comparison for these snapshots.",
                 "The rendering is done by native pdfium binaries that arrive with the package, one per runtime identifier.",
-                "`PagesToInclude(count)` and `SkipPdfNormalization()` exist but are not in the readme; toggling normalization rewrites existing verified pdfs once.",
-                "With a second pdf plugin referenced, `PagesToInclude` and `SkipPdfNormalization` are ambiguous at compile time and have to be called in their static form.",
+                "`PagesToInclude` is a setting of Verify itself and takes a count or a delegate. A page file is named by its one based number, `#page_0001` onward, and the `.verified.pdf` is always the whole document.",
+                "`VerifierSettings.PageText(PageTextPlacement.None)` leaves the text out and `VerifierSettings.ExcludeDerivedTargets(\"png\")` leaves the page images out.",
+                "Toggling `SkipPdfNormalization()` rewrites existing verified pdfs once. With a second pdf plugin referenced it is ambiguous at compile time and has to be called in its static form.",
                 "The samples need a `sample.pdf` in the test project, copied to the output directory."
             ]
         },
