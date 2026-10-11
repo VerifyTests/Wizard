@@ -211,19 +211,9 @@ public static class CodeFiles
     /// </summary>
     internal static string ExpectoInitialize(Plan plan)
     {
-        var builder = new StringBuilder();
-        foreach (var line in ModuleInitializerGenerator.Statements(plan, windows: false, skipBlocksNeedingMembers: true))
-        {
-            if (line.Length == 0)
-            {
-                builder.Append('\n');
-                continue;
-            }
-
-            // F# statements carry no terminator; comments are the same in both languages.
-            builder.Append($"        {line.TrimEnd(';')}\n");
-        }
-
-        return builder.ToString().TrimEnd('\n');
+        // F# statements carry no terminator; comments are the same in both languages.
+        var lines = ModuleInitializerGenerator.Statements(plan, windows: false, skipBlocksNeedingMembers: true)
+            .SelectMany(_ => ModuleInitializerGenerator.Indented(_.TrimEnd(';'), "        "));
+        return Joined.Lines(lines).TrimEnd('\n');
     }
 }

@@ -1,4 +1,4 @@
-﻿/// <param name="Changes">Package id, old version, new version, in file order.</param>
+/// <param name="Changes">Package id, old version, new version, in file order.</param>
 /// <param name="Unanswered">Ids nuget.org gave no answer for, left as they were.</param>
 public sealed record RefreshResult(
     string Json,
@@ -10,26 +10,29 @@ public sealed record RefreshResult(
     /// <summary>The pull request body: what moved, and what could not be checked.</summary>
     public string Summary()
     {
-        var builder = new StringBuilder();
+        var lines = new List<string>();
         if (Changed)
         {
-            builder.Append("Newest stable versions on nuget.org (plan 15.2).\n\n");
-            builder.Append("| Package | From | To |\n|---|---|---|\n");
-            foreach (var (id, from, to) in Changes)
-            {
-                builder.Append($"| {id} | {from} | {to} |\n");
-            }
+            lines.Add(
+                """
+                Newest stable versions on nuget.org (plan 15.2).
+
+                | Package | From | To |
+                |---|---|---|
+                """);
+            lines.AddRange(Changes.Select(_ => $"| {_.Id} | {_.From} | {_.To} |"));
         }
         else
         {
-            builder.Append("Every package is already at its newest stable version.\n");
+            lines.Add("Every package is already at its newest stable version.");
         }
 
         if (Unanswered.Count > 0)
         {
-            builder.Append($"\nNot checked, because nuget.org did not answer: {string.Join(", ", Unanswered)}.\n");
+            lines.Add("");
+            lines.Add($"Not checked, because nuget.org did not answer: {string.Join(", ", Unanswered)}.");
         }
 
-        return builder.ToString();
+        return Joined.File(lines);
     }
 }

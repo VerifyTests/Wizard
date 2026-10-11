@@ -54,29 +54,26 @@ public static class AdditionGenerator
     }
 
     /// <summary>The <c>PackageVersion</c> lines, for a solution using Central Package Management.</summary>
-    public static string Packages(Plan plan)
-    {
-        var builder = new StringBuilder(
+    public static string Packages(Plan plan) =>
+        Joined.File(
+        [
             """
             <!-- Merge into the ItemGroup of PackageVersion items in Directory.Packages.props.
                  Without Central Package Management, put each Version on the PackageReference in
                  TestProject.csproj.fragment.xml instead, and skip this file. -->
             <ItemGroup>
-
-            """);
-        foreach (var package in plan.AddedPackages)
-        {
-            builder.Append($"  <PackageVersion Include=\"{package}\" Version=\"{plan.Version(package)}\" />\n");
-        }
-
-        builder.Append("</ItemGroup>\n");
-        return builder.ToString();
-    }
+            """,
+            .. plan.AddedPackages.Select(_ => $"""  <PackageVersion Include="{_}" Version="{plan.Version(_)}" />"""),
+            "</ItemGroup>"
+        ]);
 
     /// <summary>What the test project gains: package references, and any properties and items the plugins need.</summary>
     public static string Project(Plan plan)
     {
-        var builder = new StringBuilder("<!-- Merge into the test project. -->\n");
+        var lines = new List<string>
+        {
+            "<!-- Merge into the test project. -->"
+        };
         var properties = plan.Plugins
             .SelectMany(_ => _.Definition.ProjectProperties)
             .Distinct()
@@ -85,34 +82,25 @@ public static class AdditionGenerator
         if (properties.Count > 0 ||
             windowsOnly.Count > 0)
         {
-            builder.Append("<PropertyGroup>\n");
+            lines.Add("<PropertyGroup>");
             if (windowsOnly.Count > 0)
             {
-                builder.Append($"  <!-- {InteractionRules.Join(windowsOnly)} only runs on Windows: the test project has to\n");
-                builder.Append($"       target {WizardDefaults.TargetFramework}-windows, or these tests go in a separate project that does. -->\n");
+                lines.Add(
+                    $"""
+                       <!-- {InteractionRules.Join(windowsOnly)} only runs on Windows: the test project has to
+                            target {WizardDefaults.TargetFramework}-windows, or these tests go in a separate project that does. -->
+                     """);
             }
 
-            foreach (var (name, value) in properties)
-            {
-                builder.Append($"  <{name}>{value}</{name}>\n");
-            }
-
-            builder.Append("</PropertyGroup>\n");
+            lines.AddRange(properties.Select(_ => $"  <{_.Name}>{_.Value}</{_.Name}>"));
+            lines.Add("</PropertyGroup>");
         }
 
-        builder.Append("<ItemGroup>\n");
-        foreach (var package in plan.AddedPackages)
-        {
-            builder.Append($"  <PackageReference Include=\"{package}\" />\n");
-        }
-
-        foreach (var item in plan.Plugins.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal))
-        {
-            builder.Append($"  {item}\n");
-        }
-
-        builder.Append("</ItemGroup>\n");
-        return builder.ToString();
+        lines.Add("<ItemGroup>");
+        lines.AddRange(plan.AddedPackages.Select(_ => $"""  <PackageReference Include="{_}" />"""));
+        lines.AddRange(plan.Plugins.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal).Select(_ => $"  {_}"));
+        lines.Add("</ItemGroup>");
+        return Joined.File(lines);
     }
 
     /// <summary>
@@ -129,55 +117,55 @@ public static class AdditionGenerator
                 return null;
             }
 
-            return "<!-- Merge into Directory.Build.props. -->\n" +
-                   SponsorXml.OwnersOnly(plan.State, "", owners);
+            return
+                $"""
+                 <!-- Merge into Directory.Build.props. -->
+                 {SponsorXml.OwnersOnly(plan.State, "", owners)}
+                 """;
         }
 
-        return "<!-- Merge into Directory.Build.props, replacing any existing Verify_ declaration. -->\n" +
-               SponsorXml.Block(plan.State, "", owners);
+        return
+            $"""
+             <!-- Merge into Directory.Build.props, replacing any existing Verify_ declaration. -->
+             {SponsorXml.Block(plan.State, "", owners)}
+             """;
     }
 
     static string Tools(Plan plan)
     {
-        var builder = new StringBuilder("{\n  \"tools\": {\n");
-        var tools = plan.DotnetTools;
-        for (var index = 0; index < tools.Count; index++)
-        {
-            var id = tools[index];
-            var separator = index < tools.Count - 1 ? "," : "";
-            builder.Append(
+        var tools = plan.DotnetTools.Select(
+            _ =>
                 $$"""
-                    "{{id}}": {
-                      "version": "{{plan.Version(id)}}",
-                      "commands": [
-                        "dotnet-verify"
-                      ],
-                      "rollForward": false
-                    }{{separator}}
+                      "{{_}}": {
+                        "version": "{{plan.Version(_)}}",
+                        "commands": [
+                          "dotnet-verify"
+                        ],
+                        "rollForward": false
+                      }
+                  """);
+        return
+            $$"""
+              {
+                "tools": {
+              {{string.Join(",\n", tools)}}
+                }
+              }
 
-                """);
-        }
-
-        builder.Append("  }\n}\n");
-        return builder.ToString();
+              """;
     }
 
     /// <summary>
     /// Expecto has no module initializer; the calls go in the lazy value the project's tests force, in
     /// this order (plan D9).
     /// </summary>
-    static string FSharpInitialize(Plan plan)
-    {
-        var builder = new StringBuilder(CodeFiles.Banner(plan));
-        builder.Append("// Merge into the lazy initialization value the tests force before verifying.\n");
-        foreach (var open in CodeFiles.ExpectoOpens(plan))
-        {
-            builder.Append($"{open}\n");
-        }
-
-        builder.Append('\n');
-        builder.Append(CodeFiles.ExpectoInitialize(plan).Replace("\n        ", "\n").TrimStart());
-        builder.Append('\n');
-        return builder.ToString();
-    }
+    static string FSharpInitialize(Plan plan) =>
+        CodeFiles.Banner(plan) +
+        Joined.File(
+        [
+            "// Merge into the lazy initialization value the tests force before verifying.",
+            .. CodeFiles.ExpectoOpens(plan),
+            "",
+            CodeFiles.ExpectoInitialize(plan).Replace("\n        ", "\n").TrimStart()
+        ]);
 }

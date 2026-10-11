@@ -16,15 +16,15 @@ public static class ModuleInitializerGenerator
     static string Body(Plan plan, bool windows)
     {
         var blocks = Blocks(plan, windows);
-        var builder = new StringBuilder();
-
-        builder.Append("using System.Runtime.CompilerServices;\n");
-        foreach (var name in blocks.SelectMany(_ => _.Usings).Distinct(StringComparer.Ordinal).Order(StringComparer.Ordinal))
-        {
-            builder.Append($"using {name};\n");
-        }
-
-        builder.Append(
+        var usings = blocks
+            .SelectMany(_ => _.Usings)
+            .Distinct(StringComparer.Ordinal)
+            .Order(StringComparer.Ordinal)
+            .Select(_ => $"using {_};");
+        List<string> lines =
+        [
+            "using System.Runtime.CompilerServices;",
+            .. usings,
             """
 
             // Everything here runs once, when the test assembly loads, before any test.
@@ -33,30 +33,19 @@ public static class ModuleInitializerGenerator
                 [ModuleInitializer]
                 public static void Initialize()
                 {
-
-            """);
-
-        foreach (var line in Statements(plan, windows))
-        {
-            if (line.Length == 0)
-            {
-                builder.Append('\n');
-                continue;
-            }
-
-            builder.Append($"        {line}\n");
-        }
-
-        builder.Append("    }\n");
+            """,
+            .. Statements(plan, windows).SelectMany(_ => Indented(_, "        ")),
+            "    }"
+        ];
 
         foreach (var member in blocks.SelectMany(_ => _.Members))
         {
-            builder.Append('\n');
-            builder.Append(Indent(member, "    "));
+            lines.Add("");
+            lines.AddRange(Indented(member, "    "));
         }
 
-        builder.Append("}\n");
-        return builder.ToString();
+        lines.Add("}");
+        return Joined.File(lines);
     }
 
     /// <summary>
@@ -204,7 +193,11 @@ public static class ModuleInitializerGenerator
     /// is not something the generated solution should inherit.
     /// </summary>
     internal static string Indent(string code, string indent) =>
-        string.Join('\n', Lines(code).Select(_ => _.Length == 0 ? _ : indent + _)) + "\n";
+        Joined.File(Indented(code, indent));
+
+    /// <summary>The lines of <paramref name="code"/>, each indented unless it is empty.</summary>
+    internal static IEnumerable<string> Indented(string code, string indent) =>
+        Lines(code).Select(_ => _.Length == 0 ? _ : indent + _);
 
     internal static IEnumerable<string> Lines(string text) =>
         text.Split('\n').Select(_ => _.TrimEnd('\r'));

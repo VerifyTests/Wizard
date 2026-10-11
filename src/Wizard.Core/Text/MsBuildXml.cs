@@ -8,18 +8,13 @@ public static class MsBuildXml
             .Replace(">", "&gt;")
             .Replace("\"", "&quot;");
 
-    public static string PropertyGroup(IEnumerable<(string Name, string Value)> properties, string indent = "")
-    {
-        var builder = new StringBuilder();
-        builder.Append(indent).Append("<PropertyGroup>\n");
-        foreach (var (name, value) in properties)
-        {
-            builder.Append(indent).Append($"  <{name}>{Escape(value)}</{name}>\n");
-        }
-
-        builder.Append(indent).Append("</PropertyGroup>");
-        return builder.ToString();
-    }
+    public static string PropertyGroup(IEnumerable<(string Name, string Value)> properties, string indent = "") =>
+        Joined.Lines(
+        [
+            $"{indent}<PropertyGroup>",
+            .. properties.Select(_ => $"{indent}  <{_.Name}>{Escape(_.Value)}</{_.Name}>"),
+            $"{indent}</PropertyGroup>"
+        ]);
 
     public static string Fenced(string content, string language = "xml") =>
         $"```{language}\n{content}\n```";

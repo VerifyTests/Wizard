@@ -19,71 +19,51 @@ public static class PluginTestFiles
     {
         var framework = plan.Framework;
         var definition = plugin.Definition;
-        var builder = new StringBuilder(CodeFiles.Banner(plan));
-
-        foreach (var name in definition.Usings)
-        {
-            builder.Append($"using {name};\n");
-        }
-
+        var lines = new List<string>();
+        lines.AddRange(definition.Usings.Select(_ => $"using {_};"));
         if (definition.Usings.Count > 0)
         {
-            builder.Append('\n');
+            lines.Add("");
         }
 
-        builder.Append($"// {definition.DisplayName}: {definition.Description}\n");
-        builder.Append($"// {definition.RepoUrl}\n");
-        foreach (var note in definition.Notes)
-        {
-            foreach (var line in Wrap($"Note: {Plain(note)}"))
-            {
-                builder.Append($"// {line}\n");
-            }
-        }
-
-        foreach (var attribute in framework.ClassAttributes)
-        {
-            builder.Append($"{attribute}\n");
-        }
+        lines.Add($"// {definition.DisplayName}: {definition.Description}");
+        lines.Add($"// {definition.RepoUrl}");
+        lines.AddRange(definition.Notes.SelectMany(_ => Wrap($"Note: {Plain(_)}")).Select(_ => $"// {_}"));
+        lines.AddRange(framework.ClassAttributes);
 
         var partial = framework.PartialClasses ? "partial " : "";
-        builder.Append($"public {partial}class {plugin.TestClass}\n{{\n");
+        lines.Add($"public {partial}class {plugin.TestClass}");
+        lines.Add("{");
 
         var first = true;
         foreach (var sample in plugin.Samples)
         {
             if (!first)
             {
-                builder.Append('\n');
+                lines.Add("");
             }
 
             first = false;
-            AppendSample(builder, framework, sample);
+            lines.AddRange(SampleLines(framework, sample));
         }
 
         foreach (var member in plugin.Samples.SelectMany(_ => _.Members))
         {
-            builder.Append('\n');
-            builder.Append(ModuleInitializerGenerator.Indent(member, "    "));
+            lines.Add("");
+            lines.AddRange(ModuleInitializerGenerator.Indented(member, "    "));
         }
 
-        builder.Append("}\n");
-        return builder.ToString();
+        lines.Add("}");
+        return CodeFiles.Banner(plan) + Joined.File(lines);
     }
 
-    static void AppendSample(StringBuilder builder, TestFrameworkInfo framework, Sample sample)
+    static List<string> SampleLines(TestFrameworkInfo framework, Sample sample)
     {
-        foreach (var line in sample.Comment)
-        {
-            builder.Append($"    // {line}\n");
-        }
-
+        var lines = new List<string>();
+        lines.AddRange(sample.Comment.Select(_ => $"    // {_}"));
         if (sample.SkipReason is { } reason)
         {
-            foreach (var line in Wrap($"Not run by default: {reason}"))
-            {
-                builder.Append($"    // {line}\n");
-            }
+            lines.AddRange(Wrap($"Not run by default: {reason}").Select(_ => $"    // {_}"));
         }
 
         var attribute = framework.TestAttribute;
@@ -96,7 +76,7 @@ public static class PluginTestFiles
 
         if (attribute.Length > 0)
         {
-            builder.Append($"    {attribute}\n");
+            lines.Add($"    {attribute}");
         }
 
         // Fixie runs every public method of the class, so a skipped sample is made private instead.
@@ -108,9 +88,11 @@ public static class PluginTestFiles
         }
 
         var signature = sample.Async ? "async Task" : "Task";
-        builder.Append($"    {visibility} {signature} {sample.Name}()\n    {{\n");
-        builder.Append(ModuleInitializerGenerator.Indent(sample.Body, "        "));
-        builder.Append("    }\n");
+        lines.Add($"    {visibility} {signature} {sample.Name}()");
+        lines.Add("    {");
+        lines.AddRange(ModuleInitializerGenerator.Indented(sample.Body, "        "));
+        lines.Add("    }");
+        return lines;
     }
 
     /// <summary>Notes are written as markdown for the guide; a code comment wants them plain.</summary>

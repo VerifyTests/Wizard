@@ -137,13 +137,11 @@ public static class BuildServerFiles
             return "";
         }
 
-        var builder = new StringBuilder("        env:\n");
-        foreach (var variable in variables)
-        {
-            builder.Append($"          {variable}: ${{{{ secrets.{variable} }}}}\n");
-        }
-
-        return builder.ToString();
+        return Joined.File(
+        [
+            "        env:",
+            .. variables.Select(_ => $$$"""          {{{_}}}: ${{ secrets.{{{_}}} }}""")
+        ]);
     }
 
     static string AzureDevOps(Plan plan) =>

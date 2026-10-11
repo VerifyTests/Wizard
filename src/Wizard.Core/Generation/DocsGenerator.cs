@@ -171,15 +171,21 @@ public static class DocsGenerator
 
         builder.Paragraph("In `Directory.Packages.props`:");
         builder.Code(
-            "<ItemGroup>\n" +
-            string.Join('\n', plan.TestPackages.Select(_ => $"  <PackageVersion Include=\"{_}\" Version=\"{plan.Version(_)}\" />")) +
-            "\n</ItemGroup>",
+            Joined.Lines(
+            [
+                "<ItemGroup>",
+                .. plan.TestPackages.Select(_ => $"""  <PackageVersion Include="{_}" Version="{plan.Version(_)}" />"""),
+                "</ItemGroup>"
+            ]),
             "xml");
         builder.Paragraph("In the test project:");
         builder.Code(
-            "<ItemGroup>\n" +
-            string.Join('\n', plan.TestPackages.Select(_ => $"  <PackageReference Include=\"{_}\" />")) +
-            "\n</ItemGroup>",
+            Joined.Lines(
+            [
+                "<ItemGroup>",
+                .. plan.TestPackages.Select(_ => $"""  <PackageReference Include="{_}" />"""),
+                "</ItemGroup>"
+            ]),
             "xml");
     }
 

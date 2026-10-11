@@ -13,7 +13,13 @@ public static class ProjectFiles
         // Fixie runs on VSTest; the MTP runner switch would stop dotnet test from running it (plan D10).
         if (!plan.Framework.UsesTestingPlatform)
         {
-            return $"{{\n{sdk}\n}}\n";
+            return
+                $$"""
+                {
+                {{sdk}}
+                }
+
+                """;
         }
 
         return
@@ -30,68 +36,42 @@ public static class ProjectFiles
 
     public static string DirectoryBuildProps(Plan plan)
     {
-        var builder = new StringBuilder();
-        builder.Append(
+        var warnings =
             """
-            <Project>
-              <!-- Applies to every project under this directory. -->
-              <PropertyGroup>
-                <LangVersion>latest</LangVersion>
-                <ImplicitUsings>enable</ImplicitUsings>
-
-            """);
-        // F# has its own nullness checking, switched on differently; this setting is for C# only.
-        builder.Append(
-            """
-                <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
-
-            """);
+                <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
+            """;
         if (plan.State.SponsorMode == SponsorMode.Ignore)
         {
-            builder.Append(
+            warnings =
                 """
                     <!-- Not TreatWarningsAsErrors: opting out of the maintenance fee logs an SC023 warning on
                          every build, which would then fail it. -->
-
-                """);
-        }
-        else
-        {
-            builder.Append(
-                """
-                    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-
-                """);
+                """;
         }
 
-        builder.Append(
-            """
-              </PropertyGroup>
+        // F# has its own nullness checking, switched on differently; the Nullable setting is for C# only.
+        // The sponsor block ends with a newline of its own, so the closing tag follows it on the same line here.
+        return
+            $"""
+             <Project>
+               <!-- Applies to every project under this directory. -->
+               <PropertyGroup>
+                 <LangVersion>latest</LangVersion>
+                 <ImplicitUsings>enable</ImplicitUsings>
+                 <Nullable Condition="'$(MSBuildProjectExtension)' == '.csproj'">enable</Nullable>
+             {warnings}
+               </PropertyGroup>
+             {SponsorXml.Block(plan.State, "  ", plan.SponsorOwners)}</Project>
 
-            """);
-        builder.Append(SponsorXml.Block(plan.State, "  ", plan.SponsorOwners));
-        builder.Append("</Project>\n");
-        return builder.ToString();
+             """;
     }
 
     public static string DirectoryPackagesProps(Plan plan)
     {
-        var builder = new StringBuilder();
-        builder.Append(
-            """
-            <Project>
-              <!-- Central Package Management: every package version is set here, once. Projects reference
-                   packages with <PackageReference Include="..." /> and no Version.
-                   https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management -->
-              <PropertyGroup>
-                <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
-                <!-- Transitive dependencies are held to the versions below too, so a package pulled in
-                     indirectly cannot resolve to an older version than the one referenced directly. -->
-                <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
-              </PropertyGroup>
-
-            """);
-        AppendVersions(builder, $"Test framework: {plan.Framework.Framework.Name()}", plan.Framework.Packages, plan);
+        var groups = new List<string>
+        {
+            Versions($"Test framework: {plan.Framework.Framework.Name()}", plan.Framework.Packages, plan)
+        };
         var listed = new HashSet<string>(plan.Framework.Packages, StringComparer.Ordinal);
         foreach (var plugin in plan.Plugins)
         {
@@ -103,28 +83,54 @@ public static class ProjectFiles
                 continue;
             }
 
-            AppendVersions(
-                builder,
-                $"{plugin.Definition.DisplayName}: {plugin.Definition.Description}",
-                packages.Select(_ => _.Id),
-                plan);
+            groups.Add(
+                Versions(
+                    $"{plugin.Definition.DisplayName}: {plugin.Definition.Description}",
+                    packages.Select(_ => _.Id),
+                    plan));
         }
 
-        builder.Append("</Project>\n");
-        return builder.ToString();
+        return
+            $"""
+             <Project>
+               <!-- Central Package Management: every package version is set here, once. Projects reference
+                    packages with <PackageReference Include="..." /> and no Version.
+                    https://learn.microsoft.com/en-us/nuget/consume-packages/central-package-management -->
+               <PropertyGroup>
+                 <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+                 <!-- Transitive dependencies are held to the versions below too, so a package pulled in
+                      indirectly cannot resolve to an older version than the one referenced directly. -->
+                 <CentralPackageTransitivePinningEnabled>true</CentralPackageTransitivePinningEnabled>
+               </PropertyGroup>
+             {Joined.Lines(groups)}
+             </Project>
+
+             """;
     }
 
-    static void AppendVersions(StringBuilder builder, string comment, IEnumerable<string> packages, Plan plan)
-    {
-        builder.Append($"  <!-- {comment} -->\n");
-        builder.Append("  <ItemGroup>\n");
-        foreach (var package in packages)
-        {
-            builder.Append($"    <PackageVersion Include=\"{package}\" Version=\"{plan.Version(package)}\" />\n");
-        }
+    static string Versions(string comment, IEnumerable<string> packages, Plan plan) =>
+        Joined.Lines(
+        [
+            $"  <!-- {comment} -->",
+            "  <ItemGroup>",
+            .. packages.Select(_ => $"""    <PackageVersion Include="{_}" Version="{plan.Version(_)}" />"""),
+            "  </ItemGroup>"
+        ]);
 
-        builder.Append("  </ItemGroup>\n");
-    }
+    static string PackageReference(string package) =>
+        $"""    <PackageReference Include="{package}" />""";
+
+    static string Property((string Name, string Value) property) =>
+        $"    <{property.Name}>{property.Value}</{property.Name}>";
+
+    /// <summary>An item group of a project file, one item per entry. Each entry carries its own indentation.</summary>
+    static string ItemGroup(IEnumerable<string> items) =>
+        Joined.Lines(
+        [
+            "  <ItemGroup>",
+            .. items,
+            "  </ItemGroup>"
+        ]);
 
     public const string NugetConfig =
         """
@@ -235,22 +241,25 @@ public static class ProjectFiles
 
     public static string Slnx(Plan plan, IEnumerable<string> solutionItems)
     {
-        var builder = new StringBuilder("<Solution>\n  <Folder Name=\"/Solution Items/\">\n");
-        foreach (var item in solutionItems)
+        var projects = new List<string>
         {
-            builder.Append($"    <File Path=\"{item}\" />\n");
-        }
-
-        builder.Append("  </Folder>\n");
-        builder.Append($"  <Project Path=\"src/{plan.LibraryProject}/{plan.LibraryProject}.csproj\" />\n");
-        builder.Append($"  <Project Path=\"src/{plan.TestProject}/{plan.TestProject}.{plan.Framework.ProjectExtension}\" />\n");
+            $"src/{plan.LibraryProject}/{plan.LibraryProject}.csproj",
+            $"src/{plan.TestProject}/{plan.TestProject}.{plan.Framework.ProjectExtension}"
+        };
         if (plan.HasWindowsProject)
         {
-            builder.Append($"  <Project Path=\"src/{plan.WindowsTestProject}/{plan.WindowsTestProject}.csproj\" />\n");
+            projects.Add($"src/{plan.WindowsTestProject}/{plan.WindowsTestProject}.csproj");
         }
 
-        builder.Append("</Solution>\n");
-        return builder.ToString();
+        return Joined.File(
+        [
+            "<Solution>",
+            """  <Folder Name="/Solution Items/">""",
+            .. solutionItems.Select(_ => $"""    <File Path="{_}" />"""),
+            "  </Folder>",
+            .. projects.Select(_ => $"""  <Project Path="{_}" />"""),
+            "</Solution>"
+        ]);
     }
 
     /// <summary>
@@ -285,7 +294,8 @@ public static class ProjectFiles
 
     public static string LibraryProject(Plan plan)
     {
-        var builder = new StringBuilder(
+        var lines = new List<string>
+        {
             $"""
              <Project Sdk="Microsoft.NET.Sdk">
                <!-- The code under test. It references nothing test related. -->
@@ -293,8 +303,8 @@ public static class ProjectFiles
                  <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>
                  <RootNamespace>{SolutionNames.RootNamespace(plan.LibraryProject)}</RootNamespace>
                </PropertyGroup>
-
-             """);
+             """
+        };
         var items = plan.Plugins
             .SelectMany(_ => _.Definition.LibraryProjectItems)
             .Distinct(StringComparer.Ordinal)
@@ -302,23 +312,17 @@ public static class ProjectFiles
         if (plan.LibraryPackages.Count > 0 ||
             items.Count > 0)
         {
-            builder.Append("  <!-- What the sample types the plugins brought in compile against. -->\n");
-            builder.Append("  <ItemGroup>\n");
-            foreach (var package in plan.LibraryPackages)
-            {
-                builder.Append($"    <PackageReference Include=\"{package}\" />\n");
-            }
-
-            foreach (var item in items)
-            {
-                builder.Append($"    {item}\n");
-            }
-
-            builder.Append("  </ItemGroup>\n");
+            lines.Add("  <!-- What the sample types the plugins brought in compile against. -->");
+            lines.Add(
+                ItemGroup(
+                [
+                    .. plan.LibraryPackages.Select(PackageReference),
+                    .. items.Select(_ => $"    {_}")
+                ]));
         }
 
-        builder.Append("</Project>\n");
-        return builder.ToString();
+        lines.Add("</Project>");
+        return Joined.File(lines);
     }
 
     /// <param name="windows">The second project, which holds the Windows-only plugins (plan D5).</param>
@@ -327,91 +331,76 @@ public static class ProjectFiles
         var framework = plan.Framework;
         var name = windows ? plan.WindowsTestProject : plan.TestProject;
         var plugins = plan.PluginsIn(windows).ToList();
-        var builder = new StringBuilder("<Project Sdk=\"Microsoft.NET.Sdk\">\n");
-        builder.Append("  <PropertyGroup>\n");
+        var properties = new List<string>();
         if (windows)
         {
-            builder.Append("    <!-- Windows only: these plugins render with Windows APIs, so the target framework\n");
-            builder.Append("         has the windows suffix. Nothing references this project, so the rest of the\n");
-            builder.Append("         solution still builds and runs on any operating system. -->\n");
-            builder.Append($"    <TargetFramework>{WizardDefaults.TargetFramework}-windows</TargetFramework>\n");
+            properties.Add(
+                $"""
+                     <!-- Windows only: these plugins render with Windows APIs, so the target framework
+                          has the windows suffix. Nothing references this project, so the rest of the
+                          solution still builds and runs on any operating system. -->
+                     <TargetFramework>{WizardDefaults.TargetFramework}-windows</TargetFramework>
+                 """);
         }
         else
         {
-            builder.Append($"    <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>\n");
+            properties.Add($"    <TargetFramework>{WizardDefaults.TargetFramework}</TargetFramework>");
         }
 
-        builder.Append($"    <RootNamespace>{SolutionNames.RootNamespace(name)}</RootNamespace>\n");
-        foreach (var (property, value) in plugins.SelectMany(_ => _.Definition.ProjectProperties).Distinct())
-        {
-            builder.Append($"    <{property}>{value}</{property}>\n");
-        }
+        properties.Add($"    <RootNamespace>{SolutionNames.RootNamespace(name)}</RootNamespace>");
+        properties.AddRange(plugins.SelectMany(_ => _.Definition.ProjectProperties).Distinct().Select(Property));
 
         if (framework.Properties.Count > 0)
         {
-            builder.Append("    <!-- Run as a Microsoft.Testing.Platform app; dotnet test uses it through the runner set in global.json. -->\n");
+            properties.Add("    <!-- Run as a Microsoft.Testing.Platform app; dotnet test uses it through the runner set in global.json. -->");
         }
 
-        foreach (var (property, value) in framework.Properties)
-        {
-            builder.Append($"    <{property}>{value}</{property}>\n");
-        }
+        properties.AddRange(framework.Properties.Select(Property));
 
         if (framework.Framework == TestFramework.Expecto)
         {
-            builder.Append("    <!-- Verify.Expecto needs a newer FSharp.Core than the SDK references implicitly, so it is referenced below. -->\n");
-            builder.Append("    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>\n");
+            properties.Add(
+                """
+                    <!-- Verify.Expecto needs a newer FSharp.Core than the SDK references implicitly, so it is referenced below. -->
+                    <DisableImplicitFSharpCoreReference>true</DisableImplicitFSharpCoreReference>
+                """);
         }
 
         if (plugins.Count > 0 &&
             framework.SuppressedWarnings.Count > 0)
         {
-            foreach (var (code, reason) in framework.SuppressedWarnings)
-            {
-                foreach (var line in PluginTestFiles.Wrap($"{code}: {reason}", 92))
-                {
-                    builder.Append($"    <!-- {line} -->\n");
-                }
-            }
-
-            builder.Append($"    <NoWarn>$(NoWarn);{string.Join(";", framework.SuppressedWarnings.Select(_ => _.Code))}</NoWarn>\n");
+            properties.AddRange(
+                framework.SuppressedWarnings
+                    .SelectMany(_ => PluginTestFiles.Wrap($"{_.Code}: {_.Reason}", 92))
+                    .Select(_ => $"    <!-- {_} -->"));
+            properties.Add($"    <NoWarn>$(NoWarn);{string.Join(";", framework.SuppressedWarnings.Select(_ => _.Code))}</NoWarn>");
         }
 
-        builder.Append("  </PropertyGroup>\n");
+        List<string> lines =
+        [
+            """<Project Sdk="Microsoft.NET.Sdk">""",
+            "  <PropertyGroup>",
+            .. properties,
+            "  </PropertyGroup>"
+        ];
 
         if (framework.IsFSharp)
         {
             // F# compiles in file order
-            builder.Append("  <ItemGroup>\n");
-            builder.Append("    <Compile Include=\"Tests.fs\" />\n");
-            builder.Append("  </ItemGroup>\n");
+            lines.Add(ItemGroup(["""    <Compile Include="Tests.fs" />"""]));
         }
 
-        builder.Append("  <ItemGroup>\n");
         var packages = windows ? plan.WindowsTestPackages : plan.TestPackages;
-        foreach (var package in packages)
-        {
-            builder.Append($"    <PackageReference Include=\"{package}\" />\n");
-        }
-
-        builder.Append("  </ItemGroup>\n");
+        lines.Add(ItemGroup(packages.Select(PackageReference)));
 
         var items = plugins.SelectMany(_ => _.Definition.ProjectItems).Distinct(StringComparer.Ordinal).ToList();
         if (items.Count > 0)
         {
-            builder.Append("  <ItemGroup>\n");
-            foreach (var item in items)
-            {
-                builder.Append($"    {item}\n");
-            }
-
-            builder.Append("  </ItemGroup>\n");
+            lines.Add(ItemGroup(items.Select(_ => $"    {_}")));
         }
 
-        builder.Append("  <ItemGroup>\n");
-        builder.Append($"    <ProjectReference Include=\"..\\{plan.LibraryProject}\\{plan.LibraryProject}.csproj\" />\n");
-        builder.Append("  </ItemGroup>\n");
-        builder.Append("</Project>\n");
-        return builder.ToString();
+        lines.Add(ItemGroup([$"""    <ProjectReference Include="..\{plan.LibraryProject}\{plan.LibraryProject}.csproj" />"""]));
+        lines.Add("</Project>");
+        return Joined.File(lines);
     }
 }
