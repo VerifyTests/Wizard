@@ -94,17 +94,21 @@ public class ScreenSnapshotTests
         var page = await Open(
             $"/new?step=plugins&{beforeOutput}&ext=EntityFramework,SqlServer",
             ".interaction-notice[data-rule=ef-sql-recording]");
-        await VerifyScreen(page, fullPage: false);
+        // the notices are below the cards
+        await VerifyScreen(page);
     }
 
-    /// <summary>A conflict, which is what stops the step being left (plan 11.1).</summary>
+    /// <summary>
+    /// A conflict, which is what stops the step being left (plan 11.1): marked on both cards, counted
+    /// beside the filter, and explained above Next.
+    /// </summary>
     [Test]
     public async Task NewPluginsConflict()
     {
         var page = await Open(
             $"/new?step=plugins&{beforeOutput}&ext=Diagnostics,OpenTelemetry",
             ".interaction-notice.conflict");
-        await VerifyScreen(page, fullPage: false);
+        await VerifyScreen(page);
     }
 
     [Test]
@@ -137,7 +141,7 @@ public class ScreenSnapshotTests
         var page = await Open(
             "/add/by-tech?step=plugins&tf=XunitV3&have=SqlServer&tech=efcore&ext=EntityFramework,LocalDb",
             ".interaction-notice[data-rule=ef-sql-recording]");
-        await VerifyScreen(page, fullPage: false);
+        await VerifyScreen(page);
     }
 
     [Test]

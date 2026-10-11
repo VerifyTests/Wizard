@@ -297,6 +297,39 @@ public class RegistryTests
         }
     }
 
+    /// <summary>Each plugin in a conflict is marked with what it clashes with, and nothing else is.</summary>
+    [Test]
+    public async Task ConflictMarksNameTheOtherPlugins()
+    {
+        var state = GeneratorTests.WithPlugins(GeneratorTests.State(), "Diagnostics", "OpenTelemetry", "EntityFramework", "SqlServer");
+        var marks = InteractionRules.ConflictMarks(InteractionRules.For(state));
+
+        await Assert.That(marks.Keys).IsEquivalentTo(["Diagnostics", "OpenTelemetry"]);
+        await Assert.That(marks["Diagnostics"]).IsEqualTo("Conflicts with OpenTelemetry");
+        await Assert.That(marks["OpenTelemetry"]).IsEqualTo("Conflicts with Diagnostics");
+    }
+
+    /// <summary>
+    /// A plugin in several groups gets one mark for everything it clashes with, in registry order, and
+    /// a count once the names would not fit on a badge.
+    /// </summary>
+    [Test]
+    public async Task ConflictMarksMergeAcrossGroups()
+    {
+        // Aspose and Syncfusion clash over pdf, xlsx, docx and pptx; PdfPig only over pdf
+        var three = GeneratorTests.WithPlugins(GeneratorTests.State(), "Syncfusion", "PdfPig", "Aspose");
+        var marks = InteractionRules.ConflictMarks(InteractionRules.For(three));
+        await Assert.That(marks["Aspose"]).IsEqualTo("Conflicts with PdfPig and Syncfusion");
+        await Assert.That(marks["PdfPig"]).IsEqualTo("Conflicts with Aspose and Syncfusion");
+
+        // ClosedXml clashes with the other two over xlsx, but not with PdfPig
+        var four = GeneratorTests.WithPlugins(three, "Syncfusion", "PdfPig", "Aspose", "ClosedXml");
+        marks = InteractionRules.ConflictMarks(InteractionRules.For(four));
+        await Assert.That(marks["Aspose"]).IsEqualTo("Conflicts with 3 plugins");
+        await Assert.That(marks["ClosedXml"]).IsEqualTo("Conflicts with Aspose and Syncfusion");
+        await Assert.That(marks["PdfPig"]).IsEqualTo("Conflicts with Aspose and Syncfusion");
+    }
+
     public static IEnumerable<Func<InteractionRule>> AllRules() =>
         InteractionRules.Rules.Select<InteractionRule, Func<InteractionRule>>(rule => () => rule);
 }

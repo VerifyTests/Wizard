@@ -1,6 +1,10 @@
+@inject IJSRuntime JS
+
 @* The plugin picker (plan 7.1 step 7). What the tech stack suggests comes first; everything else
    follows, grouped by category so a long list stays navigable. Every interaction the selection implies
-   appears above the cards as soon as the combination exists, rather than at the end. *@
+   appears below the cards, next to the button it may be holding back. That is a long way from most
+   cards, so a conflict also shows where it was caused: on the cards involved, and as a count beside
+   the filter that jumps to the notices. *@
 <p class="hint">
     Plugins teach Verify about one kind of value each. Nothing here is required, and anything chosen
     can be deleted from what is generated later. @Plugins.All.Count are available.
@@ -14,17 +18,11 @@
            value="@filter"
            @oninput="FilterChanged" />
     <span class="selected-count">@State.SelectedPlugins.Count selected</span>
+    @if (conflicts > 0)
+    {
+        <button type="button" class="link-button conflict-count" @onclick="ShowNotices">@ConflictCount</button>
+    }
 </div>
-
-@if (interactions.Count > 0)
-{
-    <div class="interactions">
-        @foreach (var interaction in interactions)
-        {
-            <InteractionNotice Result="interaction" />
-        }
-    </div>
-}
 
 @if (suggested.Count > 0)
 {
@@ -36,6 +34,7 @@
                 <PluginCard Definition="Plugins.ById[suggestion.PluginId]"
                                Selected="State.Has(suggestion.PluginId)"
                                Existing="State.IsExisting(suggestion.PluginId)"
+                               Conflict="@marks.GetValueOrDefault(suggestion.PluginId)"
                                Tag="@Tag(suggestion)"
                                SelectedChanged="_ => Toggle(suggestion.PluginId, _)" />
             }
@@ -54,10 +53,21 @@
                                Selected="State.Has(definition.Id)"
                                Existing="State.IsExisting(definition.Id)"
                                Unavailable="@State.Unavailable(definition.Id)"
+                               Conflict="@marks.GetValueOrDefault(definition.Id)"
                                SelectedChanged="_ => Toggle(definition.Id, _)" />
             }
         </div>
     </section>
+}
+
+@if (interactions.Count > 0)
+{
+    <div class="interactions" id="@noticesId">
+        @foreach (var interaction in interactions)
+        {
+            <InteractionNotice Result="interaction" />
+        }
+    </div>
 }
 
 @code {
@@ -66,15 +76,36 @@
 
     string filter = "";
 
+    const string noticesId = "plugin-notices";
+
     IReadOnlyList<InteractionResult> interactions = [];
     IReadOnlyList<Suggestion> suggested = [];
-
+    IReadOnlyDictionary<string, string> marks = new Dictionary<string, string>();
+    int conflicts;
 
     protected override void OnParametersSet()
     {
         interactions = InteractionRules.For(State);
+        marks = InteractionRules.ConflictMarks(interactions);
+        conflicts = interactions.Count(_ => _.Severity == Severity.Conflict);
         suggested = [.. TechSuggestions.For(State).Where(_ => Matches(Plugins.ById[_.PluginId]))];
     }
+
+    string ConflictCount
+    {
+        get
+        {
+            if (conflicts == 1)
+            {
+                return "1 conflict";
+            }
+
+            return $"{conflicts} conflicts";
+        }
+    }
+
+    Task ShowNotices() =>
+        JS.InvokeVoidAsync("verifyWizard.scrollIntoView", noticesId).AsTask();
 
     string SuggestedHeading
     {
@@ -115,7 +146,9 @@
         }
 
         // A selected plugin stays visible whatever the filter says, so it cannot be lost from view.
-        if (State.Has(definition.Id))
+        // So does one in a conflict, which can be a plugin the project already has.
+        if (State.Has(definition.Id) ||
+            marks.ContainsKey(definition.Id))
         {
             return true;
         }

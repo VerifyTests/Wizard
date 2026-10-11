@@ -81,6 +81,25 @@ public class EndToEndTests
         await Assert.That(await next.IsDisabledAsync()).IsFalse();
     }
 
+    /// <summary>
+    /// The notices are below a long list of cards. The count beside the filter is there for a conflict
+    /// whose notice is out of sight, and brings it into view without leaving the step.
+    /// </summary>
+    [Test]
+    public async Task TheConflictCountJumpsToTheNotices()
+    {
+        var page = await ScreenSnapshotTests.Open(
+            "/new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry",
+            ".conflict-count");
+
+        var notice = page.Locator(".interaction-notice[data-rule=activity-listener]");
+        await Assertions.Expect(notice).Not.ToBeInViewportAsync();
+
+        await page.ClickAsync(".conflict-count");
+        await Assertions.Expect(notice).ToBeInViewportAsync();
+        await Assert.That(page.Url).Contains("/new?step=plugins&");
+    }
+
     /// <summary>The options step writes the depth and the choice into the url, so the link carries them.</summary>
     [Test]
     public async Task OptionsAreCarriedInTheUrl()

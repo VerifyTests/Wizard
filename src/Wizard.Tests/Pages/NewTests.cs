@@ -269,6 +269,43 @@ public class NewTests : WebTestContext
         await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsFalse();
     }
 
+    /// <summary>
+    /// The notice is at the end of a long list, so the conflict also shows where it was caused: on
+    /// both cards, and as a count beside the filter that jumps to the notices.
+    /// </summary>
+    [Test]
+    public async Task AConflictIsMarkedOnTheCardsInvolved()
+    {
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=Diagnostics,OpenTelemetry");
+        await Assert.That(page.Find(".plugin-card.conflict[data-id=Diagnostics] .badge.conflict").TextContent).IsEqualTo("Conflicts with OpenTelemetry");
+        await Assert.That(page.Find(".plugin-card.conflict[data-id=OpenTelemetry] .badge.conflict").TextContent).IsEqualTo("Conflicts with Diagnostics");
+        await Assert.That(page.FindAll(".plugin-card.conflict").Count).IsEqualTo(2);
+        await Assert.That(page.Find(".conflict-count").TextContent).IsEqualTo("1 conflict");
+
+        await page.Find(".conflict-count").ClickAsync(new());
+        var scrolled = JSInterop.Invocations.Single(_ => _.Identifier == "verifyWizard.scrollIntoView");
+        await Assert.That(page.Find($"#{scrolled.Arguments[0]}").ClassList.Contains("interactions")).IsTrue();
+
+        await page.Find(".plugin-card[data-id=OpenTelemetry] input")
+            .ChangeAsync(
+                new()
+                {
+                    Value = false
+                });
+        await Assert.That(page.FindAll(".plugin-card.conflict")).IsEmpty();
+        await Assert.That(page.FindAll(".conflict-count")).IsEmpty();
+    }
+
+    /// <summary>What is not a conflict stays a notice only: the count and the red cards mean Next is held back.</summary>
+    [Test]
+    public async Task OtherInteractionsDoNotMarkCards()
+    {
+        var page = Open("new?step=plugins&os=Windows&ide=Rider&cli=Cli&tf=XunitV3&ci=None&ext=EntityFramework,SqlServer");
+        await Assert.That(page.FindAll(".interaction-notice[data-rule=ef-sql-recording]").Count).IsEqualTo(1);
+        await Assert.That(page.FindAll(".plugin-card.conflict")).IsEmpty();
+        await Assert.That(page.FindAll(".conflict-count")).IsEmpty();
+    }
+
     /// <summary>With nothing selected the options step still asks about inline snapshots, and nothing else.</summary>
     [Test]
     public async Task OptionsStepAsksOnlyInlineWhenNothingIsSelected()

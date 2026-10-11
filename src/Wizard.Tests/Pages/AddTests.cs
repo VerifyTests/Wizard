@@ -79,6 +79,25 @@ public class AddTests : WebTestContext
         await Assert.That(page.FindAll(".interaction-notice[data-rule=ef-sql-recording]").Count).IsEqualTo(1);
     }
 
+    /// <summary>
+    /// A plugin the project already has can clash with one being added. Both cards say so, and the
+    /// existing one stays in view whatever the filter says, since it is half of the explanation.
+    /// </summary>
+    [Test]
+    public async Task AConflictWithAnExistingPluginIsMarkedOnBoth()
+    {
+        var page = OpenAdd("add?step=plugins&tf=XunitV3&have=Diagnostics&ext=OpenTelemetry");
+        var existing = page.Find(".plugin-card[data-id=Diagnostics]");
+        await Assert.That(existing.ClassName).IsEqualTo("plugin-card existing conflict");
+        await Assert.That(existing.QuerySelector(".badge.conflict")!.TextContent).IsEqualTo("Conflicts with OpenTelemetry");
+        await Assert.That(page.Find(".plugin-card[data-id=OpenTelemetry]").ClassName).IsEqualTo("plugin-card selected conflict");
+        await Assert.That(page.Find("button.primary").HasAttribute("disabled")).IsTrue();
+
+        await page.Find("#pluginFilter").InputAsync(new() {Value = "serilog"});
+        var shown = page.FindAll(".plugin-card").Select(_ => _.GetAttribute("data-id")!);
+        await Assert.That(shown).IsEquivalentTo(["Diagnostics", "OpenTelemetry", "Serilog"]);
+    }
+
     [Test]
     public async Task TickingAnExistingPluginUpdatesTheUrlAndIsRemembered()
     {

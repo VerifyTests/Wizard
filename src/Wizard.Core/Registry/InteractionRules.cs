@@ -181,6 +181,41 @@ public static partial class InteractionRules
         ];
     }
 
+    /// <summary>
+    /// Plugin id to what its card says, for every plugin in a conflict among <paramref name="results"/>:
+    /// which other plugins it cannot be used with. The notice explains the conflict, but on a list this
+    /// long it is a screen or more away from the card that was just ticked; the mark is on that card.
+    /// A plugin in several groups, such as a converter for pdf and for xlsx, gets one mark naming
+    /// everything it clashes with.
+    /// </summary>
+    public static IReadOnlyDictionary<string, string> ConflictMarks(IEnumerable<InteractionResult> results)
+    {
+        var conflicts = results.Where(_ => _.Severity == Severity.Conflict).ToList();
+        var marks = new Dictionary<string, string>(StringComparer.Ordinal);
+        foreach (var id in conflicts.SelectMany(_ => _.Involved).Distinct(StringComparer.Ordinal))
+        {
+            // registry order, as everywhere else a list of plugins is shown
+            var others = Plugins.All
+                .Select(_ => _.Id)
+                .Where(_ => _ != id && conflicts.Any(conflict => conflict.Involved.Contains(id) && conflict.Involved.Contains(_)))
+                .ToList();
+            marks[id] = $"Conflicts with {Few(others)}";
+        }
+
+        return marks;
+    }
+
+    /// <summary>The names when there are one or two; otherwise how many, since a card's badge has no room for a list.</summary>
+    static string Few(IReadOnlyList<string> names)
+    {
+        if (names.Count > 2)
+        {
+            return $"{names.Count} plugins";
+        }
+
+        return Join(names);
+    }
+
     /// <summary>The choices the options step shows for rules that are currently firing.</summary>
     public static IEnumerable<PluginChoice> ChoicesFor(IReadOnlySet<string> selected) =>
         Rules

@@ -1,5 +1,7 @@
 @* One selectable plugin (plan 7.1 step 7). The whole card is the checkbox's label, so clicking
-   anywhere toggles it. Badges say up front what selecting it will cost: a licence, a tool, Windows. *@
+   anywhere toggles it. Badges say up front what selecting it will cost: a licence, a tool, Windows.
+   A card that is part of a conflict says so itself, because the notice explaining it is at the end of
+   the list and the click that caused it was here. *@
 <label class="plugin-card @CardClass" data-id="@Definition.Id" title="@Unavailable">
     <input type="checkbox"
            checked="@(Selected || Existing)"
@@ -21,7 +23,7 @@
             <span class="badges">
                 @foreach (var badge in Badges)
                 {
-                    <span class="badge" title="@badge.Hint">@badge.Label</span>
+                    <span class="badge @badge.Class" title="@badge.Hint">@badge.Label</span>
                 }
             </span>
         }
@@ -42,7 +44,26 @@
     /// <summary>Why the card is suggested, from the tech stack.</summary>
     [Parameter] public string Tag { get; set; } = "";
 
+    /// <summary>
+    /// What the card says about the conflict it is part of, or null. A plugin the project already has
+    /// can be in one too, with a plugin being added next to it.
+    /// </summary>
+    [Parameter] public string? Conflict { get; set; }
+
     string CardClass
+    {
+        get
+        {
+            if (Conflict == null)
+            {
+                return StateClass;
+            }
+
+            return $"{StateClass} conflict".TrimStart();
+        }
+    }
+
+    string StateClass
     {
         get
         {
@@ -65,13 +86,18 @@
         }
     }
 
-    record Badge(string Label, string Hint);
+    record Badge(string Label, string Hint, string Class = "");
 
     IReadOnlyList<Badge> Badges
     {
         get
         {
             var badges = new List<Badge>();
+            if (Conflict != null)
+            {
+                badges.Add(new(Conflict, "Explained at the end of the list. The step cannot be left until it is resolved.", "conflict"));
+            }
+
             if (Definition.Platform == Platform.WindowsOnly &&
                 Unavailable == null)
             {
