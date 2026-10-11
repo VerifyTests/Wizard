@@ -11,6 +11,28 @@
     <p class="restored">Restored from this browser.</p>
 }
 
+@* The file input covers the whole zone, so the browser's own handling of a click and of a drop
+   does both jobs, and no script is needed. *@
+<div class="packages-drop @(dragging ? "dragging" : "")"
+     @ondragenter="() => dragging = true"
+     @ondragleave="() => dragging = false"
+     @ondrop="() => dragging = false">
+    <InputFile @key="inputKey"
+               id="packagesProps"
+               aria-label="@PackagesProps.FileName"
+               accept=".props"
+               OnChange="FileChosen" />
+    <span>
+        <strong>Drop a <code>@PackagesProps.FileName</code> here, or click to browse.</strong>
+        The plugins it references are ticked. It is read in this browser and is not uploaded.
+    </span>
+</div>
+
+@if (result != null)
+{
+    <p class="packages-result @(result.Failed ? "failed" : "")"><strong>@result.FileName</strong>: @result.Message</p>
+}
+
 <div class="plugin-search">
     <label for="existingFilter">Filter</label>
     <input type="text"
@@ -45,7 +67,56 @@
     [Parameter] public bool Restored { get; set; }
     [Parameter] public EventCallback Changed { get; set; }
 
+    const long maximumFileSize = 1024 * 1024;
+
     string filter = "";
+    bool dragging;
+    int inputKey;
+    FileResult? result;
+
+    record FileResult(string FileName, string Message, bool Failed = false);
+
+    /// <summary>Adds to what is ticked, never unticks.</summary>
+    async Task FileChosen(InputFileChangeEventArgs args)
+    {
+        dragging = false;
+        // a new input, so choosing the same file again raises the change again
+        inputKey++;
+        result = await Read(args.File);
+        await Changed.InvokeAsync();
+    }
+
+    async Task<FileResult> Read(IBrowserFile file)
+    {
+        if (!file.Name.EndsWith(".props", StringComparison.OrdinalIgnoreCase))
+        {
+            return new(file.Name, $"not a {PackagesProps.FileName}.", true);
+        }
+
+        if (file.Size > maximumFileSize)
+        {
+            return new(file.Name, $"too large to be a {PackagesProps.FileName}.", true);
+        }
+
+        using var reader = new StreamReader(file.OpenReadStream(maximumFileSize));
+        var xml = await reader.ReadToEndAsync();
+        if (!PackagesProps.TryReadPlugins(xml, out var plugins))
+        {
+            return new(file.Name, "could not be read.", true);
+        }
+
+        if (plugins.Count == 0)
+        {
+            return new(file.Name, "no Verify plugins found.");
+        }
+
+        foreach (var id in plugins)
+        {
+            State.SetExisting(id, true);
+        }
+
+        return new(file.Name, $"found {string.Join(", ", plugins.Select(_ => Plugins.ById[_].DisplayName))}.");
+    }
 
     IEnumerable<IGrouping<PluginCategory, PluginDefinition>> Categories =>
         Plugins.All

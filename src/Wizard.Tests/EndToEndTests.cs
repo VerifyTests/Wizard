@@ -116,6 +116,36 @@ public class EndToEndTests
             "() => location.search.includes('min=EntityFramework') && location.search.includes('opt=ef-sql-format:false')");
     }
 
+    /// <summary>The "already using" step reads a chosen Directory.Packages.props in the browser and ticks what it references.</summary>
+    [Test]
+    public async Task APackagesPropsFillsInAlreadyUsing()
+    {
+        var page = await ScreenSnapshotTests.Open("/add?step=have&tf=NUnit", "#packagesProps");
+        await page.SetInputFilesAsync(
+            "#packagesProps",
+            new FilePayload
+            {
+                Name = PackagesProps.FileName,
+                MimeType = "text/xml",
+                Buffer = Encoding.UTF8.GetBytes(
+                    """
+                    <Project>
+                      <ItemGroup>
+                        <PackageVersion Include="Verify.NUnit" Version="1.0.0" />
+                        <PackageVersion Include="Verify.SqlServer" Version="1.0.0" />
+                        <PackageVersion Include="Verify.Http" Version="1.0.0" />
+                      </ItemGroup>
+                    </Project>
+                    """)
+            });
+
+        await page.WaitForSelectorAsync(".packages-result");
+        await Assert.That(await page.TextContentAsync(".packages-result"))
+            .IsEqualTo("Directory.Packages.props: found Verify.Http, Verify.SqlServer.");
+        await Assert.That(await page.IsCheckedAsync(".existing-item[data-id=SqlServer] input")).IsTrue();
+        await Assert.That(page.Url).EndsWith("/add?step=have&tf=NUnit&have=Http,SqlServer");
+    }
+
     /// <summary>
     /// Plan 17.3: a plugin readme's deep link, in a browser that remembers the project already has
     /// Verify.SqlServer. The recording interaction appears though only EF Core is being added, and the

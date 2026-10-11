@@ -71,6 +71,15 @@
             <p class="hint">
               Tick the Verify plugins the project already references. They are left out of what is generated,     and any side effect of adding something next to them is spelled out. The list is remembered in this browser.
             </p>
+            <div class="packages-drop ">
+              <input id="packagesProps" aria-label="Directory.Packages.props" accept=".props" type="file" _bl_2="">
+              <span>
+                <strong>Drop a
+                  <code>Directory.Packages.props</code>
+                  here, or click to browse.</strong>
+                The plugins it references are ticked. It is read in this browser and is not uploaded.
+              </span>
+            </div>
             <div class="plugin-search">
               <label for="existingFilter">Filter</label>
               <input type="text" id="existingFilter" placeholder="Name">

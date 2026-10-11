@@ -1,3 +1,5 @@
+using Microsoft.AspNetCore.Components.Forms;
+
 /// <summary>The add flows (plan 7.2, 7.3) and the browser's memory (plan 8.2), against bunit's fake NavigationManager.</summary>
 public class AddTests : WebTestContext
 {
@@ -77,6 +79,43 @@ public class AddTests : WebTestContext
     {
         var page = OpenAdd("add?step=plugins&tf=XunitV3&have=SqlServer&ext=EntityFramework");
         await Assert.That(page.FindAll(".interaction-notice[data-rule=ef-sql-recording]").Count).IsEqualTo(1);
+    }
+
+    /// <summary>A browsed or dropped Directory.Packages.props ticks what it references, on top of what is already ticked.</summary>
+    [Test]
+    public async Task APackagesPropsTicksThePluginsItReferences()
+    {
+        var page = OpenAdd("add?step=have&tf=XunitV3&have=Http");
+        page.FindComponent<InputFile>()
+            .UploadFiles(
+                InputFileContent.CreateFromText(
+                    """
+                    <Project>
+                      <ItemGroup>
+                        <PackageVersion Include="Verify.SqlServer" Version="1.0.0" />
+                        <PackageVersion Include="Verify.XunitV3" Version="1.0.0" />
+                      </ItemGroup>
+                    </Project>
+                    """,
+                    PackagesProps.FileName));
+
+        await Assert.That(page.WaitForElement(".packages-result").TextContent)
+            .IsEqualTo("Directory.Packages.props: found Verify.SqlServer.");
+        await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3&have=Http,SqlServer");
+        await Assert.That(Written()).Contains((BrowserMemory.ExistingKey, "Http,SqlServer"));
+    }
+
+    [Test]
+    [Arguments("Tests.csproj", "<Project />", "Tests.csproj: not a Directory.Packages.props.")]
+    [Arguments("Directory.Packages.props", "nothing like xml", "Directory.Packages.props: could not be read.")]
+    [Arguments("Directory.Packages.props", "<Project />", "Directory.Packages.props: no Verify plugins found.")]
+    public async Task AFileWithNothingToTickSaysWhy(string fileName, string content, string message)
+    {
+        var page = OpenAdd("add?step=have&tf=XunitV3");
+        page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromText(content, fileName));
+
+        await Assert.That(page.WaitForElement(".packages-result").TextContent).IsEqualTo(message);
+        await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3");
     }
 
     /// <summary>
