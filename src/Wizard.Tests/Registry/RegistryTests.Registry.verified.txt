@@ -57,7 +57,8 @@
     Category: Documents,
     Platform: CrossPlatform,
     Packages: [
-      Verify.Aspose
+      Verify.Aspose,
+      System.Security.Cryptography.Xml
     ],
     PluginType: VerifyAspose,
     DiscoveredByInitializePlugins: true,
@@ -377,7 +378,8 @@
     Platform: CrossPlatform,
     Packages: [
       Verify.EntityFramework,
-      Microsoft.EntityFrameworkCore.SqlServer
+      Microsoft.EntityFrameworkCore.SqlServer,
+      System.Security.Cryptography.Xml
     ],
     PluginType: VerifyEntityFramework,
     DiscoveredByInitializePlugins: true,
@@ -672,7 +674,8 @@
       EfLocalDb.TUnit,
       EfLocalDb,
       Verify.EntityFramework,
-      Microsoft.EntityFrameworkCore.SqlServer
+      Microsoft.EntityFrameworkCore.SqlServer,
+      System.Security.Cryptography.Xml
     ],
     DiscoveredByInitializePlugins: false,
     Initialize: [
@@ -1372,7 +1375,8 @@
     Platform: CrossPlatform,
     Packages: [
       Verify.SqlServer,
-      Microsoft.Data.SqlClient
+      Microsoft.Data.SqlClient,
+      System.Security.Cryptography.Xml
     ],
     PluginType: VerifySqlServer,
     DiscoveredByInitializePlugins: true,
@@ -1428,7 +1432,8 @@
     Category: Documents,
     Platform: CrossPlatform,
     Packages: [
-      Verify.Syncfusion
+      Verify.Syncfusion,
+      System.Security.Cryptography.Xml
     ],
     PluginType: VerifySyncfusion,
     DiscoveredByInitializePlugins: true,

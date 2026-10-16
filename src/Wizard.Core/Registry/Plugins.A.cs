@@ -233,7 +233,14 @@ public static partial class Plugins
             RepoUrl = "https://github.com/VerifyTests/Verify.Aspose",
             Description = "Converts pdf, docx, xlsx and pptx documents to a png per page, plus a metadata and text snapshot.",
             Category = PluginCategory.Documents,
-            Packages = [new("Verify.Aspose")],
+            Packages =
+            [
+                new("Verify.Aspose"),
+                new("System.Security.Cryptography.Xml")
+                {
+                    Comment = "lifts the System.Security.Cryptography.Xml and Pkcs that Aspose brings past GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7"
+                }
+            ],
             PluginType = "VerifyAspose",
             ExternalRequirements =
             [
@@ -1424,6 +1431,11 @@ public static partial class Plugins
                 {
                     ForLibrary = true,
                     Comment = "the provider the sample DbContext uses"
+                },
+                new("System.Security.Cryptography.Xml")
+                {
+                    ForLibrary = true,
+                    Comment = "lifts the System.Security.Cryptography.Pkcs that Microsoft.Data.SqlClient brings past GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7"
                 }
             ],
             PluginType = "VerifyEntityFramework",

@@ -50,6 +50,7 @@
     "SendGrid": "9.29.3",
     "Serilog": "4.4.0",
     "System.Drawing.Common": "10.0.12",
+    "System.Security.Cryptography.Xml": "10.0.13",
     "TUnit": "1.73.19",
     "Verify": "33.3.2",
     "Verify.AngleSharp": "5.1.2",

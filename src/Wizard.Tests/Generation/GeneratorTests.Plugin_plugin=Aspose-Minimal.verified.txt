@@ -76,6 +76,7 @@ public class AsposeTests
 Verify.XunitV3
 xunit.v3
 Verify.Aspose
+System.Security.Cryptography.Xml
 
 ==== interactions
 

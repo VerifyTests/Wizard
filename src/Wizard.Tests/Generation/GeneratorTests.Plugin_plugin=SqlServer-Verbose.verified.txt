@@ -123,6 +123,7 @@ Verify.XunitV3
 xunit.v3
 Verify.SqlServer
 Microsoft.Data.SqlClient
+System.Security.Cryptography.Xml
 
 ==== interactions
 

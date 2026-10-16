@@ -77,6 +77,7 @@ public class SyncfusionTests
 Verify.XunitV3
 xunit.v3
 Verify.Syncfusion
+System.Security.Cryptography.Xml
 
 ==== interactions
 

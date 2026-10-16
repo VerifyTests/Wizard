@@ -106,6 +106,7 @@ Verify.XunitV3
 xunit.v3
 EfLocalDb.Xunit.V3
 Microsoft.EntityFrameworkCore.SqlServer
+System.Security.Cryptography.Xml
 
 ==== interactions
 

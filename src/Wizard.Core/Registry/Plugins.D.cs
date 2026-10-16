@@ -51,6 +51,11 @@ public static partial class Plugins
                 {
                     ForLibrary = true,
                     Comment = "the provider the sample DbContext uses"
+                },
+                new("System.Security.Cryptography.Xml")
+                {
+                    ForLibrary = true,
+                    Comment = "lifts the System.Security.Cryptography.Pkcs that Microsoft.Data.SqlClient brings past GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7"
                 }
             ],
             // There is no VerifyLocalDb type: LocalDbTestBase<T>.Initialize() is a plain static that has
@@ -364,7 +369,11 @@ public static partial class Plugins
             Packages =
             [
                 new("Verify.SqlServer"),
-                new("Microsoft.Data.SqlClient") {Comment = "the SqlConnection the samples open"}
+                new("Microsoft.Data.SqlClient") {Comment = "the SqlConnection the samples open"},
+                new("System.Security.Cryptography.Xml")
+                {
+                    Comment = "lifts the System.Security.Cryptography.Pkcs that Microsoft.Data.SqlClient brings past GHSA-846f-f764-76mx and GHSA-2fmv-rv2c-59x7"
+                }
             ],
             PluginType = "VerifySqlServer",
             Initialize =
@@ -612,7 +621,14 @@ public static partial class Plugins
             RepoUrl = "https://github.com/VerifyTests/Verify.Syncfusion",
             Description = "Verifies pdf, docx, xlsx and pptx documents through Syncfusion File Formats, as text, csv and rendered pages.",
             Category = PluginCategory.Documents,
-            Packages = [new("Verify.Syncfusion")],
+            Packages =
+            [
+                new("Verify.Syncfusion"),
+                new("System.Security.Cryptography.Xml")
+                {
+                    Comment = "lifts the System.Security.Cryptography.Xml and Pkcs that Syncfusion brings past GHSA-7hqp-7c5m-4vq6 and GHSA-846f-f764-76mx"
+                }
+            ],
             PluginType = "VerifySyncfusion",
             RetiredBy = "C4",
             Initialize =
