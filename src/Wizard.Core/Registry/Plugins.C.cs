@@ -178,6 +178,110 @@ public static partial class Plugins
         },
         new()
         {
+            Id = "OfficeIMO",
+            DisplayName = "Verify.OfficeIMO",
+            RepoUrl = "https://github.com/VerifyTests/Verify.OfficeIMO",
+            Description = "Verifies Word, Excel, PowerPoint, Visio, PDF, OpenDocument, RTF, EPUB, email and more through OfficeIMO: text, a csv per sheet, a deterministic copy and page renders.",
+            Category = PluginCategory.Documents,
+            Packages =
+            [
+                new("Verify.OfficeIMO"),
+                new("OfficeIMO.Word") {Comment = "the WordDocument the samples build"},
+                new("OfficeIMO.Excel") {Comment = "the ExcelDocument the samples build"},
+                new("OfficeIMO.PowerPoint") {Comment = "the PowerPointPresentation the samples build"}
+            ],
+            PluginType = "VerifyOfficeIMO",
+            ExclusiveGroups = ["pdf-converter", "xlsx-converter", "docx-converter", "pptx-converter"],
+            Usings = ["OfficeIMO.Word", "OfficeIMO.Excel", "OfficeIMO.PowerPoint"],
+            MinimalSamples =
+            [
+                new(
+                    "Word",
+                    """
+                    using var document = WordDocument.Create();
+                    document.AddParagraph("Hello World");
+                    document.AddParagraph("Second paragraph");
+                    return Verify(document);
+                    """)
+                {
+                    Comment =
+                    [
+                        "A WordDocument writes an info file of its properties, the text of every paragraph,",
+                        "a deterministic docx, and a png per page rendered by OfficeIMO itself."
+                    ]
+                },
+                new(
+                    "Excel",
+                    """
+                    using var document = ExcelDocument.Create();
+                    var sheet = document.AddWorksheet("Data");
+                    sheet.CellValue(1, 1, "ID");
+                    sheet.CellValue(1, 2, "Name");
+                    sheet.CellValue(2, 1, 1);
+                    sheet.CellValue(2, 2, "Jane Smith");
+                    return Verify(document);
+                    """)
+                {
+                    Comment =
+                    [
+                        "A workbook writes a csv and a png per sheet, so a changed cell shows up as a one line diff."
+                    ]
+                }
+            ],
+            VerboseSamples =
+            [
+                new(
+                    "PowerPoint",
+                    """
+                    using var presentation = PowerPointPresentation.Create();
+                    presentation.AddSlide();
+                    return Verify(presentation);
+                    """)
+                {
+                    Comment =
+                    [
+                        "A presentation writes the text of each slide, with its notes, and a png per slide."
+                    ]
+                },
+                new(
+                    "ExcludePng",
+                    """
+                    using var document = WordDocument.Create();
+                    document.AddParagraph("Hello World");
+                    return Verify(document)
+                        .ExcludeDerivedTargets("png");
+                    """)
+                {
+                    Comment =
+                    [
+                        "Rendering is the slow part, and a png depends on the fonts installed. This skips it;",
+                        "the info, text and deterministic copy still verify."
+                    ]
+                },
+                new(
+                    "DocxFile",
+                    """
+                    return VerifyFile("sample.docx");
+                    """)
+                {
+                    Comment =
+                    [
+                        "A file or stream with any extension OfficeIMO reads is loaded and verified the same way."
+                    ],
+                    SkipReason = "needs a sample.docx in the test project, copied to the output directory."
+                }
+            ],
+            Notes =
+            [
+                "Streams and files are matched by extension: docx, xlsx, pptx, vsdx, pdf, xps, odt, ods, odp, rtf, epub, eml, msg, mht, one, mpp, pub, djvu, pages, numbers, key, accdb and mdb.",
+                "Images are rendered by OfficeIMO, with no Office install needed. OpenDocument and RTF have no png.",
+                "A png is rendered with the installed fonts, and Office's default font Aptos is installed only with Office. Add the fonts the documents use to `VerifyOfficeIMO.Fonts` so a build server renders the same png.",
+                "Open XML SDK documents are opt in, via `VerifyOfficeIMO.RegisterOpenXml()`, since Verify.OpenXml converts the same types.",
+                "Targets net10.0 only."
+            ]
+        },
+        new()
+        {
             Id = "OpenTelemetry",
             DisplayName = "Verify.OpenTelemetry",
             RepoUrl = "https://github.com/VerifyTests/Verify.OpenTelemetry",

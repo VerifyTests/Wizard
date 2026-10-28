@@ -918,6 +918,40 @@
     ]
   },
   {
+    Id: OfficeIMO,
+    DisplayName: Verify.OfficeIMO,
+    Category: Documents,
+    Platform: CrossPlatform,
+    Packages: [
+      Verify.OfficeIMO,
+      OfficeIMO.Word,
+      OfficeIMO.Excel,
+      OfficeIMO.PowerPoint
+    ],
+    PluginType: VerifyOfficeIMO,
+    DiscoveredByInitializePlugins: true,
+    Usings: [
+      OfficeIMO.Word,
+      OfficeIMO.Excel,
+      OfficeIMO.PowerPoint
+    ],
+    ExclusiveGroups: [
+      pdf-converter,
+      xlsx-converter,
+      docx-converter,
+      pptx-converter
+    ],
+    Minimal: [
+      Word,
+      Excel
+    ],
+    Verbose: [
+      PowerPoint,
+      ExcludePng,
+      DocxFile
+    ]
+  },
+  {
     Id: OpenTelemetry,
     DisplayName: Verify.OpenTelemetry,
     Category: Observability,

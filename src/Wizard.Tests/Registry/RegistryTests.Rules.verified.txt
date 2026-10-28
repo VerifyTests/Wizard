@@ -8,6 +8,7 @@
         Aspose,
         DocNet,
         ImageMagick,
+        OfficeIMO,
         PDFium,
         PdfPig,
         QuestPDF,
@@ -32,6 +33,7 @@
       Members: [
         Aspose,
         ClosedXml,
+        OfficeIMO,
         OpenXml,
         Sylvan,
         Syncfusion
@@ -43,6 +45,7 @@
       Reason: each registers a converter for the docx plugin, and the last one registered wins.,
       Members: [
         Aspose,
+        OfficeIMO,
         OpenXml,
         Pandoc,
         Syncfusion
@@ -54,6 +57,7 @@
       Reason: each registers a converter for the pptx plugin, and the last one registered wins.,
       Members: [
         Aspose,
+        OfficeIMO,
         OpenXml,
         Syncfusion
       ]

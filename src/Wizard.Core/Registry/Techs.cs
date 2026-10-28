@@ -23,11 +23,11 @@ public static class Techs
         new("cosmos", "Azure Cosmos DB", "Data", ["Cosmos"], []),
         new("ravendb", "RavenDB", "Data", ["RavenDB"], []),
         new("csv", "CSV files", "Data", ["CsvHelper"], ["Sep"]),
-        new("excel", "Excel files", "Data", ["ClosedXml"], ["OpenXml", "Sylvan", "Aspose", "Syncfusion"]),
+        new("excel", "Excel files", "Data", ["ClosedXml"], ["OpenXml", "OfficeIMO", "Sylvan", "Aspose", "Syncfusion"]),
 
-        new("word", "Word documents", "Documents", ["OpenXml"], ["Pandoc", "Aspose", "Syncfusion"]),
-        new("powerpoint", "PowerPoint", "Documents", ["OpenXml"], ["Aspose", "Syncfusion"]),
-        new("pdf", "PDF files", "Documents", ["PdfPig"], ["PDFium", "DocNet", "ImageMagick", "Aspose", "Syncfusion"]),
+        new("word", "Word documents", "Documents", ["OpenXml"], ["OfficeIMO", "Pandoc", "Aspose", "Syncfusion"]),
+        new("powerpoint", "PowerPoint", "Documents", ["OpenXml"], ["OfficeIMO", "Aspose", "Syncfusion"]),
+        new("pdf", "PDF files", "Documents", ["PdfPig"], ["PDFium", "DocNet", "ImageMagick", "OfficeIMO", "Aspose", "Syncfusion"]),
         new("questpdf", "PDF generation with QuestPDF", "Documents", ["QuestPDF"], ["PdfPig"]),
 
         new("aspnetcore", "ASP.NET Core", "Web", ["AspNetCore", "Http"], ["AngleSharp"]),

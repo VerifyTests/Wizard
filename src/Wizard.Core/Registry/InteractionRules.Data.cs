@@ -11,7 +11,7 @@ public static partial class InteractionRules
             "pdf-converter",
             "PDF converter",
             "each registers a converter for the pdf plugin, and the last one registered wins.",
-            ["Aspose", "DocNet", "ImageMagick", "PDFium", "PdfPig", "QuestPDF", "Syncfusion"])
+            ["Aspose", "DocNet", "ImageMagick", "OfficeIMO", "PDFium", "PdfPig", "QuestPDF", "Syncfusion"])
         {
             // ImageMagick always registers the pdf converter; comparer-only means another plugin's
             // converter is meant to override it, so the group no longer holds (plan A3).
@@ -24,17 +24,17 @@ public static partial class InteractionRules
             "xlsx-converter",
             "Excel converter",
             "each registers a converter for the xlsx plugin, and the last one registered wins.",
-            ["Aspose", "ClosedXml", "OpenXml", "Sylvan", "Syncfusion"]),
+            ["Aspose", "ClosedXml", "OfficeIMO", "OpenXml", "Sylvan", "Syncfusion"]),
         new(
             "docx-converter",
             "Word converter",
             "each registers a converter for the docx plugin, and the last one registered wins.",
-            ["Aspose", "OpenXml", "Pandoc", "Syncfusion"]),
+            ["Aspose", "OfficeIMO", "OpenXml", "Pandoc", "Syncfusion"]),
         new(
             "pptx-converter",
             "PowerPoint converter",
             "each registers a converter for the pptx plugin, and the last one registered wins.",
-            ["Aspose", "OpenXml", "Syncfusion"]),
+            ["Aspose", "OfficeIMO", "OpenXml", "Syncfusion"]),
         new(
             "csv-scrubber",
             "CSV handling",
