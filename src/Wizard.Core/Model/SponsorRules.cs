@@ -30,7 +30,7 @@ public static class SponsorRules
             _ => throw new ArgumentOutOfRangeException(nameof(exemption), exemption, null)
         };
 
-    public static string? Summary(WizardState state) =>
+    public static string Summary(WizardState state) =>
         state.SponsorMode switch
         {
             SponsorMode.Sponsor when state.SponsorAccount.Length > 0 => $"Sponsor: {state.SponsorAccount}",

@@ -127,16 +127,18 @@ public class EndToEndTests
             {
                 Name = PackagesProps.FileName,
                 MimeType = "text/xml",
-                Buffer = Encoding.UTF8.GetBytes(
-                    """
-                    <Project>
-                      <ItemGroup>
-                        <PackageVersion Include="Verify.NUnit" Version="1.0.0" />
-                        <PackageVersion Include="Verify.SqlServer" Version="1.0.0" />
-                        <PackageVersion Include="Verify.Http" Version="1.0.0" />
-                      </ItemGroup>
-                    </Project>
-                    """)
+                Buffer =
+                [
+                    .. """
+                       <Project>
+                         <ItemGroup>
+                           <PackageVersion Include="Verify.NUnit" Version="1.0.0" />
+                           <PackageVersion Include="Verify.SqlServer" Version="1.0.0" />
+                           <PackageVersion Include="Verify.Http" Version="1.0.0" />
+                         </ItemGroup>
+                       </Project>
+                       """u8
+                ]
             });
 
         await page.WaitForSelectorAsync(".packages-result");
