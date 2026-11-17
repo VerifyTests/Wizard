@@ -35,7 +35,7 @@ jobs:
         run: dotnet build src/Wizard.Tests --configuration Release
 
       - name: Install Playwright browser
-        run: pwsh src/Wizard.Tests/bin/Release/net10.0/playwright.ps1 install chromium
+        run: pwsh src/Wizard.Tests/bin/Release/net11.0/playwright.ps1 install chromium
 
       - name: Run tests
         run: dotnet run --project src/Wizard.Tests --configuration Release --no-build -- --no-ansi --progress off

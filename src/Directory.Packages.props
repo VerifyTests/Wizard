@@ -10,7 +10,7 @@
     <PackageVersion Include="Markdig" Version="1.6.0" />
     <PackageVersion Include="TUnit" Version="1.84.0" />
     <PackageVersion Include="Verify" Version="33.3.4" />
-    <PackageVersion Include="Verify.TUnit" Version="33.3.4" />
+    <PackageVersion Include="Verify.TUnit" Version="33.4.0" />
     <PackageVersion Include="Verify.AngleSharp" Version="5.1.2" />
     <PackageVersion Include="bunit" Version="2.15.2" />
     <PackageVersion Include="Verify.Bunit" Version="14.1.0" />

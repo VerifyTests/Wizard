@@ -77,7 +77,6 @@ public class MicrosoftLoggingTests
 Verify.XunitV3
 xunit.v3
 Verify.MicrosoftLogging
-Microsoft.Extensions.Logging.Abstractions
 
 ==== interactions
 

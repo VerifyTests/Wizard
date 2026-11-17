@@ -1174,15 +1174,7 @@ public static partial class Plugins
             RepoUrl = "https://github.com/VerifyTests/Verify.MicrosoftLogging",
             Description = "Records what the code under test logged through ILogger and appends it to the snapshot.",
             Category = PluginCategory.Logging,
-            Packages =
-            [
-                new("Verify.MicrosoftLogging"),
-                new("Microsoft.Extensions.Logging.Abstractions")
-                {
-                    ForLibrary = true,
-                    Comment = "the class under test takes an ILogger"
-                }
-            ],
+            Packages = [new("Verify.MicrosoftLogging")],
             PluginType = "VerifyMicrosoftLogging",
             Initialize =
             [
@@ -1779,8 +1771,8 @@ public static partial class Plugins
                     "Playwright drives a real Chromium, which has to be downloaded once. Initialize(installPlaywright: true) does it on assembly load, and the samples also need the site under test running.")
                 {
                     Url = "https://playwright.dev/dotnet/docs/browsers",
-                    WindowsInstall = "pwsh bin/Debug/net10.0/playwright.ps1 install",
-                    LinuxInstall = "pwsh bin/Debug/net10.0/playwright.ps1 install --with-deps",
+                    WindowsInstall = $"pwsh bin/Debug/{WizardDefaults.TargetFramework}/playwright.ps1 install",
+                    LinuxInstall = $"pwsh bin/Debug/{WizardDefaults.TargetFramework}/playwright.ps1 install --with-deps",
                     CannotRunUnattended = true
                 }
             ],
