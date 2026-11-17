@@ -746,8 +746,7 @@
     Category: Logging,
     Platform: CrossPlatform,
     Packages: [
-      Verify.MicrosoftLogging,
-      Microsoft.Extensions.Logging.Abstractions
+      Verify.MicrosoftLogging
     ],
     PluginType: VerifyMicrosoftLogging,
     DiscoveredByInitializePlugins: true,

@@ -36,10 +36,7 @@ public static class ProjectFiles
 
     public static string DirectoryBuildProps(Plan plan)
     {
-        var warnings =
-            """
-                <TreatWarningsAsErrors>true</TreatWarningsAsErrors>
-            """;
+        var warnings = "    <TreatWarningsAsErrors>true</TreatWarningsAsErrors>";
         if (plan.State.SponsorMode == SponsorMode.Ignore)
         {
             warnings =

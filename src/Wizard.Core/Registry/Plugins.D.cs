@@ -1096,7 +1096,7 @@ public static partial class Plugins
                 "Unlike Verify.Xaml, no STA apartment attribute is needed.",
                 "The sample form is nested in the test class: the generated class library is not a WinForms project, so a `Form` cannot live there.",
                 "WinForms and WPF define many of the same control names, so selecting Verify.Xaml as well makes `Label`, `Button` and their siblings ambiguous; the sample qualifies the one it uses.",
-                "Windows only: the test project targets `net10.0-windows` and sets `UseWindowsForms`."
+                $"Windows only: the test project targets `{WizardDefaults.TargetFramework}-windows` and sets `UseWindowsForms`."
             ]
         },
         new()
@@ -1312,7 +1312,7 @@ public static partial class Plugins
                 "Rendering differs slightly between Windows versions; Verify.Phash or a custom comparer keeps the png target stable on a build agent.",
                 "The sample window is nested in the test class: the generated class library is not a WPF project.",
                 "WPF only: not UWP, WinUI, MAUI or Avalonia.",
-                "Windows only: the test project targets `net10.0-windows` and sets `UseWPF`."
+                $"Windows only: the test project targets `{WizardDefaults.TargetFramework}-windows` and sets `UseWPF`."
             ]
         },
         new()

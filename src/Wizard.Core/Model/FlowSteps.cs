@@ -92,7 +92,7 @@ public static class FlowSteps
         _ => null,
         (_, _) => false);
 
-    static string? PluginSummary(WizardState state)
+    static string PluginSummary(WizardState state)
     {
         var selected = Plugins.Selected(state);
         if (selected.Count == 0)
@@ -108,7 +108,7 @@ public static class FlowSteps
         return string.Join(", ", selected.Select(_ => _.Id));
     }
 
-    static string? TechSummary(WizardState state)
+    static string TechSummary(WizardState state)
     {
         var count = state.Techs.Count;
         if (count == 0)
@@ -124,7 +124,7 @@ public static class FlowSteps
         return $"{count} techs";
     }
 
-    static string? ExistingSummary(WizardState state)
+    static string ExistingSummary(WizardState state)
     {
         var existing = Plugins.All.Where(_ => state.IsExisting(_.Id)).ToList();
         if (existing.Count == 0)
@@ -140,7 +140,7 @@ public static class FlowSteps
         return string.Join(", ", existing.Select(_ => _.Id));
     }
 
-    static string? OptionsSummary(WizardState state)
+    static string OptionsSummary(WizardState state)
     {
         var minimal = state.SelectedPlugins.Count(_ => state.DepthOf(_) == Depth.Minimal);
         var changed = state.Choices.Count;

@@ -59,7 +59,7 @@ using System.Windows.Controls;
 // Note: The sample window is nested in the test class: the generated class library is not a WPF
 // project.
 // Note: WPF only: not UWP, WinUI, MAUI or Avalonia.
-// Note: Windows only: the test project targets net10.0-windows and sets UseWPF.
+// Note: Windows only: the test project targets net11.0-windows and sets UseWPF.
 public class XamlTests
 {
     // Two snapshots come out of this: a .verified.xml holding the XAML tree, which reads well in

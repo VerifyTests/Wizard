@@ -51,7 +51,7 @@ public static class ModuleInitializer
 // project, so a Form cannot live there.
 // Note: WinForms and WPF define many of the same control names, so selecting Verify.Xaml as well
 // makes Label, Button and their siblings ambiguous; the sample qualifies the one it uses.
-// Note: Windows only: the test project targets net10.0-windows and sets UseWindowsForms.
+// Note: Windows only: the test project targets net11.0-windows and sets UseWindowsForms.
 public class WinFormsTests
 {
     // The form is drawn to a bitmap and the png is the snapshot, so a change to the layout is

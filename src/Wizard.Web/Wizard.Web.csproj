@@ -7,6 +7,10 @@
     <InvariantGlobalization>true</InvariantGlobalization>
     <BlazorEnableTimeZoneSupport>false</BlazorEnableTimeZoneSupport>
     <UseNativeHttpHandler>true</UseNativeHttpHandler>
+    <!-- BL0016 arrived with the .NET 11 analyzers and asks for a try/catch around every JS interop
+         call. The storage helpers in wwwroot/js/interop.js already guard their own failures, and no
+         caller here treats a JS failure differently from any other exception. -->
+    <NoWarn>$(NoWarn);BL0016</NoWarn>
   </PropertyGroup>
 
   <ItemGroup>

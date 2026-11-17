@@ -99,7 +99,7 @@ public class AddTests : WebTestContext
                     """,
                     PackagesProps.FileName));
 
-        await Assert.That(page.WaitForElement(".packages-result").TextContent)
+        await Assert.That((await page.WaitForElementAsync(".packages-result")).TextContent)
             .IsEqualTo("Directory.Packages.props: found Verify.SqlServer.");
         await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3&have=Http,SqlServer");
         await Assert.That(Written()).Contains((BrowserMemory.ExistingKey, "Http,SqlServer"));
@@ -114,7 +114,7 @@ public class AddTests : WebTestContext
         var page = OpenAdd("add?step=have&tf=XunitV3");
         page.FindComponent<InputFile>().UploadFiles(InputFileContent.CreateFromText(content, fileName));
 
-        await Assert.That(page.WaitForElement(".packages-result").TextContent).IsEqualTo(message);
+        await Assert.That((await page.WaitForElementAsync(".packages-result")).TextContent).IsEqualTo(message);
         await Assert.That(CurrentUrl).IsEqualTo("add?step=have&tf=XunitV3");
     }
 
