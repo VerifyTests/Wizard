@@ -188,7 +188,7 @@ public static partial class Plugins
                 new("Verify.OfficeIMO"),
                 new("OfficeIMO.Word") {Comment = "the WordDocument the samples build"},
                 new("OfficeIMO.Excel") {Comment = "the ExcelDocument the samples build"},
-                new("OfficeIMO.PowerPoint") {Comment = "the PowerPointPresentation the samples build"}
+                new("OfficeIMO.PowerPoint") {Comment = "the PowerPointDocument the samples build"}
             ],
             PluginType = "VerifyOfficeIMO",
             ExclusiveGroups = ["pdf-converter", "xlsx-converter", "docx-converter", "pptx-converter"],
@@ -214,11 +214,11 @@ public static partial class Plugins
                     "Excel",
                     """
                     using var document = ExcelDocument.Create();
-                    var sheet = document.AddWorksheet("Data");
-                    sheet.CellValue(1, 1, "ID");
-                    sheet.CellValue(1, 2, "Name");
-                    sheet.CellValue(2, 1, 1);
-                    sheet.CellValue(2, 2, "Jane Smith");
+                    var sheet = document.AddSheet("Data");
+                    sheet.Cell(1, 1).SetValue("ID");
+                    sheet.Cell(1, 2).SetValue("Name");
+                    sheet.Cell(2, 1).SetValue(1);
+                    sheet.Cell(2, 2).SetValue("Jane Smith");
                     return Verify(document);
                     """)
                 {
@@ -233,7 +233,7 @@ public static partial class Plugins
                 new(
                     "PowerPoint",
                     """
-                    using var presentation = PowerPointPresentation.Create();
+                    using var presentation = PowerPointDocument.Create();
                     presentation.AddSlide();
                     return Verify(presentation);
                     """)

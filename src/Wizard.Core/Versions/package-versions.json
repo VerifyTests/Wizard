@@ -8,7 +8,7 @@
     "bunit": "2.15.2",
     "ClosedXML": "0.105.1",
     "CommunityToolkit.Mvvm": "8.4.2",
-    "CsvHelper": "34.0.0",
+    "CsvHelper": "33.1.0",
     "DiffEngineTray": "21.0.0",
     "DocumentFormat.OpenXml": "3.5.1",
     "EfLocalDb": "28.1.0",
@@ -131,6 +131,7 @@
     "YoloDev.Expecto.TestSdk": "0.16.1"
   },
   "pinned": {
+    "CsvHelper": "34.0.0 rewrote the reader API; Verify.CsvHelper builds against 33.1.0 and fails to load with 34.",
     "YoloDev.Expecto.TestSdk": "1.0.0 sorts newest but requires Expecto < 10; 0.16.1 is the version Verify's own usages build against."
   }
 }
