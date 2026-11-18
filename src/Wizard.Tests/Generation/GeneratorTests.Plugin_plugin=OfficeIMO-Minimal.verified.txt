@@ -54,11 +54,11 @@ public class OfficeIMOTests
     public Task Excel()
     {
         using var document = ExcelDocument.Create();
-        var sheet = document.AddWorksheet("Data");
-        sheet.CellValue(1, 1, "ID");
-        sheet.CellValue(1, 2, "Name");
-        sheet.CellValue(2, 1, 1);
-        sheet.CellValue(2, 2, "Jane Smith");
+        var sheet = document.AddSheet("Data");
+        sheet.Cell(1, 1).SetValue("ID");
+        sheet.Cell(1, 2).SetValue("Name");
+        sheet.Cell(2, 1).SetValue(1);
+        sheet.Cell(2, 2).SetValue("Jane Smith");
         return Verify(document);
     }
 }
